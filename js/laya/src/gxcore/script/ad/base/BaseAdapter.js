@@ -23,6 +23,7 @@ const gx_ui_toast_1 = __importDefault(require("../../ui/gx_ui_toast"));
 const gx_ui_gamebox_1 = __importDefault(require("../../ui/gx_ui_gamebox"));
 const gx_ui_crazypoint_1 = __importDefault(require("../../ui/gx_ui_crazypoint"));
 const TDSDK_1 = __importDefault(require("../../td/TDSDK"));
+const GxChecker_1 = __importDefault(require("../../GxChecker"));
 var RECORDER_STATE;
 (function (RECORDER_STATE) {
     RECORDER_STATE[RECORDER_STATE["NO"] = 0] = "NO";
@@ -71,6 +72,8 @@ class BaseAd {
         this.ismailiang = false; //是买量用户吗
         this.waitSubIds = [];
         this.manifestInfo = null;
+        this.canReward = false; //头条侧边框奖励用
+        this.curVideoFlag = "";
     }
     static getInstance() {
         if (this.instance == null) {
@@ -80,7 +83,7 @@ class BaseAd {
     }
     /**广告初始化 */
     initAd() {
-        console.log('[gx_game]广告初始化');
+        console.log("[gx_game]广告初始化");
     }
     setManifestInfo(info) {
         this.manifestInfo = info;
@@ -129,7 +132,7 @@ class BaseAd {
     }
     /**qq常量策略 结束游戏  ov结束游戏的全屏点击*/
     showGameOverAD() {
-        if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_VIVO_GAME || GxConstant_1.default.IS_WEB_DEBUG) {
+        if ( /*GxConstant.IS_OPPO_GAME || GxConstant.IS_VIVO_GAME ||*/GxConstant_1.default.IS_WEB_DEBUG) {
             if (!this.gameOverAdView || this.gameOverAdView.parent == null) {
                 this.gameOverAdView = new gx_ui_gameover_ad_1.default();
                 this.gameOverAdView.show();
@@ -145,13 +148,19 @@ class BaseAd {
     }
     /////////////////////////public/////////////////////////
     canIn() {
-        if (GxConstant_1.default.IS_OPPO_GAME) {
-            let value = GxGame_1.default.getValue("ysgl", 0);
-            let number = Math.random() * 100;
-            if (number < value) {
-                return true;
-            }
-        }
+        /*
+                if (GxConstant.IS_OPPO_GAME) {
+
+                    let value = GxGame.gGN("ysgl", 0);
+
+                    let number = Math.random() * 100;
+                    if (number < value) {
+
+                        return true;
+                    }
+
+
+                }*/
         return false;
     }
     /**
@@ -159,9 +168,11 @@ class BaseAd {
      * 优先展示原生Banner，若广告ID不存在/无广告数据，自动切换普通Banner
      */
     showBanner(showCallback, failedCallback) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.ad_banner_show);
     }
     /**隐藏Banner */
     hideBanner() {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.ad_banner_hide);
         if (this.bannerTimer)
             this.bannerTimer.clear();
         if (this.bannerDelayTimer)
@@ -176,7 +187,24 @@ class BaseAd {
      * @param complete 参数表示是否完成
      */
     showVideo(complete, flag = "") {
+        this.curVideoFlag = flag;
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.ad_video, { flag });
+        if (!!flag) {
+            GxGame_1.default.gameEvent("reward_" + flag);
+        }
+        else {
+            console.warn("视频点没有加flag");
+        }
         complete && complete(true);
+    }
+    _videoCompleteEvent() {
+        GxGame_1.default.gameEvent("reward_complete_" + this.curVideoFlag);
+    }
+    _videoErrorEvent() {
+        GxGame_1.default.gameEvent("reward_error_" + this.curVideoFlag);
+    }
+    _videoCloseEvent() {
+        GxGame_1.default.gameEvent("reward_close_" + this.curVideoFlag);
     }
     /**
      * 上报原生广告曝光
@@ -282,6 +310,7 @@ class BaseAd {
      * @returns
      */
     showNativeInterstitial(on_show, on_hide, delay_time = 0) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.ad_inter, {});
     }
     /**
      * 原生插屏  vivo专用的  有switch控制
@@ -291,6 +320,7 @@ class BaseAd {
      * @returns
      */
     showOtherNativeInterstitial(on_show, on_hide, delay_time = 0) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.ad_otherInter, {});
     }
     /**隐藏原生插屏 */
     hideNativeInterstitial() {
@@ -321,10 +351,10 @@ class BaseAd {
     /**获取平台版本 */
     platformVersion() {
         if (GxConstant_1.default.IS_OPPO_GAME) {
-            return window["qg"].getSystemInfoSync()['platformVersion'];
+            return window["qg"].getSystemInfoSync()["platformVersion"];
         }
         else if (GxConstant_1.default.IS_VIVO_GAME) {
-            return window["qg"].getSystemInfoSync()['platformVersionCode'];
+            return window["qg"].getSystemInfoSync()["platformVersionCode"];
         }
         return 0;
     }
@@ -375,7 +405,7 @@ class BaseAd {
      * @param image 按钮图片（vivo）
      * @param marginTop 距顶部距离（vivo）
      */
-    showGamePortal(on_show, on_hide, show_toast = true, image = '', marginTop = 300) {
+    showGamePortal(on_show, on_hide, show_toast = true, image = "", marginTop = 300) {
     }
     /**隐藏九宫格 */
     hideGamePortal() {
@@ -401,7 +431,7 @@ class BaseAd {
      * 主动点击跳转广告
      */
     clickNative() {
-        if (this.isGameCd || GxGame_1.default.inBlockArea) {
+        if (this.isGameCd) {
             return console.log("[gx_game]广告CD中");
         }
         let native_data = this.getLocalNativeData(GxEnum_1.ad_native_type.inter1);
@@ -464,11 +494,15 @@ class BaseAd {
     hideQQBlockAd() {
     }
     // showCustomInter(){}
-    showCustomLeft() { }
-    showCustomRight() { }
+    showCustomLeft() {
+    }
+    showCustomRight() {
+    }
     // hideCustomInter(){}
-    hideCustomLeft() { }
-    hideCustomRight() { }
+    hideCustomLeft() {
+    }
+    hideCustomRight() {
+    }
     /**
      * 砸宝箱
      * @param on_show 展示回调
@@ -477,7 +511,7 @@ class BaseAd {
      * @param is_banner 误触使用视频还是banner  true banner  默认视频
      */
     showCrazyPoint(on_show, on_close, on_get, is_banner = false) {
-        if (GxGame_1.default.getLabel("crazy") || GxConstant_1.default.IS_WEB_DEBUG) {
+        if (GxGame_1.default.gGB("crazy") || GxConstant_1.default.IS_WEB_DEBUG) {
             /*   let node = cc.instantiate(GxUtils.getRes('gx/prefab/crazypoint', cc.Prefab));
                let crazyPoint = node.getComponent('Gx_crazypoint');
                node.parent = cc.director.getScene();
@@ -498,7 +532,7 @@ class BaseAd {
      * @param on_get 回传获取的金币数
      */
     showGameBox(on_show, on_close, on_get) {
-        if (GxGame_1.default.getLabel("switch")) {
+        if (GxGame_1.default.gGB("z1")) {
             if (!this.gameBoxView || this.gameBoxView.parent == null) {
                 this.gameBoxView = new gx_ui_gamebox_1.default();
                 this.gameBoxView.show(on_show, on_close, (num) => {
@@ -590,11 +624,11 @@ class BaseAd {
     initNativeAd() {
     }
     get_time() {
-        if (window['cc']) {
-            return window['cc'].sys.now();
+        if (window["cc"]) {
+            return window["cc"].sys.now();
         }
-        else if (window['Laya']) {
-            return window['Laya'].timer.currTimer;
+        else if (window["Laya"]) {
+            return window["Laya"].timer.currTimer;
         }
         else {
             return (new Date()).getTime();
@@ -668,7 +702,7 @@ class BaseAd {
     }
     /////////////////////////private/////////////////////////
     _setClickNative(type, cbk, rto = null) {
-        /*    if (this.isGameCd || GxGame.inBlockArea) {
+        /*    if (this.isGameCd ) {
                 cbk && cbk();
                 return console.log("[gx_game]广告CD中");
             }
@@ -720,6 +754,8 @@ class BaseAd {
     rewardAdEnd() {
     }
     ttReport() {
+    }
+    onClickBtn(type) {
     }
 }
 BaseAd.instance = null;

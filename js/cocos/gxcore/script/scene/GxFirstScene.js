@@ -51,6 +51,7 @@ const GxGame_1 = __importDefault(require("../GxGame"));
 const ResUtil_1 = __importDefault(require("../util/ResUtil"));
 const GxAdParams_1 = require("../GxAdParams");
 const GxConstant_1 = __importDefault(require("../core/GxConstant"));
+const GxChecker_1 = __importDefault(require("../GxChecker"));
 const { ccclass, property } = cc._decorator;
 let FirstScene = (() => {
     let _classDecorators = [ccclass];
@@ -80,12 +81,13 @@ let FirstScene = (() => {
             this.jkCompany = __runInitializers(this, _jkCompany_initializers, null);
             this.jkSoftCode = __runInitializers(this, _jkSoftCode_initializers, null);
             this.ageSp = __runInitializers(this, _ageSp_initializers, null);
-            this.gameSceneName = __runInitializers(this, _gameSceneName_initializers, 'GameScene');
+            this.gameSceneName = __runInitializers(this, _gameSceneName_initializers, "GameScene");
             // LIFE-CYCLE CALLBACKS:
             this.canJumpToNext = false;
             // update (dt) {}
         }
         onLoad() {
+            GxChecker_1.default.getInstance().init();
             let winSize = cc.winSize;
             if (winSize.width > winSize.height) {
                 this.node.getComponent(cc.Canvas).designResolution = cc.size(1280, 720);
@@ -100,6 +102,7 @@ let FirstScene = (() => {
             this.canJumpToNext = true;
             this.jkTitle.node.active = false;
             this.jkContent.node.active = false;
+            GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.jkzg, {});
             GxGame_1.default.initPlatform(() => {
                 GxGame_1.default.initGame(() => {
                     //隐私政策和和适龄
@@ -138,29 +141,28 @@ let FirstScene = (() => {
                                     GxGame_1.default.btnQQShareSp = spriteFrame;
                                 }
                             });
+                            ResUtil_1.default.loadSprite("gx/texture/btn_TTBox", (err, spriteFrame) => {
+                                if (err) {
+                                }
+                                else {
+                                    GxGame_1.default.btnTTBoxSp = spriteFrame;
+                                }
+                            });
                         }
-                        if (GxConstant_1.default.IS_QQ_GAME) {
-                            this.jkCompany.string = "";
+                        if (GxAdParams_1.AdParams.company && GxAdParams_1.AdParams.company.length > 0) {
+                            this.jkCompany.string = "著作权人：" + GxAdParams_1.AdParams.company;
                         }
                         else {
-                            if (GxAdParams_1.AdParams.company && GxAdParams_1.AdParams.company.length > 0) {
-                                this.jkCompany.string = "著作权人：" + GxAdParams_1.AdParams.company;
+                            if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_QQ_GAME) {
+                                this.canJumpToNext = false;
+                                this.jkCompany.string = "需要著作权人：";
                             }
-                            else {
-                                if (GxConstant_1.default.IS_OPPO_GAME) {
-                                    this.canJumpToNext = false;
-                                    this.jkCompany.string = "需要著作权人：";
-                                }
-                            }
-                        }
-                        if (GxConstant_1.default.IS_QQ_GAME) {
-                            this.jkCompany.string = "";
                         }
                         if (GxAdParams_1.AdParams.softCode && GxAdParams_1.AdParams.softCode.length > 0) {
                             this.jkSoftCode.string = "软著登记号：" + GxAdParams_1.AdParams.softCode;
                         }
                         else {
-                            if (GxConstant_1.default.IS_OPPO_GAME) {
+                            if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_QQ_GAME) {
                                 this.canJumpToNext = false;
                                 this.jkCompany.string = "软著登记号：";
                             }
@@ -169,6 +171,7 @@ let FirstScene = (() => {
                         this.jkContent.node.active = true;
                     }
                     this.scheduleOnce(() => {
+                        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.showGamePrivacy);
                         if (GxGame_1.default.needShowAuthorize()) {
                             GxGame_1.default.Ad().showAuthorize(() => {
                                 // 同意继续游戏
@@ -204,7 +207,7 @@ let FirstScene = (() => {
                 }
             }
             else {
-                if (GxConstant_1.default.IS_OPPO_GAME) {
+                if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_QQ_GAME) {
                     console.log("是不是没添加软著 信息");
                     console.log("是不是没添加软著 信息");
                     console.log("是不是没添加软著 信息");

@@ -337,7 +337,7 @@ class MZAdapter extends BaseAdapter_1.default {
                     on_show && on_show();
                 }, on_hide);
             }
-        }, (GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) ? 0 : 1000);
+        }, (GxGame_1.default.isShenHe) ? 0 : 1000);
     }
     hideNativeInterstitial() {
         super.hideNativeInterstitial();

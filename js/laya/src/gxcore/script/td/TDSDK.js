@@ -182,7 +182,7 @@ class TDSDK {
                 if (this.lastPage && this.lastPage.leaveTime > 0) {
                     let a = JSON.parse(JSON.stringify(this.lastMockData));
                     let duration = parseInt(((this.lastPage.leaveTime - this.lastMockData.appContext.sessionStartTime) / 1e3) + "");
-                    console.log("上报 上次会话时长：" + duration + "秒");
+                    // console.log("上报 上次会话时长：" + duration + "秒")
                     a.action = {
                         domain: "session",
                         name: "end",
@@ -197,11 +197,11 @@ class TDSDK {
                     this.save4Fetch(t);
                 }
                 else {
-                    console.log("上次lastPage空 或者leaveTime小于等于0");
+                    // console.log("上次lastPage空 或者leaveTime小于等于0")
                 }
             }
             else {
-                console.log("没有上次保存的sessionId或者 session开始时间");
+                // console.log("没有上次保存的sessionId或者 session开始时间")
             }
             this.startNewSession(true);
             setTimeout(() => {
@@ -264,7 +264,7 @@ class TDSDK {
             let curTime = (new Date).getTime();
             let a = JSON.parse(JSON.stringify(this.mock_data));
             let duration = parseInt(((curTime - this.mock_data.appContext.sessionStartTime) / 1e3) + "");
-            console.log("本次会话时长：" + duration + "秒");
+            // console.log("本次会话时长：" + duration + "秒")
             a.action = {
                 domain: "session",
                 name: "end",
@@ -324,7 +324,7 @@ class TDSDK {
         return defaultValue;
     }
     save4Fetch(e) {
-        console.log("saveFile了", e);
+        // console.log("saveFile了", e)
         e && "object" == typeof (e) && (Array.isArray(e) || (e = [e]), e = JSON.stringify(e), this.logList.push({
             uri: this.logPath + "event_" + (new Date).getTime() + Math.random(),
             text: e
@@ -352,7 +352,7 @@ class TDSDK {
                          }*/
                     }
                     else {
-                        console.log(xhr.responseText);
+                        // console.log(xhr.responseText);
                     }
                 }
             };
@@ -361,7 +361,7 @@ class TDSDK {
         }
     }
     heartBeat() {
-        console.log("开始心跳");
+        // console.log("开始心跳")
         clearInterval(this.heartBeat_timer);
         this.fetch();
         this.heartBeat_timer = setInterval(() => {
@@ -488,7 +488,7 @@ class TDSDK {
                 }, 100);
             }
             else {
-                console.log("没有调用init事件");
+                // console.log("没有调用init事件")
             }
         }
         catch (e) {

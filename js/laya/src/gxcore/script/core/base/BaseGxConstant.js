@@ -120,5 +120,7 @@ BaseGxConstant.IS_4399_H5_GAME = false;
 BaseGxConstant.IS_4399_BOX_GAME = false;
 BaseGxConstant.IS_MEIZU_GAME = false;
 BaseGxConstant.IS_WEB_DEBUG = false;
+/**支付宝小游戏 */
+BaseGxConstant.IS_ZFB_GAME = false;
 BaseGxConstant.KEY_PRIVACY_AGREE = "_GxPrivacyAgree_";
 exports.default = BaseGxConstant;

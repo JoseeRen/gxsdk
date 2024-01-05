@@ -35,19 +35,19 @@ class MiAdapter extends BaseAdapter_1.default {
         this.getGameInfo();
         GxGame_1.default.adConfig.interTick = 30;
         GxGame_1.default.adConfig.bannerTick = 30;
-        GxGame_1.default.adConfig.adCdTime = GxGame_1.default.getValue("delay", 30);
-        let label = GxGame_1.default.getLabel("switch");
+        GxGame_1.default.adConfig.adCdTime = GxGame_1.default.gGN('delay', 30);
+        let label = GxGame_1.default.gGB('z1');
         if (label) {
             GxGame_1.default.adConfig.adCdTime = 0;
         }
         this.isGameCd = GxGame_1.default.adConfig.adCdTime > 0;
-        this.logi("广告冷却：" + this.isGameCd);
+        this.logi('广告冷却：' + this.isGameCd);
         super.initAd();
-        let channel = "miDefault";
+        let channel = 'miDefault';
         if (this.manifestInfo != null) {
-            channel = this.manifestInfo.package.replace(/\./g, "_");
+            channel = this.manifestInfo.package.replace(/\./g, '_');
         }
-        TDSDK_1.default.getInstance().init("6D92901997C943FE9A91798414E30C6C", channel);
+        TDSDK_1.default.getInstance().init('6D92901997C943FE9A91798414E30C6C', channel);
         this._gameCd();
         this.initBanner();
         this.initNormalBanner();
@@ -60,9 +60,9 @@ class MiAdapter extends BaseAdapter_1.default {
         }, 6e4);
     }
     getDeviceId() {
-        if (window["qg"].getDeviceId) {
-            window["qg"].getDeviceId({
-                success: data => {
+        if (window['qg'].getDeviceId) {
+            window['qg'].getDeviceId({
+                success: (data) => {
                     this.logi(`deviceId get success: ${data}`);
                     if (data && data.deviceId && DataStorage_1.default.deviceid != data.deviceId) {
                         DataStorage_1.default.deviceid = data.deviceId;
@@ -76,18 +76,18 @@ class MiAdapter extends BaseAdapter_1.default {
         }
     }
     getGameInfo() {
-        if (window["qg"].getManifestInfo) {
-            window["qg"].getManifestInfo({
-                success: res => {
+        if (window['qg'].getManifestInfo) {
+            window['qg'].getManifestInfo({
+                success: (res) => {
                     const ret = JSON.parse(res.manifest);
                     GxGame_1.default.gameInfo = {
                         package: ret.package,
                         name: ret.name,
                         versionName: ret.versionName,
-                        versionCode: ret.versionCode
+                        versionCode: ret.versionCode,
                     };
                     this.logi(JSON.stringify(GxGame_1.default.gameInfo));
-                }
+                },
             });
         }
     }
@@ -105,15 +105,15 @@ class MiAdapter extends BaseAdapter_1.default {
      */
     initNormalBanner() {
         // @ts-ignore
-        if (!qg["createBannerAd"] || GxAdParams_1.AdParams.mi.banner.length <= 0) {
-            this.logi("环境不支持banner  或者banner广告参数空");
+        if (!qg['createBannerAd'] || GxAdParams_1.AdParams.mi.banner.length <= 0) {
+            this.logi('环境不支持banner  或者banner广告参数空');
             return;
         }
         this.destroyNormalBanner();
         let screenWidth = GxGame_1.default.screenWidth;
         let screenHeight = GxGame_1.default.screenHeight;
-        console.log("scree:" + screenWidth);
-        console.log("screenHeight:" + screenHeight);
+        console.log('scree:' + screenWidth);
+        console.log('screenHeight:' + screenHeight);
         let width = 500;
         let height = 200;
         let bannerShowTop = GxAdParams_1.AdParams.mi.bannerOnTop;
@@ -126,22 +126,22 @@ class MiAdapter extends BaseAdapter_1.default {
             height = 200;
         }
         let style = {
-            left: (screenWidth - screenWidth * 0.4) / 2,
-            top: screenHeight - (screenWidth * 0.4 * (88 / 208)) + 80,
-            width: 1000,
+        // left: (screenWidth - screenWidth * 0.4) / 2,
+        // top: screenHeight - (screenWidth * 0.4 * (88 / 208)) + 80,
+        // width: 1000,
         };
         if (bannerShowTop) {
-            style["top"] = 0;
+            style['top'] = 0;
         }
-        this.bannerAd = window["qg"].createBannerAd({
+        this.bannerAd = window['qg'].createBannerAd({
             adUnitId: GxAdParams_1.AdParams.mi.banner,
-            style: style
+            style: style,
         });
         let setEnd = false;
-        this.bannerAd.onError(err => {
+        this.bannerAd.onError((err) => {
             this.loge('normal banner error: ', JSON.stringify(err));
         });
-        this.bannerAd.onClose(err => {
+        this.bannerAd.onClose((err) => {
             this.loge('normal banner close: ');
             this.bannerShowTime = this.get_time();
             // if (this.bannerAd) {
@@ -149,13 +149,13 @@ class MiAdapter extends BaseAdapter_1.default {
             // }
             // this.bannerAd = null;
         });
-        this.bannerAd.onResize(res => {
+        this.bannerAd.onResize((res) => {
             this.loge('normal banner onResize: ', JSON.stringify(res));
             if (!setEnd) {
                 if (this.bannerAd) {
                     this.loge('normal banner 改变: ');
                     if (screenWidth > screenHeight) {
-                        this.bannerAd.style.top = screenHeight - (screenWidth * 0.4 * (88 / 208)) + 80;
+                        this.bannerAd.style.left = (screenWidth - screenWidth * 0.4) / 2;
                     }
                 }
             }
@@ -166,21 +166,25 @@ class MiAdapter extends BaseAdapter_1.default {
      * 展示普通banner
      */
     showNormalBanner(showCallback, failedCallback) {
-        if (this.get_time() - this.bannerShowTime <= GxGame_1.default.adConfig.bannerTick * 1000 || GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) {
-            this.logi("限制了2banner");
+        if (this.get_time() - this.bannerShowTime <=
+            GxGame_1.default.adConfig.bannerTick * 1000 ||
+            GxGame_1.default.isShenHe) {
+            this.logi('限制了2banner');
             return failedCallback && failedCallback();
         }
         if (this.bannerAd == null) {
             this.initNormalBanner();
         }
         if (this.bannerAd == null) {
-            this.logi("banner空");
+            this.logi('banner空');
             failedCallback && failedCallback();
             return;
         }
-        this.bannerAd.show().then(() => {
+        this.bannerAd
+            .show()
+            .then(() => {
             showCallback && showCallback();
-            this.logi("normal banner show success");
+            this.logi('normal banner show success');
             if (GxGame_1.default.adConfig.bannerUpdateTime <= 0) {
                 if (this.bannerTimer)
                     this.bannerTimer.stop();
@@ -188,14 +192,16 @@ class MiAdapter extends BaseAdapter_1.default {
             if (this.bannerAd) {
                 //不设置下面的话  banner 的left不生效？？？
                 if (GxGame_1.default.screenWidth > GxGame_1.default.screenHeight) {
-                    this.bannerAd.style.top = GxGame_1.default.screenHeight - (GxGame_1.default.screenWidth * 0.4 * (88 / 208)) + 80;
+                    this.bannerAd.style.top =
+                        GxGame_1.default.screenHeight - GxGame_1.default.screenWidth * 0.4 * (88 / 208) + 80;
                     this.bannerAd.style.height = this.bannerAd.style.realHeight;
                     this.bannerAd.style.top = GxGame_1.default.screenHeight - 65;
                 }
             }
-        }).catch(e => {
+        })
+            .catch((e) => {
             failedCallback && failedCallback();
-            this.loge("banner error", e);
+            this.loge('banner error', e);
         });
     }
     /**
@@ -207,7 +213,7 @@ class MiAdapter extends BaseAdapter_1.default {
             this.bannerAd.destroy();
         }
         this.bannerAd = null;
-        console.log("销毁banner");
+        console.log('销毁banner');
     }
     /**
      * 销毁普通banner
@@ -227,8 +233,10 @@ class MiAdapter extends BaseAdapter_1.default {
         //     this.logi("showBanner 广告CD中")
         //     return;
         // }
-        if (this.get_time() - this.bannerShowTime <= GxGame_1.default.adConfig.bannerTick * 1000 || GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) {
-            this.logi("限制了2banner");
+        if (this.get_time() - this.bannerShowTime <=
+            GxGame_1.default.adConfig.bannerTick * 1000 ||
+            GxGame_1.default.isShenHe) {
+            this.logi('限制了2banner');
             return failedCallback && failedCallback();
         }
         if (!this.firstBanner) {
@@ -293,7 +301,7 @@ class MiAdapter extends BaseAdapter_1.default {
     hideBanner() {
         super.hideBanner();
         this.isNeedShowBanner = false;
-        console.log("进入hideBanner");
+        console.log('进入hideBanner');
         if (this.customBanner) {
             this.customBanner.hide();
             this.customBanner.destroy();
@@ -303,47 +311,50 @@ class MiAdapter extends BaseAdapter_1.default {
     }
     initVideo() {
         if (!GxAdParams_1.AdParams.mi.video) {
-            this.logi("video广告位参数空");
+            this.logi('video广告位参数空');
             return;
         }
         this.destroyVideo();
-        this.videoAd = window["qg"].createRewardedVideoAd({
-            adUnitId: GxAdParams_1.AdParams.mi.video
+        this.videoAd = window['qg'].createRewardedVideoAd({
+            adUnitId: GxAdParams_1.AdParams.mi.video,
         });
         this.videoAd.onLoad(() => {
-            this.logi("video load succ");
+            this.logi('video load succ');
         });
         this.videoAd.onError((err) => {
-            this.logi("video error: " + JSON.stringify(err), "color: red");
+            this.logi('video error: ' + JSON.stringify(err), 'color: red');
         });
-        this.videoAd.onClose(res => {
+        this.videoAd.onClose((res) => {
             if (res && res.isEnded) {
                 this.videocallback && this.videocallback(true);
             }
             else {
                 this.videocallback && this.videocallback(false);
                 /*   let node = cc.instantiate(Utils.getRes('hs_ui/ui_watch_video', cc.Prefab));
-                   let ui_watch_video = node.getComponent('hs_ui_watch_video');
-                   ui_watch_video && ui_watch_video.show(() => {
-                       this.showVideo(this.videocallback);
-                   });*/
+                           let ui_watch_video = node.getComponent('hs_ui_watch_video');
+                           ui_watch_video && ui_watch_video.show(() => {
+                               this.showVideo(this.videocallback);
+                           });*/
             }
             this.videoAd.load();
         });
         this.videoAd.load();
     }
-    showVideo(complete, flag = "") {
+    showVideo(complete, flag = '') {
         if (this.videoAd == null) {
             this.initVideo();
         }
+        super.showVideo(null, flag);
         if (this.videoAd == null) {
             this.createToast('暂无视频，请稍后再试');
             complete && complete(false);
             return;
         }
         this.videocallback = complete;
-        this.videoAd.show().then(() => {
-        }).catch(() => {
+        this.videoAd
+            .show()
+            .then(() => { })
+            .catch(() => {
             this.createToast('暂无视频，请稍后再试');
             complete && complete(false);
         });
@@ -358,7 +369,7 @@ class MiAdapter extends BaseAdapter_1.default {
     }
     create_ad(ad_type) {
         return new Promise((resolve, reject) => {
-            let posId = "";
+            let posId = '';
             if (ad_type == GxEnum_1.ad_native_type.banner) {
                 posId = GxAdParams_1.AdParams.mi.native_banner;
             }
@@ -370,25 +381,29 @@ class MiAdapter extends BaseAdapter_1.default {
             }
             this.logi(ad_type, 'posId = ', posId);
             // @ts-ignore
-            if (posId == '' || posId === undefined || posId == null || this.is_limit_native_length(ad_type) || !qg["createNativeAd"])
+            if (posId == '' ||
+                posId === undefined ||
+                posId == null ||
+                this.is_limit_native_length(ad_type) ||
+                !qg['createNativeAd'])
                 return resolve(null);
-            let nativeAd = window["qg"].createNativeAd({
-                adUnitId: posId
+            let nativeAd = window['qg'].createNativeAd({
+                adUnitId: posId,
             });
             let on_load = (res) => {
-                this.logi("native data load:");
+                this.logi('native data load:');
                 if (res && res.adList) {
                     let data = res.adList.pop();
                     data.ad = nativeAd;
                     data.type = ad_type;
                     this.add_native_data(data);
-                    this.logi("native data load succ:" + JSON.stringify(data));
+                    this.logi('native data load succ:' + JSON.stringify(data));
                     nativeAd.offLoad(on_load);
                 }
             };
             nativeAd.onLoad(on_load);
             let on_error = (err) => {
-                this.logi("native data error: " + JSON.stringify(err), "color: red");
+                this.logi('native data error: ' + JSON.stringify(err), 'color: red');
                 nativeAd.offError(on_error);
             };
             nativeAd.onError(on_error);
@@ -397,7 +412,7 @@ class MiAdapter extends BaseAdapter_1.default {
         });
     }
     create_custom_ad(ad_type) {
-        let posId = "";
+        let posId = '';
         let style = {};
         // 定义 CustomAd 左上角距离屏幕左边的距离，不传默认为底部居中，宽度为屏幕短边
         if (ad_type == GxEnum_1.ad_native_type.banner) {
@@ -420,7 +435,7 @@ class MiAdapter extends BaseAdapter_1.default {
         }
         if (ad_type == GxEnum_1.ad_native_type.banner) {
             if (GxAdParams_1.AdParams.mi.bannerOnTop) {
-                style["top"] = 0;
+                style['top'] = 0;
             }
             else {
             }
@@ -428,25 +443,28 @@ class MiAdapter extends BaseAdapter_1.default {
         else {
             let shortWidth = Math.min(GxGame_1.default.screenWidth, GxGame_1.default.screenHeight);
             let width = shortWidth * 0.85;
-            let height = width / 16 * 15.125; //16	15.125
+            let height = (width / 16) * 15.125; //16	15.125
             //插屏 宽都是256  高  218   242   188 212 四种
             let left = (GxGame_1.default.screenWidth - width) / 2;
             let top = (GxGame_1.default.screenHeight - height) / 2;
-            style["width"] = width;
-            style["left"] = left;
-            style["top"] = top;
+            style['width'] = width;
+            style['left'] = left;
+            style['top'] = top;
             // console.log(JSON.stringify(style))
         }
         this.logi(ad_type, 'posId = ', posId);
-        if (posId == '' || posId === undefined || posId == null || !window["qg"].createCustomAd)
+        if (posId == '' ||
+            posId === undefined ||
+            posId == null ||
+            !window['qg'].createCustomAd)
             return null;
-        let nativeAd = window["qg"].createCustomAd({
+        let nativeAd = window['qg'].createCustomAd({
             adUnitId: posId,
-            style: style
+            style: style,
         });
         return nativeAd;
         return new Promise((resolve, reject) => {
-            let posId = "";
+            let posId = '';
             let style = {};
             // 定义 CustomAd 左上角距离屏幕左边的距离，不传默认为底部居中，宽度为屏幕短边
             if (ad_type == GxEnum_1.ad_native_type.banner) {
@@ -460,7 +478,7 @@ class MiAdapter extends BaseAdapter_1.default {
             }
             if (ad_type == GxEnum_1.ad_native_type.banner) {
                 if (GxAdParams_1.AdParams.mi.bannerOnTop) {
-                    style["top"] = 0;
+                    style['top'] = 0;
                 }
                 else {
                 }
@@ -468,45 +486,48 @@ class MiAdapter extends BaseAdapter_1.default {
             else {
                 let shortWidth = Math.min(GxGame_1.default.screenWidth, GxGame_1.default.screenHeight);
                 let width = shortWidth * 0.85;
-                let height = width / 16 * 15.125; //16	15.125
+                let height = (width / 16) * 15.125; //16	15.125
                 //插屏 宽都是256  高  218   242   188 212 四种
                 let left = (GxGame_1.default.screenWidth - width) / 2;
                 let top = (GxGame_1.default.screenHeight - height) / 2;
-                style["width"] = width;
-                style["left"] = left;
-                style["top"] = top;
+                style['width'] = width;
+                style['left'] = left;
+                style['top'] = top;
                 // console.log(JSON.stringify(style))
             }
             this.logi(ad_type, 'posId = ', posId);
-            if (posId == '' || posId === undefined || posId == null || window["qg"].createCustomAd)
+            if (posId == '' ||
+                posId === undefined ||
+                posId == null ||
+                window['qg'].createCustomAd)
                 return resolve(null);
-            let nativeAd = window["qg"].createCustomAd({
+            let nativeAd = window['qg'].createCustomAd({
                 adUnitId: posId,
-                style: style
+                style: style,
             });
             /* let on_load = (res) => {
-                 this.logi("custom data load succ:");
-
-
-                 nativeAd.offLoad(on_load);
-                 if (ad_type == ad_native_type.banner) {
-                     this._native_custom_banner_cache.push(nativeAd)
-
-                 } else {
-                     this._native_custom_inter_cache.push(nativeAd)
-
-                 }
-
-             }
-             nativeAd.onLoad(on_load);
-
-             let on_error = (err) => {
-                 this.logi("custom data error: " + JSON.stringify(err));
-                 nativeAd.offError(on_error);
-             }
-             nativeAd.onError(on_error);
-
-             nativeAd.load();*/
+                       this.logi("custom data load succ:");
+      
+      
+                       nativeAd.offLoad(on_load);
+                       if (ad_type == ad_native_type.banner) {
+                           this._native_custom_banner_cache.push(nativeAd)
+      
+                       } else {
+                           this._native_custom_inter_cache.push(nativeAd)
+      
+                       }
+      
+                   }
+                   nativeAd.onLoad(on_load);
+      
+                   let on_error = (err) => {
+                       this.logi("custom data error: " + JSON.stringify(err));
+                       nativeAd.offError(on_error);
+                   }
+                   nativeAd.onError(on_error);
+      
+                   nativeAd.load();*/
             if (ad_type == GxEnum_1.ad_native_type.banner) {
                 this._native_custom_banner_cache.push(nativeAd);
             }
@@ -520,41 +541,44 @@ class MiAdapter extends BaseAdapter_1.default {
     initNativeAd() {
         // 拉取间隔1s
         if (GxGame_1.default.adConfig.useNative) {
-            this.logi("使用原生自渲染广告");
-            this.create_ad(GxEnum_1.ad_native_type.banner).then(() => {
+            this.logi('使用原生自渲染广告');
+            this.create_ad(GxEnum_1.ad_native_type.banner)
+                .then(() => {
                 return this.create_ad(GxEnum_1.ad_native_type.inter1);
-            }).then(() => {
+            })
+                .then(() => {
                 return this.create_ad(GxEnum_1.ad_native_type.inter2);
-            }).then(() => {
+            })
+                .then(() => {
                 this.loop_get_native_data();
             }); /* this.create_ad(ad_native_type.banner).then(() => {
-            return this.create_ad(ad_native_type.native_icon);
-        }).then(() => {
-            return this.create_ad(ad_native_type.inter1);
-        }).then(() => {
-            return this.create_ad(ad_native_type.inter2);
-        }).then(() => {
-            this.loop_get_native_data();
-        })*/
+                return this.create_ad(ad_native_type.native_icon);
+            }).then(() => {
+                return this.create_ad(ad_native_type.inter1);
+            }).then(() => {
+                return this.create_ad(ad_native_type.inter2);
+            }).then(() => {
+                this.loop_get_native_data();
+            })*/
         }
         else {
-            this.logi("使用原生模板广告");
+            this.logi('使用原生模板广告');
             /* this.create_custom_ad(ad_native_type.banner).then(() => {
-                 return this.create_custom_ad(ad_native_type.inter1);
-             }).then(() => {
-                 return this.create_custom_ad(ad_native_type.inter2);
-             }).then(() => {
-                 this.loop_get_custom_data();
-             })*/
+                       return this.create_custom_ad(ad_native_type.inter1);
+                   }).then(() => {
+                       return this.create_custom_ad(ad_native_type.inter2);
+                   }).then(() => {
+                       this.loop_get_custom_data();
+                   })*/
         }
     }
     showInterstitialNative(parent, on_click, on_show, on_hide) {
         on_hide && on_hide();
-        this.logi("不使用这个广告");
+        this.logi('不使用这个广告');
         return;
         if (this.isGameCd) {
             on_hide && on_hide();
-            return this.logi("广告CD中");
+            return this.logi('广告CD中');
         }
         this.hideInterstitialNative();
         let native_data = this.getLocalNativeData(GxEnum_1.ad_native_type.inter1);
@@ -565,28 +589,31 @@ class MiAdapter extends BaseAdapter_1.default {
             this.isNeedShowBanner = false;
             let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_inner_interstitial', cc.Prefab));
             this.innerInter = node.getComponent('gx_native_inner_interstitial');
-            this.innerInter && this.innerInter.show(parent, native_data, on_click, () => {
-                // this.hideBanner();
-                on_show && on_show();
-            }, on_hide);
+            this.innerInter &&
+                this.innerInter.show(parent, native_data, on_click, () => {
+                    // this.hideBanner();
+                    on_show && on_show();
+                }, on_hide);
         }
     }
     /**普通插屏 */
     showInterstitial(on_show, on_close) {
-        this.logi("普通 插屏");
+        this.logi('普通 插屏');
         // @ts-ignore
-        if (!qg["createInterstitialAd"] || GxAdParams_1.AdParams.mi.inter == null || GxAdParams_1.AdParams.mi.inter.length == 0) {
+        if (!qg['createInterstitialAd'] ||
+            GxAdParams_1.AdParams.mi.inter == null ||
+            GxAdParams_1.AdParams.mi.inter.length == 0) {
             return on_close && on_close();
         }
         this.destroyNormalInter();
         // this.hideBanner();
         // @ts-ignore
         this.interAd = qg.createInterstitialAd({
-            adUnitId: GxAdParams_1.AdParams.mi.inter
+            adUnitId: GxAdParams_1.AdParams.mi.inter,
         });
         let self = this;
         this.interAd.onLoad(() => {
-            self.logi("插屏广告加载");
+            self.logi('插屏广告加载');
             this.interAd.show();
             on_show && on_show();
         });
@@ -595,19 +622,19 @@ class MiAdapter extends BaseAdapter_1.default {
             on_close && on_close();
         });
         this.interAd.onClose(() => {
-            self.logi("插屏广告关闭");
+            self.logi('插屏广告关闭');
             this.interShowTime = this.get_time();
             on_close && on_close();
         });
         /*  this.interAd.load().then(res => {
-              return this.interAd.show()
-          }).then(() => {
-              // this.hideBanner();
-              this.interShowTime = this.get_time();
-          }).catch(err => {
-              this.logi('普通插屏展示失败' + JSON.stringify(err));
-              on_close && on_close();
-          });*/
+                  return this.interAd.show()
+              }).then(() => {
+                  // this.hideBanner();
+                  this.interShowTime = this.get_time();
+              }).catch(err => {
+                  this.logi('普通插屏展示失败' + JSON.stringify(err));
+                  on_close && on_close();
+              });*/
     }
     destroyNormalInter() {
         if (this.interAd) {
@@ -628,19 +655,21 @@ class MiAdapter extends BaseAdapter_1.default {
      * @returns
      */
     showNativeInterstitial(on_show, on_hide, delay_time = 0) {
-        /*  let label = GxGame.getLabel("switch");
-          if (!label) {
-              this.logi("限制了1")
-              on_hide && on_hide()
-              return
-          }*/
+        /*  let label = GxGame.gGB("switch");
+              if (!label) {
+                  this.logi("限制了1")
+                  on_hide && on_hide()
+                  return
+              }*/
         if (this.isGameCd) {
             on_hide && on_hide();
-            this.logi("showNativeInterstitial 广告CD中");
+            this.logi('showNativeInterstitial 广告CD中');
             return;
         }
-        if (this.get_time() - this.interShowTime <= GxGame_1.default.adConfig.interTick * 1000 || GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) {
-            this.logi("限制了2");
+        if (this.get_time() - this.interShowTime <=
+            GxGame_1.default.adConfig.interTick * 1000 ||
+            GxGame_1.default.isShenHe) {
+            this.logi('限制了2');
             return on_hide && on_hide();
         }
         GxTimer_1.default.once(() => {
@@ -651,7 +680,7 @@ class MiAdapter extends BaseAdapter_1.default {
             //循环加兜底
             if (GxGame_1.default.adConfig.useNative) {
                 if (this.interIdx % 2 == 1) {
-                    this.logi(" useNative interIdx:" + this.interIdx);
+                    this.logi(' useNative interIdx:' + this.interIdx);
                     native_data = this.getLocalNativeData(GxEnum_1.ad_native_type.inter1);
                     tmpInter = GxEnum_1.ad_native_type.inter1;
                     if (native_data == null || native_data === undefined) {
@@ -660,25 +689,25 @@ class MiAdapter extends BaseAdapter_1.default {
                     }
                 }
                 else {
-                    this.logi(" useNative inter222Idx:" + this.interIdx);
-                    this.logi("调用普通插屏");
+                    this.logi(' useNative inter222Idx:' + this.interIdx);
+                    this.logi('调用普通插屏');
                     this.interIdx++;
                     this.showInterstitial(on_show, on_hide);
                     return;
                     /*     native_data = this.getLocalNativeData(ad_native_type.inter2);
-                         tmpInter = ad_native_type.inter2
-
-                         if (native_data == null || native_data === undefined) {
-                             native_data = this.getLocalNativeData(ad_native_type.inter1);
-                             tmpInter = ad_native_type.inter1
-
-                         } else {
-                             this.logi("调用普通插屏")
-                             this.interIdx++;
-                             this.showInterstitial(on_show, on_hide);
-
-                             return
-                         }*/
+                                 tmpInter = ad_native_type.inter2
+        
+                                 if (native_data == null || native_data === undefined) {
+                                     native_data = this.getLocalNativeData(ad_native_type.inter1);
+                                     tmpInter = ad_native_type.inter1
+        
+                                 } else {
+                                     this.logi("调用普通插屏")
+                                     this.interIdx++;
+                                     this.showInterstitial(on_show, on_hide);
+        
+                                     return
+                                 }*/
                 }
             }
             else {
@@ -692,41 +721,42 @@ class MiAdapter extends BaseAdapter_1.default {
                 }
             }
             this.interIdx++;
-            this.logi("interIdx:" + this.interIdx);
-            this.logi("显示:" + tmpInter);
+            this.logi('interIdx:' + this.interIdx);
+            this.logi('显示:' + tmpInter);
             if (native_data == null || native_data === undefined) {
-                this.logi("native_data null");
+                this.logi('native_data null');
                 on_hide && on_hide();
             }
             else {
                 if (GxGame_1.default.adConfig.useNative) {
-                    this.logi("native inter ");
+                    this.logi('native inter ');
                     /*if (Utils.randomInt(1, 100) > GxGame.adConfig.showInterRto) {
-                  this.logi("限制了3")
-
-                  return on_hide && on_hide()
-              }*/
+                          this.logi("限制了3")
+        
+                          return on_hide && on_hide()
+                      }*/
                     let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_interstitial', cc.Prefab));
                     this.nativeInter = node.getComponent('gx_native_interstitial');
-                    this.nativeInter && this.nativeInter.show(native_data, () => {
-                        // this.hideBanner();
-                        on_show && on_show();
-                    }, () => {
-                        this.interShowTime = this.get_time();
-                        on_hide && on_hide();
-                    });
+                    this.nativeInter &&
+                        this.nativeInter.show(native_data, () => {
+                            // this.hideBanner();
+                            on_show && on_show();
+                        }, () => {
+                            this.interShowTime = this.get_time();
+                            on_hide && on_hide();
+                        });
                 }
                 else {
                     if (this.customInter) {
                         this.customInter.destroy();
                         this.customInter = null;
                     }
-                    this.logi("custom inter ");
+                    this.logi('custom inter ');
                     native_data.onHide(() => {
                         this.interShowTime = this.get_time();
                         // console.log("隐藏block")
-                        if (window["cc"]) {
-                            let childByName = cc.director.getScene().getChildByName("BLOCK");
+                        if (window['cc']) {
+                            let childByName = cc.director.getScene().getChildByName('BLOCK');
                             if (childByName) {
                                 childByName.destroy();
                             }
@@ -738,32 +768,53 @@ class MiAdapter extends BaseAdapter_1.default {
                         .show()
                         .then(() => {
                         // console.log("显示block")
-                        if (window["cc"]) {
-                            let childByName = cc.director.getScene().getChildByName("BLOCK");
+                        if (window['cc']) {
+                            let childByName = cc.director
+                                .getScene()
+                                .getChildByName('BLOCK');
                             if (!childByName) {
                                 let node = new cc.Node();
                                 node.width = 2000;
                                 node.height = 2000;
-                                node.name = "BLOCK";
+                                node.name = 'BLOCK';
                                 cc.director.getScene().addChild(node);
                                 node.zIndex = cc.macro.MAX_ZINDEX;
                                 node.addComponent(cc.BlockInputEvents);
                                 let winSize = cc.winSize;
                                 node.x = winSize.width / 2;
                                 node.y = winSize.height / 2;
+                                let t = 0;
+                                node.on(cc.Node.EventType.TOUCH_START, () => {
+                                    t++;
+                                    console.log('触摸了');
+                                    if (t == 4) {
+                                        node.destroy();
+                                    }
+                                });
                             }
                         }
                         this.customInter = native_data;
-                        this.logi("show custom inter  success");
+                        this.logi('show custom inter  success');
                         on_show && on_show();
                     })
                         .catch((error) => {
-                        this.logi("show custom inter fail with:" + error.errCode + "," + error.errMsg);
+                        this.logi('show custom inter fail with:' +
+                            error.errCode +
+                            ',' +
+                            error.errMsg);
                         on_hide && on_hide();
+                        if (window['cc']) {
+                            let childByName = cc.director
+                                .getScene()
+                                .getChildByName('BLOCK');
+                            if (childByName) {
+                                childByName.destroy();
+                            }
+                        }
                     });
                 }
             }
-        }, (GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) ? 0 : delay_time * 1000);
+        }, GxGame_1.default.isShenHe ? 0 : delay_time * 1000);
     }
     showOtherNativeInterstitial(on_show, on_hide, delay_time = 0) {
         this.showNativeInterstitial(on_show, on_hide, delay_time);
@@ -774,10 +825,10 @@ class MiAdapter extends BaseAdapter_1.default {
      */
     showNativeIcon(parent) {
         if (this.isGameCd) {
-            return this.logi("showNativeIcon 广告CD中");
+            return this.logi('showNativeIcon 广告CD中');
         }
         if (!GxGame_1.default.adConfig.useNative) {
-            return this.logi("native无法显示 现在是custom ");
+            return this.logi('native无法显示 现在是custom ');
             return;
         }
         // 特殊处理
@@ -791,7 +842,7 @@ class MiAdapter extends BaseAdapter_1.default {
         }
         let native_data = this.getLocalNativeData(type);
         if (native_data == null || native_data === undefined) {
-            return this.logi("showNativeIcon 暂无广告数据");
+            return this.logi('showNativeIcon 暂无广告数据');
         }
         else {
             let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_icon', cc.Prefab));
@@ -807,11 +858,16 @@ class MiAdapter extends BaseAdapter_1.default {
      * 每隔n秒加载一条数据，保持数组内各类型数据有5条
      */
     loop_get_native_data() {
-        let nextTimeLeft = this._native_data_cache.length < 5 ? GxUtils_1.default.randomInt(15, 20) * 1000 : 30000;
+        let nextTimeLeft = this._native_data_cache.length < 5
+            ? GxUtils_1.default.randomInt(15, 20) * 1000
+            : 30000;
         setTimeout(this.initNativeAd.bind(this), nextTimeLeft);
     }
     loop_get_custom_data() {
-        let nextTimeLeft = (this._native_custom_inter_cache.length < 5 || this._native_custom_banner_cache.length < 5) ? GxUtils_1.default.randomInt(15, 20) * 1000 : 30000;
+        let nextTimeLeft = this._native_custom_inter_cache.length < 5 ||
+            this._native_custom_banner_cache.length < 5
+            ? GxUtils_1.default.randomInt(15, 20) * 1000
+            : 30000;
         setTimeout(this.initNativeAd.bind(this), nextTimeLeft);
     }
     /**
@@ -819,19 +875,21 @@ class MiAdapter extends BaseAdapter_1.default {
      */
     initGamePortal() {
         let self = this;
-        if (this.supportGameBox() && GxAdParams_1.AdParams.mi.gamePortal && window["qg"].createGamePortalAd) {
+        if (this.supportGameBox() &&
+            GxAdParams_1.AdParams.mi.gamePortal &&
+            window['qg'].createGamePortalAd) {
             this.destroyGamePortal();
-            this.portalAd = window["qg"].createGamePortalAd({
-                adUnitId: GxAdParams_1.AdParams.mi.gamePortal
+            this.portalAd = window['qg'].createGamePortalAd({
+                adUnitId: GxAdParams_1.AdParams.mi.gamePortal,
             });
             this.portalAd.onLoad(function () {
-                self.logi("game portal ad load succ");
+                self.logi('game portal ad load succ');
             });
             this.portalAd.onClose(() => {
                 self._game_portal_hide && this._game_portal_hide();
             });
             this.portalAd.onError(function (err) {
-                self.logi("game portal ad error: " + JSON.stringify(err), "color: red");
+                self.logi('game portal ad error: ' + JSON.stringify(err), 'color: red');
             });
         }
     }
@@ -847,17 +905,23 @@ class MiAdapter extends BaseAdapter_1.default {
             return;
         }
         this._game_portal_hide = on_hide;
-        this.portalAd.load().then(() => {
-            this.portalAd.show().then(() => {
+        this.portalAd
+            .load()
+            .then(() => {
+            this.portalAd
+                .show()
+                .then(() => {
                 this.logi('show success');
                 this.hideBanner();
                 on_show && on_show();
-            }).catch(error => {
+            })
+                .catch((error) => {
                 this.loge('showGamePortal show error:', error);
                 on_hide && on_hide();
                 show_toast && this.createToast('努力加载中,请稍后再试~');
             });
-        }).catch(error => {
+        })
+            .catch((error) => {
             this.loge('showGamePortal load error:', error);
             on_hide && on_hide();
             show_toast && this.createToast('努力加载中,请稍后再试~');
@@ -874,10 +938,12 @@ class MiAdapter extends BaseAdapter_1.default {
      */
     initGameBanner() {
         let self = this;
-        if (!window["qg"].createGameBannerAd && GxAdParams_1.AdParams.mi.gameBanner && window["qg"].createGameBannerAd) {
+        if (!window['qg'].createGameBannerAd &&
+            GxAdParams_1.AdParams.mi.gameBanner &&
+            window['qg'].createGameBannerAd) {
             this.destroyGameBanner();
-            this.gameBannerAd = window["qg"].createGameBannerAd({
-                adUnitId: GxAdParams_1.AdParams.mi.gameBanner
+            this.gameBannerAd = window['qg'].createGameBannerAd({
+                adUnitId: GxAdParams_1.AdParams.mi.gameBanner,
             });
             this.gameBannerAd.onLoad(function () {
                 self.logi('盒子横幅广告加载成功');
@@ -896,9 +962,12 @@ class MiAdapter extends BaseAdapter_1.default {
         }
         if (!this.gameBannerAd)
             return;
-        this.gameBannerAd.show().then(function () {
+        this.gameBannerAd
+            .show()
+            .then(function () {
             self.logi('show success');
-        }).catch(function (error) {
+        })
+            .catch(function (error) {
             self.logi('show fail with:' + error.errCode + ',' + error.errMsg);
         });
     }
@@ -919,7 +988,9 @@ class MiAdapter extends BaseAdapter_1.default {
      * @param on_succ
      */
     showAddDesktop(on_close, on_succ) {
-        if (this.addIconNode && this.addIconNode !== undefined && cc.isValid(this.addIconNode.node))
+        if (this.addIconNode &&
+            this.addIconNode !== undefined &&
+            cc.isValid(this.addIconNode.node))
             return;
         let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/add_icon', cc.Prefab));
         this.addIconNode = node.getComponent('Gx_add_icon');
@@ -927,11 +998,12 @@ class MiAdapter extends BaseAdapter_1.default {
     }
     /**判断是否支持添加桌面 */
     hasAddDesktop(can_add, has_add, on_fail) {
-        if (window["qg"].hasShortcutInstalled && window["qg"].hasShortcutInstalled) {
-            window["qg"].hasShortcutInstalled({
-                success: res => {
+        if (window['qg'].hasShortcutInstalled &&
+            window['qg'].hasShortcutInstalled) {
+            window['qg'].hasShortcutInstalled({
+                success: (res) => {
                     // 判断图标未存在时，创建图标
-                    this.logi(" hasShortcutInstalled " + (res ? 'has add' : 'can add'));
+                    this.logi(' hasShortcutInstalled ' + (res ? 'has add' : 'can add'));
                     if (res == false) {
                         can_add && can_add();
                     }
@@ -939,12 +1011,11 @@ class MiAdapter extends BaseAdapter_1.default {
                         has_add && has_add();
                     }
                 },
-                fail: err => {
+                fail: (err) => {
                     this.loge(` hasShortcutInstalled error: ${JSON.stringify(err)}`);
                     on_fail && on_fail();
                 },
-                complete: function () {
-                }
+                complete: function () { },
             });
         }
         else {
@@ -953,8 +1024,8 @@ class MiAdapter extends BaseAdapter_1.default {
     }
     /**创建桌面图标 */
     addDesktop(on_succ, on_fail) {
-        if (window["qg"].installShortcut && window["qg"].installShortcut) {
-            window["qg"].installShortcut({
+        if (window['qg'].installShortcut && window['qg'].installShortcut) {
+            window['qg'].installShortcut({
                 success: () => {
                     setTimeout(() => {
                         this.hasAddDesktop(() => {
@@ -964,14 +1035,14 @@ class MiAdapter extends BaseAdapter_1.default {
                         });
                     }, 1000);
                 },
-                fail: err => {
+                fail: (err) => {
                     this.loge(` installShortcut error: ${JSON.stringify(err)}`);
                     on_fail && on_fail();
-                    window["qg"].showToast({
-                        title: "请稍后再试",
-                        icon: "none",
+                    window['qg'].showToast({
+                        title: '请稍后再试',
+                        icon: 'none',
                     });
-                }
+                },
             });
         }
         else {
@@ -980,18 +1051,18 @@ class MiAdapter extends BaseAdapter_1.default {
     }
     login(on_succ, on_fail) {
         // if (this.platformVersion() >= 1040 && window["qg"].login) {
-        if (window["qg"].login) {
-            window["qg"].login({
-                success: res => {
+        if (window['qg'].login) {
+            window['qg'].login({
+                success: (res) => {
                     on_succ && on_succ(res);
                 },
                 fail: (err) => {
                     on_fail && on_fail(err);
-                }
+                },
             });
         }
         else {
-            on_fail && on_fail("no login");
+            on_fail && on_fail('no login');
         }
     }
     reportAdClick(native_data) {
@@ -1004,17 +1075,17 @@ class MiAdapter extends BaseAdapter_1.default {
      * @returns
      */
     openGameAd() {
-        if (!GxGame_1.default.isShenHe && !GxGame_1.default.inBlockArea && GxGame_1.default.adConfig.showBanner > 0) {
+        if (!GxGame_1.default.isShenHe && GxGame_1.default.adConfig.showBanner > 0) {
             GxTimer_1.default.once(() => {
                 this.clickNative();
             }, GxGame_1.default.adConfig.showBanner * 1000);
         }
     }
     logi(...data) {
-        super.LOG("[MiAdapter]", ...data);
+        super.LOG('[MiAdapter]', ...data);
     }
     loge(...data) {
-        super.LOGE("[MiAdapter]", ...data);
+        super.LOGE('[MiAdapter]', ...data);
     }
 }
 exports.default = MiAdapter;

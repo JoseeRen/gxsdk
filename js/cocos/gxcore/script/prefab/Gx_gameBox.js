@@ -101,11 +101,12 @@ let Gx_gameBox = (() => {
         onDestroy() {
             this.onClose && this.onClose();
             if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_VIVO_GAME) {
-                let label = GxGame_1.default.getLabel("switch");
+                let label = GxGame_1.default.gGB("z1");
                 if (label) {
-                    var gailv = GxGame_1.default.getValue("gailv");
-                    if (Math.round(Math.random() * 99 + 1) < gailv) {
-                        GxGame_1.default.Ad().showVideo((res) => { });
+                    var gb = GxGame_1.default.gGN("gb");
+                    if (Math.round(Math.random() * 99 + 1) < gb) {
+                        GxGame_1.default.Ad().showVideo((res) => {
+                        }, "GxGameBoxClose");
                     }
                 }
             }
@@ -133,7 +134,7 @@ let Gx_gameBox = (() => {
                                 this.zaiLaiSanGe.active = false;
                             }
                         }
-                    }, "gameBoxOpen3");
+                    }, "GxGameBoxOpen3");
                     break;
             }
         }
@@ -177,7 +178,7 @@ let Gx_gameBox = (() => {
                     if (res) {
                         callback();
                     }
-                }, "gameBoxKey");
+                }, "GxGameBoxKey");
             }
         }
         showVideoIcon() {

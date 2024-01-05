@@ -102,6 +102,7 @@ class H54399Adapter extends BaseAdapter_1.default {
         if (this.get_time() - this.showVideoTime < 500)
             return;
         this.showVideoTime = this.get_time();
+        super.showVideo(null, flag);
         let self = this;
         /**
          * 此callback回调函数的形式

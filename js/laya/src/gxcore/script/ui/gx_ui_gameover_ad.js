@@ -22,7 +22,7 @@ class gx_ui_gameover_ad extends layaMaxUI_1.ui.gxui.gx_ui_gameover_adUI {
         this.btn.on(Laya.Event.CLICK, this, function () {
             console.log("destroy gameoverad");
             GxGame_1.default.Ad().showVideo((res) => {
-            }, "gameover_ad");
+            }, "GxGameOverAd");
             this.destroy();
         });
     }

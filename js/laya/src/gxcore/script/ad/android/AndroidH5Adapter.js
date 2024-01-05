@@ -48,10 +48,10 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
         }, GxGame_1.default.adConfig.adCdTime * 1000);
     }
     getNativePlatform() {
-        return this.callMethod('getNativePlatform');
+        return this.callMethod("getNativePlatform");
     }
     showNormalBanner() {
-        this.callMethod('showBanner', null, ret => {
+        this.callMethod("showBanner", null, ret => {
             if (ret == 2 /* RET_TYPE.SHOW */) {
                 if (this.bannerTimer)
                     this.bannerTimer.stop();
@@ -70,7 +70,7 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
            });*/
     }
     hideNormalBanner() {
-        this.callMethod('hideBanner');
+        this.callMethod("hideBanner");
     }
     destroyNormalBanner() {
         this.hideNormalBanner();
@@ -128,12 +128,10 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
         if (this.get_time() - this.showVideoTime < 500)
             return;
         this.showVideoTime = this.get_time();
-        if (flag && flag.length > 0) {
-            GxGame_1.default.gameEvent("reward_" + flag);
-        }
-        this.callMethod('showVideo', null, ret => {
+        super.showVideo(null, flag);
+        this.callMethod("showVideo", null, ret => {
             if (ret == -1 /* RET_TYPE.ERROR */) {
-                this.createToast('暂无视频，请稍后再试');
+                this.createToast("暂无视频，请稍后再试");
             } /* else if (ret == RET_TYPE.CLOSE) {
                 AudioUtil.setMusicVolume(1);
                 AudioUtil.setSoundVolume(1);
@@ -143,14 +141,17 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
             }*/
             if (flag && flag.length > 0) {
                 if (ret == 1 /* RET_TYPE.SUCC */) {
-                    GxGame_1.default.gameEvent("reward_complete_" + flag);
+                    // GxGame.gameEvent("reward_complete_" + flag)
+                    this._videoCompleteEvent();
                 }
                 else {
                     if (ret == -1 /* RET_TYPE.ERROR */) {
-                        GxGame_1.default.gameEvent("reward_error_" + flag);
+                        // GxGame.gameEvent("reward_error_" + flag)
+                        this._videoErrorEvent();
                     }
                     else {
-                        GxGame_1.default.gameEvent("reward_close_" + flag);
+                        this._videoCloseEvent();
+                        // GxGame.gameEvent("reward_close_" + flag)
                     }
                 }
             }
@@ -158,11 +159,11 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
         });
     }
     destroyVideo() {
-        this.callMethod('destroyVideo');
+        this.callMethod("destroyVideo");
     }
     showInterstitial(on_show, on_close) {
-        this.callMethod('showInter', null, ret => {
-            console.log('[gx_game] showInter ret = ', ret);
+        this.callMethod("showInter", null, ret => {
+            console.log("[gx_game] showInter ret = ", ret);
             if (ret == 2 /* RET_TYPE.SHOW */) {
                 this.hideBanner();
                 on_show && on_show();
@@ -193,8 +194,8 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
          });*/
     }
     showOtherInterstitial(on_show, on_close) {
-        this.callMethod('showOtherInter', null, ret => {
-            console.log('[gx_game] showInter ret = ', ret);
+        this.callMethod("showOtherInter", null, ret => {
+            console.log("[gx_game] showInter ret = ", ret);
             if (ret == 2 /* RET_TYPE.SHOW */) {
                 this.hideBanner();
                 on_show && on_show();
@@ -225,12 +226,12 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
          });*/
     }
     destroyNormalInter() {
-        this.callMethod('destroyInter');
+        this.callMethod("destroyInter");
     }
     showInterVideo(on_show, on_close) {
         console.log("[gx_game]showInterVideo 不能用");
-        this.callMethod('showFullScreen', null, ret => {
-            console.log('[gx_game] 233 showFullScreen ret = ', ret);
+        this.callMethod("showFullScreen", null, ret => {
+            console.log("[gx_game] 233 showFullScreen ret = ", ret);
             if (ret == 2 /* RET_TYPE.SHOW */) {
                 this.hideBanner();
                 on_show && on_show();
@@ -267,8 +268,8 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
     }
     showOtherInterVideo(on_show, on_close) {
         console.log("[gx_game]showInterVideo 不能用");
-        this.callMethod('showOtherFullScreen', null, ret => {
-            console.log('[gx_game] 233 showFullScreen ret = ', ret);
+        this.callMethod("showOtherFullScreen", null, ret => {
+            console.log("[gx_game] 233 showFullScreen ret = ", ret);
             if (ret == 2 /* RET_TYPE.SHOW */) {
                 this.hideBanner();
                 on_show && on_show();
@@ -304,11 +305,11 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
            });*/
     }
     destroyInterVideo() {
-        this.callMethod('destroyInterVideo');
+        this.callMethod("destroyInterVideo");
     }
     create_ad(ad_type) {
         return new Promise((resolve, reject) => {
-            this.callMethod('createNativeAd', ad_type.toString(), ret => {
+            this.callMethod("createNativeAd", ad_type.toString(), ret => {
                 console.log("[gx_game]native data load succ:" + JSON.stringify(ret));
                 if (ret == -1 /* RET_TYPE.ERROR */) {
                 }
@@ -341,7 +342,7 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
     showInterstitialNative(parent, on_click, on_show, on_hide) {
         console.log("[gx_game]showInterstitialNative 不能用");
         on_hide && on_hide();
-        /*   if (this.isGameCd || GxGame.inBlockArea) {
+        /*   if (this.isGameCd ) {
                on_hide && on_hide();
                return console.log("[gx_game]showInterstitialNative 广告CD中");
            }
@@ -438,7 +439,7 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
     hideNativeIcon() {
         super.hideNativeIcon();
         if (this.platformVersion() == GxEnum_1.PLATFORM.VIVO) {
-            this.callMethod('hideNativeIcon');
+            this.callMethod("hideNativeIcon");
         }
     }
     /**
@@ -451,14 +452,14 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
     reportAdClick(native_data) {
         if (!native_data || native_data === undefined)
             return;
-        this.callMethod('reportAdClick', native_data.adId);
+        this.callMethod("reportAdClick", native_data.adId);
         this.remove_native_data(native_data);
     }
     showFeedAd(on_show, on_close) {
         if (this.isGameCd) {
             return console.log("[gx_game]showFeedAd 广告CD中");
         }
-        this.callMethod('showFeedAd', null, ret => {
+        this.callMethod("showFeedAd", null, ret => {
             if (ret == 2 /* RET_TYPE.SHOW */) {
                 on_show && on_show();
                 GxAudioUtil_1.default.setMusicVolume(0);
@@ -472,22 +473,22 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
         });
     }
     destroyFeedAd() {
-        this.callMethod('destroyFeedAd');
+        this.callMethod("destroyFeedAd");
     }
     showGamePortal() {
-        this.callMethod('jumpLeisureSubject');
+        this.callMethod("jumpLeisureSubject");
     }
     openUrl(url) {
-        this.callMethod('openUrl', url);
+        this.callMethod("openUrl", url);
     }
     showPrivacy(type = "privacy") {
-        this.callMethod('showPrivacy', type);
+        this.callMethod("showPrivacy", type);
     }
     showVivoIcon() {
-        this.callMethod('showVivoIcon');
+        this.callMethod("showVivoIcon");
     }
     hideVivoIcon() {
-        this.callMethod('hideVivoIcon');
+        this.callMethod("hideVivoIcon");
     }
     callMethod(method_name, params = null, callbak) {
         let result = null;
@@ -510,16 +511,16 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
         return false;
     }
     backGameHall() {
-        this.callMethod('backGameHall');
+        this.callMethod("backGameHall");
     }
     getGameAge() {
-        return this.callMethod('getGameAge');
+        return this.callMethod("getGameAge");
     }
     getConfigUrl() {
-        return this.callMethod('getConfigUrl');
+        return this.callMethod("getConfigUrl");
     }
     jumpGame(url) {
-        return this.callMethod('jumpGame', url);
+        return this.callMethod("jumpGame", url);
     }
 }
 exports.default = AndroidH5Adapter;

@@ -128,6 +128,11 @@ class GxGame extends BaseGxGame_1.default {
             GxLog_1.default.w("非qq 微信不显示分享");
         }
     }
+    static clickBtn(clickId, callback) {
+        // GxChecker.getInstance().check(GxChecker.MsgType.btn_event, {clickId: clickId})
+        GxGame.gameEvent(clickId);
+        callback && callback();
+    }
 }
 GxGame.lowerPhoneType = 4;
 GxGame.playGameCount = 0;

@@ -144,7 +144,7 @@ class UCAdapter extends BaseAdapter_1.default {
         this.videoAd = null;
     }
     showInterstitialNative(parent, on_click, on_show, on_hide) {
-        if (this.isGameCd || GxGame_1.default.inBlockArea) {
+        if (this.isGameCd) {
             this.showBanner();
             on_hide && on_hide();
             return console.log("%c[gx_game]广告CD中", "color: #33ccff");
@@ -197,7 +197,7 @@ class UCAdapter extends BaseAdapter_1.default {
         setTimeout(() => {
             this.hideNativeInterstitial();
             this.showInterstitial(on_show, on_hide);
-        }, (GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) ? 0 : 1000);
+        }, (GxGame_1.default.isShenHe) ? 0 : 1000);
     }
     login(on_succ, on_fail) {
         if (this.platformVersion() >= 1040) {

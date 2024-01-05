@@ -10,7 +10,6 @@ const GxUtils_1 = __importDefault(require("../../util/GxUtils"));
 const BaseAdapter_1 = __importDefault(require("../base/BaseAdapter"));
 const GxEnum_1 = require("../../core/GxEnum");
 const GxAdParams_1 = require("../../GxAdParams");
-const GxLabelUtil_1 = __importDefault(require("../../core/GxLabelUtil"));
 class VivoAdapter extends BaseAdapter_1.default {
     constructor() {
         super(...arguments);
@@ -18,7 +17,6 @@ class VivoAdapter extends BaseAdapter_1.default {
         this.customInter = null;
         this.portalAdTimer = null;
         this.interShowCount = 0;
-        this.initCount = 0;
         this.videoShowing = false;
     }
     static getInstance() {
@@ -32,58 +30,53 @@ class VivoAdapter extends BaseAdapter_1.default {
             return;
         this.isInitAd = true;
         super.initAd();
+        /*9066EF5283E848D69F28921A96A9FF54*/
+        // @ts-ignore
+        var data = qg.getSystemInfoSync();
+        if (data["miniGame"]) {
+            let packageName = data.miniGame.package;
+            /*            TDSDK.getInstance().initApp(packageName, "", data.miniGame.version + "", data.miniGame.version)
+
+                        TDSDK.getInstance().init("9066EF5283E848D69F28921A96A9FF54", packageName.replace(/\./g, "_"))*/
+        }
         this.initBanner();
         this.initNormalBanner();
         this.initVideo();
         this.initNativeAd();
         this.initGamePortal();
-        this.initLLCC();
-        /*2023年8月25日10:06:40    iniitLLVV王硕明  ov需要修改下广告策略，激励违规从到模式页触发违规，改为每隔x时间主动弹出 */
-        this.initLLVV();
+        /*时候4 2023年9月4日11:30:59*/
+        GxGame_1.default.adConfig.interTick = GxGame_1.default.gGN("ae", 10);
+        /*修改3 2023年9月4日11:26:36*/
+        this.ac();
+        /* 修改2 2023年9月4日11:22:57 */
+        this.ab();
     }
-    initLLCC() {
-        let value = GxLabelUtil_1.default.getInstance().getValue("lc", 30);
+    ac() {
+        let value = GxGame_1.default.gGN("ac", 20);
         setTimeout(() => {
-            if (GxLabelUtil_1.default.getInstance().getLabel("lc")) {
+            if (GxGame_1.default.gGB("ac")) {
                 this.privateShowInter(() => {
                 }, () => {
-                    this.initLLCC();
+                    this.ac();
                 });
             }
         }, value * 1000);
     }
-    initLLVV() {
-        this.initCount++;
+    ab() {
+        let value = GxGame_1.default.gGN("ab", 35);
         setTimeout(() => {
-            if (GxLabelUtil_1.default.getInstance().getLabel("vc")) {
+            if (GxGame_1.default.gGB("ab")) {
                 this._vv();
-                /*let value = GxLabelUtil.getInstance().getValue("vc", 30);
-                setTimeout(() => {
-
-                    if (GxLabelUtil.getInstance().getLabel("vc")) {
-                        this.privateShowInter(() => {
-
-                        }, () => {
-                            this.initLLCC()
-
-                        })
-                    }
-                }, value * 1000)*/
             }
-            else {
-                if (this.initCount < 2) {
-                    this.initLLVV();
-                }
-            }
-        }, 3000);
+        }, value * 1000);
     }
     _vv() {
         this.showVideo((res) => {
-            let value = GxLabelUtil_1.default.getInstance().getValue("vc", 30);
+            let value = GxGame_1.default.gGN("ab", 35);
             setTimeout(() => {
                 this._vv();
             }, value * 1000);
-        });
+        }, "GxVV");
     }
     /**
      * 初始化普通banner
@@ -211,6 +204,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             if (isShow) {
                 self.createToast('暂无视频，请稍后再试');
             }
+            self._videoErrorEvent();
         });
         this.videoAd.onClose(res => {
             GxAudioUtil_1.default.setMusicVolume(1);
@@ -218,8 +212,10 @@ class VivoAdapter extends BaseAdapter_1.default {
             if (res && res.isEnded) {
                 self.logi("正常播放结束，可以下发游戏奖励");
                 this.videocallback && this.videocallback(true);
+                self._videoCompleteEvent();
             }
             else {
+                self._videoCloseEvent();
                 this.videocallback && this.videocallback(false);
             }
             this.videoAd.load();
@@ -232,6 +228,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             complete && complete(false);
             return;
         }
+        super.showVideo(null, flag);
         this.videoShowing = true;
         if (this.videoAd == null) {
             this.initVideo(true);
@@ -239,6 +236,7 @@ class VivoAdapter extends BaseAdapter_1.default {
         if (this.videoAd == null) {
             this.createToast('暂无视频，请稍后再试');
             this.videoShowing = false;
+            this._videoErrorEvent();
             complete && complete(false);
             return;
         }
@@ -247,7 +245,10 @@ class VivoAdapter extends BaseAdapter_1.default {
             GxAudioUtil_1.default.setMusicVolume(0);
             GxAudioUtil_1.default.setSoundVolume(0);
         }).catch(() => {
+            this._videoErrorEvent();
             this.logi("激励视频onerror2");
+            this.videocallback && this.videocallback(false);
+            this.videocallback = null;
             this.createToast('暂无视频，请稍后再试');
             this.videoShowing = false;
             this.videoAd.load();
@@ -386,13 +387,13 @@ class VivoAdapter extends BaseAdapter_1.default {
      * @returns
      */
     showNativeInterstitial(on_show, on_hide, delay_time = 0) {
-        if (this.get_time() - this.interShowTime <= GxGame_1.default.adConfig.interTick * 1000)
-            return on_hide && on_hide();
         setTimeout(() => {
             this.privateShowInter(on_show, on_hide);
-        }, (GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) ? 0 : delay_time * 1000);
+        }, (GxGame_1.default.isShenHe) ? 0 : delay_time * 1000);
     }
     privateShowInter(on_show, on_hide) {
+        if (this.get_time() - this.interShowTime <= GxGame_1.default.adConfig.interTick * 1000)
+            return on_hide && on_hide();
         this.hideNativeInterstitial();
         // this.hideBanner();
         let native_data = this.getLocalNativeData(GxEnum_1.ad_native_type.inter2);
@@ -411,48 +412,46 @@ class VivoAdapter extends BaseAdapter_1.default {
         }
     }
     showOtherNativeInterstitial(on_show, on_hide, delay_time = 0) {
-        let label = GxGame_1.default.getLabel("switch");
+        /*修改5 2023年9月4日11:44:48*/
+        let label = GxGame_1.default.gGB("af");
         if (!label) {
             this.logi("限制了1");
             on_hide && on_hide();
             return;
         }
-        if (this.get_time() - this.interShowTime <= GxGame_1.default.adConfig.interTick * 1000)
-            return on_hide && on_hide();
         let canShow = false;
-        /*  let icLabel = GxGame.getLabel("ic");
+        /*  let icLabel = GxGame.gGB("ic");
           if (icLabel) {
     */
-        let value = GxGame_1.default.getValue("ic", 0);
-        if (value > 0) {
-            if (this.icNum == -1) {
-                this.icNum = value;
-                setInterval(() => {
-                    console.log("重置icNum");
-                    this.icNum = value;
-                }, 90 * 1000);
-            }
-            if (this.icNum > 0) {
-                this.icNum--;
-                canShow = true;
-            }
-            else {
-                console.log("icNum <0");
-            }
-        }
-        else {
-            console.log("ic <0");
-        }
+        /*      let value = GxGame.gGN("ic", 0);
+              if (value > 0) {
+                  if (this.icNum == -1) {
+                      this.icNum = value;
+                      setInterval(() => {
+                          console.log("重置icNum")
+                          this.icNum = value;
+                      }, 90 * 1000)
+                  }
+                  if (this.icNum > 0) {
+                      this.icNum--;
+                      canShow = true
+                  } else {
+                      console.log("icNum <0")
+                  }
+              } else {
+                  console.log("ic <0")
+              }*/
         /*
                 } else {
                     console.log("ic false")
                 }*/
+        canShow = true;
         if (!canShow) {
             return;
         }
         setTimeout(() => {
             this.privateShowInter(on_show, on_hide);
-        }, (GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) ? 0 : delay_time * 1000);
+        }, (GxGame_1.default.isShenHe) ? 0 : delay_time * 1000);
     }
     hideNativeInterstitial() {
         super.hideNativeInterstitial();
@@ -718,6 +717,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             }*/
         });
         this.customInter.show().then(() => {
+            this.interShowTime = this.get_time();
             // this.hideBanner();
             if (window["cc"]) {
                 let childByName = cc.director.getScene().getChildByName("BLOCK");
@@ -732,6 +732,14 @@ class VivoAdapter extends BaseAdapter_1.default {
                     let winSize = cc.winSize;
                     node.x = winSize.width / 2;
                     node.y = winSize.height / 2;
+                    let t = 0;
+                    node.on(cc.Node.EventType.TOUCH_START, () => {
+                        t++;
+                        console.log("触摸了");
+                        if (t == 4) {
+                            node.destroy();
+                        }
+                    });
                 }
             }
             on_show && on_show();
@@ -756,6 +764,12 @@ class VivoAdapter extends BaseAdapter_1.default {
         };
         this.customInter.onClose(on_hide);
         let on_error = err => {
+            if (window["cc"]) {
+                let childByName = cc.director.getScene().getChildByName("BLOCK");
+                if (childByName) {
+                    childByName.destroy();
+                }
+            }
             this.loge(' custom inter error: ' + JSON.stringify(err));
             this.customInter.offError(on_error);
             this.destroyCustomInter();
@@ -846,6 +860,10 @@ class VivoAdapter extends BaseAdapter_1.default {
     }
     loge(...data) {
         super.LOGE("[VivoAdapter]", ...data);
+    }
+    showGameOverAD() {
+        this.showVideo((res) => {
+        }, "GxGameOverAd");
     }
 }
 exports.default = VivoAdapter;

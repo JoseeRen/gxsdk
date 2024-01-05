@@ -39,6 +39,8 @@ BaseGxConstant.IS_KS_GAME = false;
 /*  4399小游戏*/
 BaseGxConstant.IS_4399_H5_GAME = false;
 BaseGxConstant.IS_4399_BOX_GAME = false;
+/**支付宝小游戏 */
+BaseGxConstant.IS_ZFB_GAME = false;
 BaseGxConstant.IS_MEIZU_GAME = false;
 BaseGxConstant.KEY_PRIVACY_AGREE = "_GxPrivacyAgree_";
 exports.default = BaseGxConstant;

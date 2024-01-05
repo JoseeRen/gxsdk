@@ -102,6 +102,7 @@ class H54399Adapter extends BaseAdapter_1.default {
         if (this.get_time() - this.showVideoTime < 500)
             return;
         this.showVideoTime = this.get_time();
+        super.showVideo(null, flag);
         let self = this;
         /**
          * 此callback回调函数的形式
@@ -244,7 +245,7 @@ class H54399Adapter extends BaseAdapter_1.default {
     showInterstitialNative(parent, on_click, on_show, on_hide) {
         console.log("[gx_game]showInterstitialNative 不能用");
         on_hide && on_hide();
-        /*   if (this.isGameCd || GxGame.inBlockArea) {
+        /*   if (this.isGameCd ) {
                on_hide && on_hide();
                return console.log("[gx_game]showInterstitialNative 广告CD中");
            }
@@ -318,7 +319,7 @@ class H54399Adapter extends BaseAdapter_1.default {
                         on_hide && on_hide();
                     });
                 }
-            }, (GxGame.isShenHe || GxGame.inBlockArea) ? 0 : delay_time * 1000);*/
+            }, (GxGame.isShenHe ) ? 0 : delay_time * 1000);*/
     }
     supportGameBox() {
         return false;

@@ -5,6 +5,15 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/reference/attributes.html
 // Learn life-cycle callbacks:
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -12,7 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const GxConstant_1 = __importDefault(require("../GxConstant"));
 const OppoAdapter_1 = __importDefault(require("../../ad/oppo/OppoAdapter"));
 const BaseAdapter_1 = __importDefault(require("../../ad/base/BaseAdapter"));
-const GxLabelUtil_1 = __importDefault(require("../GxLabelUtil"));
+const GxGameUtil_1 = __importDefault(require("../GxGameUtil"));
 const GxAdParams_1 = require("../../GxAdParams");
 const GxLog_1 = __importDefault(require("../../util/GxLog"));
 const ResUtil_1 = __importDefault(require("../../util/ResUtil"));
@@ -29,6 +38,10 @@ const MiAdapter_1 = __importDefault(require("../../ad/mi/MiAdapter"));
 const WxAdapter_1 = __importDefault(require("../../ad/wx/WxAdapter"));
 const GxLog_2 = __importDefault(require("../../util/GxLog"));
 const TTAdapter_1 = __importDefault(require("../../ad/tt/TTAdapter"));
+const KsAdapter_1 = __importDefault(require("../../ad/ks/KsAdapter"));
+const GxImgMgr_1 = __importDefault(require("../../img/GxImgMgr"));
+const ZFBAdapter_1 = __importDefault(require("../../ad/zfb/ZFBAdapter"));
+const GxChecker_1 = __importDefault(require("../../GxChecker"));
 class BaseGxGame {
     static initPlatform(initCallback) {
         if (this.initPlatformEnd) {
@@ -39,17 +52,19 @@ class BaseGxGame {
         this.initPlatformEnd = true;
         //初始化渠道
         let intLabel = true;
-        let callback = () => {
+        let callback = () => __awaiter(this, void 0, void 0, function* () {
             if (intLabel) {
-                GxLabelUtil_1.default.getInstance().initLabel(GxAdParams_1.AdParams.labelName);
+                GxGameUtil_1.default.getInstance().initLabel(GxAdParams_1.AdParams.labelName);
             }
             else {
                 GxLog_1.default.w("不初始化标签");
             }
+            yield GxImgMgr_1.default.getInstance().init(GxAdParams_1.AdParams.heJiConfig);
+            // GxImgMgr.getInstance().init("合集配置写这里hejipeizhi")
             initCallback && initCallback();
-        };
-        if (typeof window['qg'] != "undefined") {
-            if (typeof window['qg']['getBattle'] != "undefined") {
+        });
+        if (typeof window["qg"] != "undefined") {
+            if (typeof window["qg"]["getBattle"] != "undefined") {
                 console.log("进入oppo");
                 GxConstant_1.default.IS_OPPO_GAME = true;
                 //@ts-ignore
@@ -63,6 +78,7 @@ class BaseGxGame {
                     GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.oppo.ysCompanyName;
                     GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.oppo.ysMail;
                     GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.oppo.ysAddress;
+                    GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.oppo["heJiConfig"];
                     fs.readdir({
                         dirPath: "src",
                         success: function (res) {
@@ -72,7 +88,8 @@ class BaseGxGame {
                             for (let i = 0; i < res.files.length; i++) {
                                 let fileListElement = res.files[i];
                                 if (fileListElement.indexOf("gamecenter") != -1) {
-                                    if ((fileListElement.endsWith(".png") || fileListElement.endsWith(".jpg"))) {
+                                    if (fileListElement.endsWith(".png") ||
+                                        fileListElement.endsWith(".jpg")) {
                                         logoName = fileListElement;
                                     }
                                     else if (fileListElement.endsWith(".json")) {
@@ -103,12 +120,13 @@ class BaseGxGame {
                                 GxLog_1.default.w("oppo 没获取到图片");
                             }
                             if (!!configName) {
+                                GxGame_1.default.appId = configName.replace(".json", "");
                                 try {
                                     fs.readFile({
                                         filePath: "src/" + configName,
-                                        encoding: 'utf8',
+                                        encoding: "utf8",
                                         success: function (data) {
-                                            console.log('text: ' + data.data);
+                                            console.log("text: " + data.data);
                                             let config = JSON.parse(data.data);
                                             GxAdParams_1.AdParams.oppo = JSON.parse(JSON.stringify(config.oppo));
                                             GxAdParams_1.AdParams.labelName = GxAdParams_1.AdParams.oppo.labelName;
@@ -118,6 +136,7 @@ class BaseGxGame {
                                             GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.oppo.ysCompanyName;
                                             GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.oppo.ysMail;
                                             GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.oppo.ysAddress;
+                                            GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.oppo["heJiConfig"];
                                             callback && callback();
                                         },
                                         fail: function (data, code) {
@@ -152,36 +171,37 @@ class BaseGxGame {
                 }
                 return;
             }
-            else if (typeof window['qg']['gameLoginWithReal'] != "undefined") {
+            else if (typeof window["qg"]["gameLoginWithReal"] != "undefined") {
                 console.log("进入华为");
                 GxConstant_1.default.IS_HUAWEI_GAME = true;
                 //@ts-ignore
                 var fileSystemManager = qg.getFileSystemManager();
                 let configPath = "";
                 try {
-                    var result = fileSystemManager.readFileSync('manifest.json', 'utf8');
-                    console.log('result = ' + JSON.stringify(result));
+                    var result = fileSystemManager.readFileSync("manifest.json", "utf8");
+                    console.log("result = " + JSON.stringify(result));
                     let parse = JSON.parse(result);
                     console.log(parse.package + ".json");
                     try {
-                        fileSystemManager.accessSync(parse.package + '.json');
+                        fileSystemManager.accessSync(parse.package + ".json");
                         configPath = parse.package + ".json";
                     }
                     catch (error) {
                         configPath = "";
-                        console.log('error 1= ' + error);
+                        console.log("error 1= " + error);
                     }
                 }
                 catch (error) {
                     configPath = "";
-                    console.log('error 2= ' + error);
+                    console.log("error 2= " + error);
                 }
                 if (configPath.length <= 0) {
                     try {
                         var result = fileSystemManager.readdirSync("src");
-                        console.log('result = ' + JSON.stringify(result));
+                        console.log("result = " + JSON.stringify(result));
                         for (let i = 0; i < result.length; i++) {
-                            if (result[i].endsWith(".json") && result[i].indexOf("huawei") != -1) {
+                            if (result[i].endsWith(".json") &&
+                                result[i].indexOf("huawei") != -1) {
                                 configPath = "src/" + result[i];
                             }
                             else {
@@ -190,7 +210,7 @@ class BaseGxGame {
                     }
                     catch (error) {
                         configPath = "";
-                        console.log('error 3= ' + error);
+                        console.log("error 3= " + error);
                     }
                 }
                 GxAdParams_1.AdParams.labelName = GxAdParams_1.AdParams.hw.labelName;
@@ -200,10 +220,11 @@ class BaseGxGame {
                 GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.hw.ysCompanyName;
                 GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.hw.ysMail;
                 GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.hw.ysAddress;
+                GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.hw["heJiConfig"];
                 if (configPath && configPath.length > 0) {
                     try {
                         fileSystemManager.accessSync(configPath);
-                        var config = fileSystemManager.readFileSync(configPath, 'utf8');
+                        var config = fileSystemManager.readFileSync(configPath, "utf8");
                         let configObj = JSON.parse(config);
                         console.log(JSON.stringify(configObj));
                         GxAdParams_1.AdParams.hw = JSON.parse(JSON.stringify(configObj.hw));
@@ -214,12 +235,13 @@ class BaseGxGame {
                         GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.hw.ysCompanyName;
                         GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.hw.ysMail;
                         GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.hw.ysAddress;
+                        GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.hw["heJiConfig"];
                         console.log(JSON.stringify(GxAdParams_1.AdParams, null, 2));
                         console.log("hw:" + JSON.stringify(GxAdParams_1.AdParams.hw, null, 2));
                         callback && callback();
                     }
                     catch (error) {
-                        console.log('error 4= ' + error);
+                        console.log("error 4= " + error);
                         GxLog_1.default.e("hw 读取配置error");
                         GxLog_1.default.e("hw 读取配置error");
                         GxLog_1.default.e("hw 读取配置error");
@@ -242,7 +264,7 @@ class BaseGxGame {
                 }
                 return;
             }
-            else if (typeof window['qg']['onUserInfoChange'] != "undefined") {
+            else if (typeof window["qg"]["onUserInfoChange"] != "undefined") {
                 console.log("进入小米");
                 GxConstant_1.default.IS_MI_GAME = true;
                 //@ts-ignore
@@ -257,11 +279,14 @@ class BaseGxGame {
                 //代码包文件读取  必须异步
                 try {
                     fs.readFile({
-                        filePath: "manifest.json", encoding: "utf-8", success(res) {
+                        filePath: "manifest.json",
+                        encoding: "utf-8",
+                        success(res) {
                             console.log(res.data);
                             console.log("成功了");
                             GxGame_1.default.Ad().setManifestInfo(JSON.parse(res.data));
-                        }, fail(res) {
+                        },
+                        fail(res) {
                             console.log("失败了");
                             console.log(res);
                         }
@@ -277,6 +302,7 @@ class BaseGxGame {
                 GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.mi.ysCompanyName;
                 GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.mi.ysMail;
                 GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.mi.ysAddress;
+                GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.mi["heJiConfig"];
                 try {
                     fs.readdir({
                         dirPath: "src",
@@ -287,7 +313,8 @@ class BaseGxGame {
                             for (let i = 0; i < res.files.length; i++) {
                                 let fileListElement = res.files[i];
                                 if (fileListElement.indexOf("mini") != -1) {
-                                    if ((fileListElement.endsWith(".png") || fileListElement.endsWith(".jpg"))) {
+                                    if (fileListElement.endsWith(".png") ||
+                                        fileListElement.endsWith(".jpg")) {
                                         logoName = fileListElement;
                                     }
                                     else if (fileListElement.endsWith(".json")) {
@@ -322,9 +349,9 @@ class BaseGxGame {
                                 try {
                                     fs.readFile({
                                         filePath: configName,
-                                        encoding: 'utf8',
+                                        encoding: "utf8",
                                         success: function (data) {
-                                            console.log('text: ' + data.data);
+                                            console.log("text: " + data.data);
                                             let config = JSON.parse(data.data);
                                             GxAdParams_1.AdParams.mi = JSON.parse(JSON.stringify(config.mi));
                                             GxAdParams_1.AdParams.labelName = GxAdParams_1.AdParams.mi.labelName;
@@ -334,6 +361,7 @@ class BaseGxGame {
                                             GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.mi.ysCompanyName;
                                             GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.mi.ysMail;
                                             GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.mi.ysAddress;
+                                            GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.mi["heJiConfig"];
                                             callback && callback();
                                         },
                                         fail: function (data, code) {
@@ -371,12 +399,61 @@ class BaseGxGame {
             }
             else {
                 console.log("进入vivo");
+                let buyLabelName = "ntyzt_ntyztvivorpk2_1_vivo_xyx_20231201";
+                //区分买量
+                let isBuy = false;
+                if (qg["getLaunchOptionsSync"]) {
+                    var e = null, t = qg.getLaunchOptionsSync();
+                    console.log(JSON.stringify(t));
+                    console.log(t["query"]);
+                    if (t["query"]) {
+                        console.log(t["query"]["type"]);
+                    }
+                    if ("ad" === t.query.type) {
+                        isBuy = true;
+                    }
+                    try {
+                        var o = t.referrerInfo.extraData;
+                        if (o) {
+                            e = o.ad_id || o.adid || null;
+                        }
+                        else {
+                            var n = t.query.internal;
+                            if ("deeplink" === (n && n.channel ? n.channel : "")) {
+                                var i = n.custom_params;
+                                console.log(i);
+                                var r = JSON.parse(i)
+                                    .cus_origin_uri;
+                                let match = r.match(/ad_id=([^&]+)/);
+                                let match1 = r.match(/adid=([^&]+)/);
+                                if (match && match.length >= 2) {
+                                    e = match[1];
+                                }
+                                if (match1 && match1.length >= 2) {
+                                    e = match1[1];
+                                }
+                            }
+                        }
+                    }
+                    catch (e) {
+                        console.log("----异常了");
+                        console.log(e);
+                    }
+                    if (!!e) {
+                        isBuy = true;
+                    }
+                    console.log("---e" + e);
+                }
+                else {
+                    console.log("---低版本");
+                }
+                console.log("---isBuy:" + isBuy);
                 //@ts-ignore
                 var miniGame = qg.getSystemInfoSync().miniGame;
                 console.log(miniGame.package);
                 //读取logo图片
                 let logoUrl = "";
-                let urlPng = '/' + miniGame.package + ".png";
+                let urlPng = "/" + miniGame.package + ".png";
                 //@ts-ignore
                 var res = qg.isFile({
                     uri: urlPng
@@ -385,7 +462,7 @@ class BaseGxGame {
                     logoUrl = urlPng;
                 }
                 else {
-                    let urlJPg = '/' + miniGame.package + ".jpg";
+                    let urlJPg = "/" + miniGame.package + ".jpg";
                     //@ts-ignore
                     res = qg.isFile({
                         uri: urlJPg
@@ -425,18 +502,19 @@ class BaseGxGame {
                 GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.vivo.ysCompanyName;
                 GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.vivo.ysMail;
                 GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.vivo.ysAddress;
+                GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.vivo["heJiConfig"];
                 try {
                     //@ts-ignore
                     //读取参数配置
                     const result = qg.readFileSync({
                         uri: "/" + miniGame.package + ".json",
-                        encoding: 'utf8'
+                        encoding: "utf8"
                     });
-                    if (typeof result === 'string') {
+                    if (typeof result === "string") {
                         GxLog_1.default.w(`vivo  读取配置失败 = ${result}`);
                     }
                     else {
-                        console.log('vivo handling success, text: ' + result.text);
+                        console.log("vivo handling success, text: " + result.text);
                         let config = JSON.parse(result.text);
                         GxAdParams_1.AdParams.vivo = JSON.parse(JSON.stringify(config.vivo));
                         GxAdParams_1.AdParams.labelName = GxAdParams_1.AdParams.vivo.labelName;
@@ -446,19 +524,27 @@ class BaseGxGame {
                         GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.vivo.ysCompanyName;
                         GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.vivo.ysMail;
                         GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.vivo.ysAddress;
+                        GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.vivo["heJiConfig"];
                     }
                 }
                 catch (e) {
                     GxLog_1.default.w(e);
                     GxLog_1.default.w("vivo没有读取到配置文件 ");
                 }
+                if (isBuy) {
+                    GxAdParams_1.AdParams.vivo.labelName = buyLabelName;
+                    GxAdParams_1.AdParams.labelName = GxAdParams_1.AdParams.vivo.labelName;
+                }
+                console.log("最终label:" + GxAdParams_1.AdParams.labelName);
                 GxConstant_1.default.IS_VIVO_GAME = true;
             }
         }
-        else if (typeof window['tt'] != 'undefined') {
+        else if (typeof window["tt"] != "undefined") {
             GxConstant_1.default.IS_TT_GAME = true;
+            GxAdParams_1.AdParams.company = GxAdParams_1.AdParams.tt["company"];
+            GxAdParams_1.AdParams.softCode = GxAdParams_1.AdParams.tt["softCode"];
         }
-        else if (typeof window['qq'] != 'undefined') {
+        else if (typeof window["qq"] != "undefined") {
             GxConstant_1.default.IS_QQ_GAME = true;
             // @ts-ignore
             let qqfs = qq.getFileSystemManager();
@@ -469,6 +555,7 @@ class BaseGxGame {
             GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.qq["ysCompanyName"];
             GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.qq["ysMail"];
             GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.qq["ysAddress"];
+            GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.qq["heJiConfig"];
             try {
                 qqfs.accessSync(`params.json`);
                 let readFileSync = qqfs.readFileSync(`params.json`, "utf-8");
@@ -482,24 +569,26 @@ class BaseGxGame {
                 GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.qq["ysCompanyName"];
                 GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.qq["ysMail"];
                 GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.qq["ysAddress"];
+                GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.qq["heJiConfig"];
             }
             catch (e) {
                 console.warn(e);
                 console.warn("qq 获取参数配置文件失败 params.json 使用代码中的配置");
             }
         }
-        else if (typeof window['h5api'] != 'undefined') {
+        else if (typeof window["h5api"] != "undefined") {
             GxConstant_1.default.IS_4399_H5_GAME = true;
             intLabel = false;
         }
-        else if (typeof window['gamebox'] != 'undefined') {
+        else if (typeof window["gamebox"] != "undefined") {
             GxConstant_1.default.IS_4399_BOX_GAME = true;
             intLabel = false;
         }
-        else if (typeof window['ks'] != 'undefined') {
+        else if (typeof window["ks"] != "undefined") {
             GxConstant_1.default.IS_KS_GAME = true;
+            GxAdParams_1.AdParams.labelName = GxAdParams_1.AdParams.ks.labelName;
         }
-        else if (typeof window['wx'] != 'undefined') {
+        else if (typeof window["wx"] != "undefined") {
             GxConstant_1.default.IS_WECHAT_GAME = true;
             // @ts-ignore
             let wxfs = wx.getFileSystemManager();
@@ -510,6 +599,7 @@ class BaseGxGame {
             GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.wx["ysCompanyName"];
             GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.wx["ysMail"];
             GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.wx["ysAddress"];
+            GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.wx["heJiConfig"];
             try {
                 wxfs.accessSync(`params.json`);
                 let readFileSync = wxfs.readFileSync(`params.json`, "utf-8");
@@ -523,23 +613,24 @@ class BaseGxGame {
                 GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.wx["ysCompanyName"];
                 GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.wx["ysMail"];
                 GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.wx["ysAddress"];
+                GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.wx["heJiConfig"];
             }
             catch (e) {
                 console.warn(e);
                 console.warn("wx 获取参数配置文件失败 params.json 使用代码中的配置");
             }
         }
-        else if (typeof window['swan'] != 'undefined') {
+        else if (typeof window["swan"] != "undefined") {
             GxConstant_1.default.IS_BAIDU_GAME = true;
         }
-        else if (typeof window['uc'] != 'undefined') {
+        else if (typeof window["uc"] != "undefined") {
             GxConstant_1.default.IS_UC_GAME = true;
         }
         else if (cc.sys.os == cc.sys.OS_ANDROID && CC_JSB) {
             GxConstant_1.default.IS_ANDROID_NATIVE = true;
             intLabel = false;
         }
-        else if (typeof window['H5Bridge'] != 'undefined') {
+        else if (typeof window["H5Bridge"] != "undefined") {
             let platform = window["H5Bridge"].getPlatform();
             if (platform == "ios") {
                 console.log("iosh5");
@@ -556,6 +647,17 @@ class BaseGxGame {
             GxConstant_1.default.IS_IOS_NATIVE = true;
             intLabel = false;
         }
+        else if (typeof window["my"] != "undefined") {
+            GxConstant_1.default.IS_ZFB_GAME = true;
+            intLabel = false;
+            // AdParams.labelName = AdParams.zfb["labelName"];
+            GxAdParams_1.AdParams.age = GxAdParams_1.AdParams.zfb["age"];
+            GxAdParams_1.AdParams.company = GxAdParams_1.AdParams.zfb["company"];
+            GxAdParams_1.AdParams.softCode = GxAdParams_1.AdParams.zfb["softCode"];
+            // AdParams.ysCompanyName = AdParams.zfb["ysCompanyName"];
+            // AdParams.ysMail = AdParams.zfb["ysMail"];
+            // AdParams.ysAddress = AdParams.zfb["ysAddress"];
+        }
         else {
             intLabel = false;
         }
@@ -563,10 +665,16 @@ class BaseGxGame {
     }
     static initGame(callback) {
         this.initPlatform(() => {
+            GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.initSDK, {});
             let sysInfo = null;
+            let umAppKey = "";
+            let uma = null;
             if (GxConstant_1.default.IS_WECHAT_GAME) {
                 // @ts-ignore
-                wx.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage', 'shareTimeline'] });
+                wx.showShareMenu({
+                    withShareTicket: true,
+                    menus: ["shareAppMessage", "shareTimeline"]
+                });
                 // @ts-ignore
                 wx.onShareAppMessage(() => {
                     return {
@@ -581,6 +689,9 @@ class BaseGxGame {
                 // @ts-ignore
                 // @ts-ignore
                 sysInfo = tt.getSystemInfoSync();
+                // umAppKey = AdParams.tt["umAppKey"]
+                // @ts-ignore
+                //  uma = tt.uma;
                 // @ts-ignore
                 tt.showShareMenu({
                     success(res) {
@@ -591,10 +702,10 @@ class BaseGxGame {
                     },
                     complete(res) {
                         console.log("showShareMenu 调用完成");
-                    },
+                    }
                 });
                 // @ts-ignore
-                tt.onShareAppMessage(res => {
+                tt.onShareAppMessage((res) => {
                     //当监听到用户点击了分享或者拍抖音等按钮后，会执行该函数
                     console.log(res.channel);
                     // do something
@@ -602,12 +713,13 @@ class BaseGxGame {
                         //执行函数后，这里是需要该函数返回的对象
                         title: this.shareWord[1],
                         imageUrl: this.sharePath,
+                        templateId: GxAdParams_1.AdParams.tt.shareTemplateId,
                         success() {
                             console.log("分享成功");
                         },
                         fail(e) {
                             console.log("分享失败", e);
-                        },
+                        }
                     }; //返回的对象会传入tt.shareAppMessage进行最终分享
                 });
             }
@@ -620,7 +732,7 @@ class BaseGxGame {
                 GxGame_1.default.canShowUser = true;
                 // @ts-ignore
                 qq.showShareMenu({
-                    showShareItems: ['qq', 'qzone', 'wechatFriends', 'wechatMoment']
+                    showShareItems: ["qq", "qzone", "wechatFriends", "wechatMoment"]
                 });
                 // @ts-ignore
                 qq.onShareAppMessage(() => {
@@ -633,14 +745,23 @@ class BaseGxGame {
                 sysInfo = qq.getSystemInfoSync();
             }
             else if (GxConstant_1.default.IS_OPPO_GAME) {
+                umAppKey = GxAdParams_1.AdParams.oppo["umAppKey"];
+                // @ts-ignore
+                uma = qg.uma;
                 // @ts-ignore
                 sysInfo = qg.getSystemInfoSync();
             }
             else if (GxConstant_1.default.IS_MI_GAME) {
+                umAppKey = GxAdParams_1.AdParams.mi["umAppKey"];
+                // @ts-ignore
+                uma = qg.uma;
                 // @ts-ignore
                 sysInfo = qg.getSystemInfoSync();
             }
             else if (GxConstant_1.default.IS_VIVO_GAME) {
+                umAppKey = GxAdParams_1.AdParams.vivo["umAppKey"];
+                // @ts-ignore
+                uma = qg.uma;
                 // @ts-ignore
                 sysInfo = qg.getSystemInfoSync();
             }
@@ -652,11 +773,35 @@ class BaseGxGame {
                 // @ts-ignore
                 sysInfo = ks.getSystemInfoSync();
             }
+            else if (GxConstant_1.default.IS_HUAWEI_GAME) {
+                // @ts-ignore
+                // sysInfo = qg.getSystemInfoSync();
+                umAppKey = GxAdParams_1.AdParams.vivo["umAppKey"];
+                // @ts-ignore
+                uma = qg.uma;
+            }
+            else if (GxConstant_1.default.IS_ZFB_GAME) {
+                // @ts-ignore
+                sysInfo = my.getSystemInfoSync();
+            }
+            if (uma && !!umAppKey) {
+                console.log("初始化umeng");
+                uma &&
+                    uma.init({
+                        appKey: umAppKey,
+                        useOpenid: false,
+                        autoGetOpenid: false,
+                        debug: true
+                    });
+            }
+            else {
+                console.log("不能初始化umeng");
+            }
             if (sysInfo) {
                 this.screenWidth = sysInfo.screenWidth;
                 this.screenHeight = sysInfo.screenHeight;
-                if (window['cc']) {
-                    let canvas = cc.director.getScene().getChildByName('Canvas');
+                if (window["cc"]) {
+                    let canvas = cc.director.getScene().getChildByName("Canvas");
                     if (canvas.width <= canvas.height) {
                         this.scale = this.screenWidth / canvas.width;
                     }
@@ -664,23 +809,25 @@ class BaseGxGame {
                         this.scale = this.screenHeight / canvas.height;
                     }
                 }
-                else if (window['Laya']) {
+                else if (window["Laya"]) {
                 }
             }
             this.gameEvent("initGame");
-            ResUtil_1.default.loadResDir('gx/prefab', cc.Prefab).then(() => {
+            ResUtil_1.default.loadResDir("gx/prefab", cc.Prefab)
+                .then(() => {
                 console.log("加载prefab成功");
-            }).catch((e) => {
+            })
+                .catch((e) => {
                 console.log("加载prefab失败");
             });
             setTimeout(() => {
                 //延迟初始化广告  防止标签没初始化完
-                // this.adConfig.useNative = !GxLabelUtil.getInstance().getLabel("custom")
+                // this.adConfig.useNative = !GxGameUtil.getInstance().gGB("custom")
                 // this.Ad().initAd();
             }, 4000);
             callback && callback();
         });
-        ResUtil_1.default.loadJsonAsset('gx/cfg/privacy', (err, json) => {
+        ResUtil_1.default.loadJsonAsset("gx/cfg/privacy", (err, json) => {
         });
     }
     /**
@@ -698,6 +845,7 @@ class BaseGxGame {
      * @param parentNode
      */
     static showPrivacyBtnWithParent(parentNode) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.showGamePrivacyBtn, {});
         console.log("显示了111");
         if (GxConstant_1.default.IS_ANDROID_H5) {
             if (!this.isH5Hall) {
@@ -753,6 +901,7 @@ class BaseGxGame {
      * @param parentNode
      */
     static showUserPrivacyBtnWithParent(parentNode) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.showUserPrivacyBtn, {});
         if (!GxConstant_1.default.IS_QQ_GAME) {
             GxLog_1.default.e("除qq外 其他渠道不显示 ");
             return;
@@ -843,7 +992,9 @@ class BaseGxGame {
                 addComponent.spriteFrame = GxGame_1.default.btnH5HallSp;
                 node.parent = cc.find("Canvas");
                 let winSize = cc.winSize;
-                node.position = btnPosition ? btnPosition : cc.v3(-(winSize.width / 2 - 100), -110, 0);
+                node.position = btnPosition
+                    ? btnPosition
+                    : cc.v3(-(winSize.width / 2 - 100), -110, 0);
                 node.setContentSize(100, 100);
                 node.on(cc.Node.EventType.TOUCH_END, () => {
                     self.onClickBackH5HallBtn();
@@ -874,7 +1025,55 @@ class BaseGxGame {
             GxLog_1.default.e("咋会调用这儿！！！");
         }
     }
+    static showTTBoxBtnWithParent(parentNode, reward) {
+        if (!GxGame_1.default.needTTBoxBtn()) {
+            console.log("不需要显示字节宝箱按钮");
+            return;
+        }
+        let self = this;
+        let showCallback = () => {
+            if (GxGame_1.default.btnTTBoxSp) {
+                let node = new cc.Node();
+                let addComponent = node.addComponent(cc.Sprite);
+                addComponent.spriteFrame = GxGame_1.default.btnTTBoxSp;
+                node.parent = parentNode;
+                node.setContentSize(100, 100);
+                node.position = cc.v3(0, 0, 0);
+                node.on(cc.Node.EventType.TOUCH_END, () => {
+                    console.log("点击了");
+                    GxGame_1.default.Ad().hideBanner();
+                    ResUtil_1.default.loadPrefab("gx/prefab/TTReward", (err, prefab) => {
+                        let node = cc.instantiate(prefab);
+                        if (!!GxGame_1.default.uiGroup) {
+                            node.group = GxGame_1.default.uiGroup;
+                        }
+                        var canvas = cc.find("Canvas");
+                        canvas.addChild(node);
+                        var nodets = node.getComponent("Gx_TTReward");
+                        nodets.Reward = reward;
+                        // nodets.stringlabel.string = string
+                    });
+                });
+            }
+            else {
+                GxLog_1.default.e("添加桌面按钮 失败 sp null");
+            }
+        };
+        if (GxGame_1.default.btnTTBoxSp) {
+            showCallback();
+        }
+        else {
+            ResUtil_1.default.loadSprite("gx/texture/btn_TTBox", (err, spriteFrame) => {
+                if (err) {
+                    GxLog_1.default.e("添加字节奖励显示失败" + err);
+                }
+                GxGame_1.default.btnTTBoxSp = spriteFrame;
+                showCallback();
+            });
+        }
+    }
     static showAddDesktopBtnWithParent(parentNode) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.showAddDesktopBtn, {});
         if (!GxGame_1.default.needAddDesktopBtn()) {
             console.log("不需要显示添加桌面按钮");
             return;
@@ -916,6 +1115,7 @@ class BaseGxGame {
         }
     }
     static showMoreGameBtnWithParent(parentNode) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.showMoreGameBtn, {});
         if (GxUtils_1.default.getNativePlatform() == GxEnum_1.PLATFORM.OPPO) {
             if (parentNode == null) {
                 GxLog_1.default.e("showMoreGameBtnWithParent parent is null ");
@@ -1002,6 +1202,7 @@ class BaseGxGame {
         }
     }
     static showGameAgeWithParent(parentNode) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.showGameAgeBtn, {});
         if (parentNode == null) {
             GxLog_1.default.e("showGameAgeWithParent parent is null ");
             this.showGameAge();
@@ -1017,6 +1218,11 @@ class BaseGxGame {
                     node.parent = parentNode;
                     node.position = cc.v3(0, 0, 0);
                     GxLog_1.default.i("ageSp显示成功");
+                    let self = this;
+                    node.setContentSize(100, 130);
+                    node.on(cc.Node.EventType.TOUCH_END, () => {
+                        self.onClickBtn(3);
+                    });
                 }
                 else {
                     GxLog_1.default.e("ageSp 空 显示适龄失败");
@@ -1047,6 +1253,11 @@ class BaseGxGame {
                     node.parent = cc.find("Canvas");
                     let winSize = cc.winSize;
                     node.position = cc.v3(-(winSize.width / 2 - 100), 100, 0);
+                    let self = this;
+                    node.setContentSize(100, 130);
+                    node.on(cc.Node.EventType.TOUCH_END, () => {
+                        self.onClickBtn(3);
+                    });
                 }
                 else {
                     GxLog_1.default.e("ageSp 空 显示适龄失败   ");
@@ -1082,7 +1293,9 @@ class BaseGxGame {
         GxGame_1.default.Ad().showGamePortal();
     }
     static onClickAddDesktopBtn(node) {
-        if (GxConstant_1.default.IS_VIVO_GAME || GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_QQ_GAME) {
+        if (GxConstant_1.default.IS_VIVO_GAME ||
+            GxConstant_1.default.IS_OPPO_GAME ||
+            GxConstant_1.default.IS_QQ_GAME) {
             GxGame_1.default.Ad().addDesktop(() => {
                 node.destroy();
             });
@@ -1100,7 +1313,7 @@ class BaseGxGame {
                     else {
                         return false;
                     }
-                },
+                }
             });
         }
         else if (GxConstant_1.default.IS_QQ_GAME) {
@@ -1123,7 +1336,9 @@ class BaseGxGame {
                 addComponent.spriteFrame = GxGame_1.default.btnPrivacySp;
                 node.parent = cc.find("Canvas");
                 let winSize = cc.winSize;
-                node.position = btnPosition ? btnPosition : cc.v3(-(winSize.width / 2 - 100), -110, 0);
+                node.position = btnPosition
+                    ? btnPosition
+                    : cc.v3(-(winSize.width / 2 - 100), -110, 0);
                 node.setContentSize(100, 100);
                 node.on(cc.Node.EventType.TOUCH_END, () => {
                     self.onClickPrivacyBtn();
@@ -1163,7 +1378,9 @@ class BaseGxGame {
                 addComponent.spriteFrame = GxGame_1.default.btnPrivacySp;
                 node.parent = cc.find("Canvas");
                 let winSize = cc.winSize;
-                node.position = btnPosition ? btnPosition : cc.v3(-(winSize.width / 2 - 100), -110, 0);
+                node.position = btnPosition
+                    ? btnPosition
+                    : cc.v3(-(winSize.width / 2 - 100), -110, 0);
                 node.setContentSize(100, 100);
                 node.on(cc.Node.EventType.TOUCH_END, () => {
                     self.onClickUserPrivacyBtn();
@@ -1199,7 +1416,9 @@ class BaseGxGame {
                     addComponent.spriteFrame = GxGame_1.default.btnMoreGameSp;
                     node.parent = cc.find("Canvas");
                     let winSize = cc.winSize;
-                    node.position = btnPosition ? btnPosition : cc.v3(-(winSize.width / 2 - 100), 210, 0);
+                    node.position = btnPosition
+                        ? btnPosition
+                        : cc.v3(-(winSize.width / 2 - 100), 210, 0);
                     node.setContentSize(100, 100);
                     node.on(cc.Node.EventType.TOUCH_END, () => {
                         self.onClickMoreGameBtn();
@@ -1226,76 +1445,100 @@ class BaseGxGame {
             GxLog_1.default.e("不是安卓oppo  apk或者qq不显示更多游戏");
         }
     }
-    static getLabel(key) {
+    static gGB(key) {
         if (GxConstant_1.default.IS_QQ_GAME) {
-            if (GxAdParams_1.AdParams.qq.labelVersion && (GxAdParams_1.AdParams.qq.labelVersion + "").length > 0) {
+            if (GxAdParams_1.AdParams.qq.labelVersion &&
+                (GxAdParams_1.AdParams.qq.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.qq.labelVersion;
             }
         }
         else if (GxConstant_1.default.IS_WECHAT_GAME) {
-            if (GxAdParams_1.AdParams.wx.labelVersion && (GxAdParams_1.AdParams.wx.labelVersion + "").length > 0) {
+            if (GxAdParams_1.AdParams.wx.labelVersion &&
+                (GxAdParams_1.AdParams.wx.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.wx.labelVersion;
             }
         }
         else if (GxConstant_1.default.IS_TT_GAME) {
-            if (GxAdParams_1.AdParams.tt.labelVersion && (GxAdParams_1.AdParams.tt.labelVersion + "").length > 0) {
+            if (GxAdParams_1.AdParams.tt.labelVersion &&
+                (GxAdParams_1.AdParams.tt.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.tt.labelVersion;
             }
         }
         else if (GxConstant_1.default.IS_OPPO_GAME) {
-            if (GxAdParams_1.AdParams.oppo.labelVersion && (GxAdParams_1.AdParams.oppo.labelVersion + "").length > 0) {
+            if (GxAdParams_1.AdParams.oppo.labelVersion &&
+                (GxAdParams_1.AdParams.oppo.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.oppo.labelVersion;
             }
         }
         else if (GxConstant_1.default.IS_MI_GAME) {
-            if (GxAdParams_1.AdParams.mi.labelVersion && (GxAdParams_1.AdParams.mi.labelVersion + "").length > 0) {
+            if (GxAdParams_1.AdParams.mi.labelVersion &&
+                (GxAdParams_1.AdParams.mi.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.mi.labelVersion;
             }
         }
         else if (GxConstant_1.default.IS_VIVO_GAME) {
-            if (GxAdParams_1.AdParams.vivo.labelVersion && (GxAdParams_1.AdParams.vivo.labelVersion + "").length > 0) {
+            if (GxAdParams_1.AdParams.vivo.labelVersion &&
+                (GxAdParams_1.AdParams.vivo.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.vivo.labelVersion;
             }
         }
         else if (GxConstant_1.default.IS_HUAWEI_GAME) {
-            if (GxAdParams_1.AdParams.hw.labelVersion && (GxAdParams_1.AdParams.hw.labelVersion + "").length > 0) {
+            if (GxAdParams_1.AdParams.hw.labelVersion &&
+                (GxAdParams_1.AdParams.hw.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.hw.labelVersion;
+            }
+        }
+        else if (GxConstant_1.default.IS_KS_GAME) {
+            if (GxAdParams_1.AdParams.ks.labelVersion &&
+                (GxAdParams_1.AdParams.ks.labelVersion + "").length > 0) {
+                key += GxAdParams_1.AdParams.ks.labelVersion;
             }
         }
         else if (GxConstant_1.default.IS_ANDROID_NATIVE || GxConstant_1.default.IS_ANDROID_H5) {
             return GxUtils_1.default.callMethodLabel(key);
         }
-        return GxLabelUtil_1.default.getInstance().getLabel(key);
+        return GxGameUtil_1.default.getInstance().gGB(key);
     }
-    static getValue(key, defaultValue = 0) {
+    static gGN(key, defaultValue = 0) {
         if (GxConstant_1.default.IS_ANDROID_NATIVE || GxConstant_1.default.IS_ANDROID_H5) {
             return GxUtils_1.default.callMethodLabelValue(key, defaultValue);
         }
         else if (GxConstant_1.default.IS_OPPO_GAME) {
-            if (GxAdParams_1.AdParams.oppo.labelVersion && (GxAdParams_1.AdParams.oppo.labelVersion + "").length > 0) {
+            if (GxAdParams_1.AdParams.oppo.labelVersion &&
+                (GxAdParams_1.AdParams.oppo.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.oppo.labelVersion;
             }
-            return GxLabelUtil_1.default.getInstance().getValue(key, defaultValue);
+            return GxGameUtil_1.default.getInstance().gGN(key, defaultValue);
         }
         else if (GxConstant_1.default.IS_MI_GAME) {
-            if (GxAdParams_1.AdParams.mi.labelVersion && (GxAdParams_1.AdParams.mi.labelVersion + "").length > 0) {
+            if (GxAdParams_1.AdParams.mi.labelVersion &&
+                (GxAdParams_1.AdParams.mi.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.mi.labelVersion;
             }
-            return GxLabelUtil_1.default.getInstance().getValue(key, defaultValue);
+            return GxGameUtil_1.default.getInstance().gGN(key, defaultValue);
         }
         else if (GxConstant_1.default.IS_VIVO_GAME) {
-            if (GxAdParams_1.AdParams.vivo.labelVersion && (GxAdParams_1.AdParams.vivo.labelVersion + "").length > 0) {
+            if (GxAdParams_1.AdParams.vivo.labelVersion &&
+                (GxAdParams_1.AdParams.vivo.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.vivo.labelVersion;
             }
-            return GxLabelUtil_1.default.getInstance().getValue(key, defaultValue);
+            return GxGameUtil_1.default.getInstance().gGN(key, defaultValue);
         }
         else if (GxConstant_1.default.IS_QQ_GAME) {
-            if (GxAdParams_1.AdParams.qq.labelVersion && (GxAdParams_1.AdParams.qq.labelVersion + "").length > 0) {
+            if (GxAdParams_1.AdParams.qq.labelVersion &&
+                (GxAdParams_1.AdParams.qq.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.qq.labelVersion;
             }
-            return GxLabelUtil_1.default.getInstance().getValue(key, defaultValue);
+            return GxGameUtil_1.default.getInstance().gGN(key, defaultValue);
         }
-        return GxLabelUtil_1.default.getInstance().getValue(key, defaultValue);
+        else if (GxConstant_1.default.IS_KS_GAME) {
+            if (GxAdParams_1.AdParams.ks.labelVersion &&
+                (GxAdParams_1.AdParams.ks.labelVersion + "").length > 0) {
+                key += GxAdParams_1.AdParams.ks.labelVersion;
+            }
+            return GxGameUtil_1.default.getInstance().gGN(key, defaultValue);
+        }
+        return GxGameUtil_1.default.getInstance().gGN(key, defaultValue);
     }
     static Ad() {
         if (GxConstant_1.default.IS_WECHAT_GAME) {
@@ -1328,6 +1571,12 @@ class BaseGxGame {
         else if (GxConstant_1.default.IS_TT_GAME) {
             return TTAdapter_1.default.getInstance();
         }
+        else if (GxConstant_1.default.IS_KS_GAME) {
+            return KsAdapter_1.default.getInstance();
+        }
+        else if (GxConstant_1.default.IS_ZFB_GAME) {
+            return ZFBAdapter_1.default.getInstance();
+        }
         else {
             return BaseAdapter_1.default.getInstance();
         }
@@ -1343,9 +1592,9 @@ class BaseGxGame {
                 title: this.shareWord[0],
                 imageUrl: this.sharePath
             });
-            let share_time = (new Date()).getTime();
-            let func = res => {
-                if ((new Date()).getTime() - share_time >= 3000) {
+            let share_time = new Date().getTime();
+            let func = (res) => {
+                if (new Date().getTime() - share_time >= 3000) {
                     complete && complete(true);
                     // wx.showToast({title: '分享成功',duration: 2000});
                 }
@@ -1359,7 +1608,7 @@ class BaseGxGame {
                         cancelColor: "#000",
                         confirmText: "去分享",
                         confirmColor: "#08f",
-                        success: res => {
+                        success: (res) => {
                             if (res.confirm) {
                                 this.shareGame(complete);
                             }
@@ -1380,7 +1629,7 @@ class BaseGxGame {
             qq.shareAppMessage({
                 title: this.shareWord[0],
                 imageUrl: GxAdParams_1.AdParams.qq.shareImgUrl,
-                query: '',
+                query: "",
                 success: () => {
                     complete && complete(true);
                 },
@@ -1399,6 +1648,7 @@ class BaseGxGame {
                 title: this.shareWord[0],
                 desc: this.shareWord[1],
                 imageUrl: this.sharePath,
+                templateId: GxAdParams_1.AdParams.tt.shareTemplateId,
                 query: "",
                 success() {
                     console.log("分享成功");
@@ -1407,7 +1657,7 @@ class BaseGxGame {
                 fail(e) {
                     console.log("分享失败");
                     complete && complete(false);
-                },
+                }
             });
         }
     }
@@ -1419,63 +1669,87 @@ class BaseGxGame {
     }
     static startgamebtn() {
         /*    if (GxConstant.IS_OPPO_GAME || GxConstant.IS_VIVO_GAME) {
-                if (this.enterMainCount == 0) {
-                    let label = GxGame.getLabel("switch");
-                    if (label) {
-                        this.enterMainCount = 1;
-                        var gailv = GxGame.getValue("gailv")
-                        if (Math.round(Math.random() * 99 + 1) < gailv) {
-                            this.Ad().showVideo((res) => {
-                                this.Ad().showNativeInterstitial();
-                            })
+                    if (this.enterMainCount == 0) {
+                        let label = GxGame.gGB("z1");
+                        if (label) {
+                            this.enterMainCount = 1;
+                            var gailv = GxGame.gGN("gailv")
+                            if (Math.round(Math.random() * 99 + 1) < gailv) {
+                                this.Ad().showVideo((res) => {
+                                    this.Ad().showNativeInterstitial();
+                                })
+                            }
                         }
                     }
-                }
-            }*/
+                }*/
     }
     static gameEvent(eventName, params = null) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.event, { eventName, params });
         console.log("[gx_game] gameEvent:" + eventName);
-        if (GxConstant_1.default.IS_ANDROID_NATIVE || GxConstant_1.default.IS_IOS_NATIVE || GxConstant_1.default.IS_ANDROID_H5) {
+        let patt = /^\w{1,100}$/;
+        if (!patt.test(eventName)) {
+            console.warn("事件名不符合要求：" + eventName);
+        }
+        if (GxConstant_1.default.IS_ANDROID_NATIVE ||
+            GxConstant_1.default.IS_IOS_NATIVE ||
+            GxConstant_1.default.IS_ANDROID_H5) {
             GxUtils_1.default.callMethod("gameEvent", eventName);
         }
-        else {
+        else if (GxConstant_1.default.IS_OPPO_GAME ||
+            GxConstant_1.default.IS_VIVO_GAME ||
+            GxConstant_1.default.IS_HUAWEI_GAME ||
+            GxConstant_1.default.IS_MI_GAME) {
+            //@ts-ignore
+            qg.uma && qg.uma.trackEvent(eventName, params);
+        }
+        else if (GxConstant_1.default.IS_TT_GAME) {
+            //@ts-ignore
+            tt.uma && tt.uma.trackEvent(eventName, params);
+        }
+        else if (GxConstant_1.default.IS_WECHAT_GAME) {
+            //@ts-ignore
+            wx.uma && wx.uma.trackEvent(eventName, params);
+        }
+        else if (GxConstant_1.default.IS_QQ_GAME) {
+            //@ts-ignore
+            qq.uma && qq.uma.trackEvent(eventName, params);
         }
         if (eventName == GxEnum_1.EventName.modeLvChoice) {
             if (GxConstant_1.default.IS_VIVO_GAME || GxConstant_1.default.IS_OPPO_GAME) {
-                /*  2023年8月25日不用了 加了LLVV  let label = GxGame.getLabel("vc");
-                    if (label) {
-    
-                        let value = GxGame.getValue("vc", 0);
-                        if (value > 0) {
-                            if (this.vcNum == -1) {
-                                this.vcNum = value;
-                                setInterval(() => {
-                                    console.log("重置vcNum")
-                                    this.vcNum = value;
-                                }, 90 * 1000)
-                            }
-                            if (this.vcNum > 0) {
-                                this.vcNum--;
-                                GxGame.Ad().showVideo((res) => {
-    
-                                }, "vc")
+                /*  2023年8月25日不用了 加了LLVV  let label = GxGame.gGB("vc");
+                            if (label) {
+
+                                let value = GxGame.gGN("vc", 0);
+                                if (value > 0) {
+                                    if (this.vcNum == -1) {
+                                        this.vcNum = value;
+                                        setInterval(() => {
+                                            console.log("重置vcNum")
+                                            this.vcNum = value;
+                                        }, 90 * 1000)
+                                    }
+                                    if (this.vcNum > 0) {
+                                        this.vcNum--;
+                                        GxGame.Ad().showVideo((res) => {
+
+                                        }, "vc")
+                                    } else {
+                                        console.log("vcNum <0")
+                                    }
+                                } else {
+                                    console.log("vc <0")
+                                }
+
+
                             } else {
-                                console.log("vcNum <0")
+                                console.log("vc false")
                             }
-                        } else {
-                            console.log("vc <0")
-                        }
-    
-    
-                    } else {
-                        console.log("vc false")
-                    }
-    */
+            */
             }
         }
         //qq的策略 进去第一次显示视频
         // if (GxConstant.IS_QQ_GAME && eventName == EventName.main && this.enterMainCount == 0) {
-        //   let label = GxGame.getLabel("switch");
+        //   let label = GxGame.gGB("z1");
         //   if (label) {
         //     if (this.Ad().ismailiang) {
         //       this.enterMainCount++;
@@ -1489,41 +1763,144 @@ class BaseGxGame {
         // }
     }
     static gameEventLevelStart(lvName, params = null) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.lvStart, { stage: lvName, params });
         lvName = lvName ? lvName.toString() : "";
+        let patt = /^\w{0,1000000}$/;
+        if (!patt.test(lvName)) {
+            console.warn("关卡名不符合要求：" + lvName);
+        }
         console.log("[gx_game] gameEventLevelStart:" + lvName);
-        if (GxConstant_1.default.IS_ANDROID_NATIVE || GxConstant_1.default.IS_IOS_NATIVE || GxConstant_1.default.IS_ANDROID_H5) {
+        if (GxConstant_1.default.IS_ANDROID_NATIVE ||
+            GxConstant_1.default.IS_IOS_NATIVE ||
+            GxConstant_1.default.IS_ANDROID_H5) {
             GxUtils_1.default.callMethod("gameEventLevelStart", lvName);
         }
         else if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_VIVO_GAME) {
-            /*   let label = GxGame.getLabel("switch");
-               if (label) {
-                   var gailv = GxGame.getValue("gailv")
-                   if (Math.round(Math.random() * 99 + 1) < gailv) {
-                       this.Ad().showNativeInterstitial();
-                   }
-               }*/
+            //@ts-ignore
+            qg.uma &&
+                qg.uma.stage.onStart({
+                    stageId: String(lvName),
+                    stageName: `第${lvName}关`
+                });
+            /*   let label = GxGame.gGB("z1");
+                     if (label) {
+                         var gailv = GxGame.gGN("gailv")
+                         if (Math.round(Math.random() * 99 + 1) < gailv) {
+                             this.Ad().showNativeInterstitial();
+                         }
+                     }*/
         }
-        else {
+        else if (GxConstant_1.default.IS_HUAWEI_GAME || GxConstant_1.default.IS_MI_GAME) {
+            //@ts-ignore
+            qg.uma &&
+                qg.uma.stage.onStart({
+                    stageId: String(lvName),
+                    stageName: `第${lvName}关`
+                });
+        }
+        else if (GxConstant_1.default.IS_TT_GAME) {
+            //@ts-ignore
+            tt.uma &&
+                tt.uma.stage.onStart({
+                    stageId: String(lvName),
+                    stageName: `第${lvName}关`
+                });
+        }
+        else if (GxConstant_1.default.IS_WECHAT_GAME) {
+            //@ts-ignore
+            wx.uma &&
+                wx.uma.stage.onStart({
+                    stageId: String(lvName),
+                    stageName: `第${lvName}关`
+                });
+        }
+        else if (GxConstant_1.default.IS_QQ_GAME) {
+            //@ts-ignore
+            qq.uma &&
+                qq.uma.stage.onStart({
+                    stageId: String(lvName),
+                    stageName: `第${lvName}关`
+                });
         }
     }
     static gameEventLevelEnd(lvName, isVictory = false) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.lvEnd, { stage: lvName, isVictory });
         lvName = lvName ? lvName.toString() : "";
-        console.log("[gx_game] 关卡结束:" + lvName + " isVictory:" + (isVictory ? "胜利" : "失败"));
-        if (GxConstant_1.default.IS_ANDROID_NATIVE || GxConstant_1.default.IS_IOS_NATIVE || GxConstant_1.default.IS_ANDROID_H5) {
+        let patt = /^\w{0,1000000}$/;
+        if (!patt.test(lvName)) {
+            console.warn("关卡名不符合要求：" + lvName);
+        }
+        console.log("[gx_game] 关卡结束:" +
+            lvName +
+            " isVictory:" +
+            (isVictory ? "胜利" : "失败"));
+        if (GxConstant_1.default.IS_ANDROID_NATIVE ||
+            GxConstant_1.default.IS_IOS_NATIVE ||
+            GxConstant_1.default.IS_ANDROID_H5) {
             GxUtils_1.default.callMethod("gameEventLevelEnd", lvName + "_" + isVictory);
         }
-        else {
+        else if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_VIVO_GAME) {
+            //@ts-ignore
+            qg.uma &&
+                qg.uma.stage.onEnd({
+                    stageId: String(lvName),
+                    stageName: `第${lvName}关`,
+                    event: isVictory ? "complete" : "fail"
+                });
+            /*   let label = GxGame.gGB("z1");
+                     if (label) {
+                         var gailv = GxGame.gGN("gailv")
+                         if (Math.round(Math.random() * 99 + 1) < gailv) {
+                             this.Ad().showNativeInterstitial();
+                         }
+                     }*/
+        }
+        else if (GxConstant_1.default.IS_HUAWEI_GAME || GxConstant_1.default.IS_MI_GAME) {
+            //@ts-ignore
+            qg.uma &&
+                qg.uma.stage.onEnd({
+                    stageId: String(lvName),
+                    stageName: `第${lvName}关`,
+                    event: isVictory ? "complete" : "fail"
+                });
+        }
+        else if (GxConstant_1.default.IS_TT_GAME) {
+            //@ts-ignore
+            tt.uma &&
+                tt.uma.stage.onEnd({
+                    stageId: String(lvName),
+                    stageName: `第${lvName}关`,
+                    event: isVictory ? "complete" : "fail"
+                });
+        }
+        else if (GxConstant_1.default.IS_WECHAT_GAME) {
+            //@ts-ignore
+            wx.uma &&
+                wx.uma.stage.onEnd({
+                    stageId: String(lvName),
+                    stageName: `第${lvName}关`,
+                    event: isVictory ? "complete" : "fail"
+                });
+        }
+        else if (GxConstant_1.default.IS_QQ_GAME) {
+            //@ts-ignore
+            qq.uma &&
+                qq.uma.stage.onEnd({
+                    stageId: String(lvName),
+                    stageName: `第${lvName}关`,
+                    event: isVictory ? "complete" : "fail"
+                });
         }
         // //qq的策略
         //
         if (GxConstant_1.default.IS_QQ_GAME) {
-            let label = GxGame_1.default.getLabel("switch");
+            this.Ad().showGameOverAD();
+            let label = GxGame_1.default.gGB("z1");
             if (label) {
                 // if (this.Ad().ismailiang) {
                 //   this.Ad().showVideo((res) => {
                 // }, "qqGameEnd")
                 // } else {
-                this.Ad().showGameOverAD();
                 // }
                 if (GxAdParams_1.AdParams.qq.gameEndShowCrazyPoint) {
                     GxGame_1.default.Ad().showCrazyPoint(() => {
@@ -1533,12 +1910,12 @@ class BaseGxGame {
                             }, () => {
                             }, null); /*   GxGame.Ad().showGameBox(()=>{
 
-                    },()=>{
+                },()=>{
 
-                    },(num)=>{
+                },(num)=>{
 
 
-                    })*/
+                })*/
                         }
                         else {
                             GxLog_1.default.i("不用显示九宫格2");
@@ -1565,41 +1942,58 @@ class BaseGxGame {
                     }
                 }
             }
-        }
-        else 
-        //ov的策略
-        if (GxConstant_1.default.IS_OPPO_GAME) {
+        } //ov的策略
+        else if (GxConstant_1.default.IS_OPPO_GAME) {
+            /*修改1 2023年9月4日11:23:14*/
+            let gGB = GxGame_1.default.gGB("aa");
+            if (gGB) {
+                this.Ad().showGameOverAD();
+            }
             //0518去掉
-            /* let label = GxGame.getLabel("box");
-             if (label) {
-                 // if (AdParams.oppo.havebox) {
-                 var gailv = GxGame.getValue("gailv")
-                 if (Math.round(Math.random() * 99 + 1) < gailv) {
-                     this.Ad().showGameOverAD();
-                 }
-                 // }
+            /* let label = GxGame.gGB("box");
+                   if (label) {
+                       // if (AdParams.oppo.havebox) {
+                       var gailv = GxGame.gGN("gailv")
+                       if (Math.round(Math.random() * 99 + 1) < gailv) {
+                           this.Ad().showGameOverAD();
+                       }
+                       // }
 
-             }*/
+                   }*/
             this.ovDesktop();
         }
         else if (GxConstant_1.default.IS_VIVO_GAME) {
+            /*修改1 2023年9月4日11:23:14*/
+            let gGB = GxGame_1.default.gGB("aa");
+            if (gGB) {
+                this.Ad().showGameOverAD();
+            }
             //0518去掉
-            /*  let label = GxGame.getLabel("box");
-              if (label) {
-                  // if (AdParams.vivo.havebox) {
-                  var gailv = GxGame.getValue("gailv")
-                  if (Math.round(Math.random() * 99 + 1) < gailv) {
-                      this.Ad().showGameOverAD();
-                  }
-                  // }
+            /*  let label = GxGame.gGB("box");
+                    if (label) {
+                        // if (AdParams.vivo.havebox) {
+                        var gailv = GxGame.gGN("gailv")
+                        if (Math.round(Math.random() * 99 + 1) < gailv) {
+                            this.Ad().showGameOverAD();
+                        }
+                        // }
 
-              }*/
+                    }*/
             this.ovDesktop();
+        }
+        else if (GxConstant_1.default.IS_WECHAT_GAME) {
+            var lab = GxGame_1.default.gGB("qiangtan");
+            if (lab) {
+                var num = Math.floor(Math.random() * 100) + 1;
+                if (num <= 40) {
+                    this.Ad().showVideo();
+                }
+            }
         }
     }
     //0518新加 游戏结束页面弹出添加桌面提示   每两次添加一次  vivo需要间隔一分钟
     static ovDesktop() {
-        let label = GxGame_1.default.getLabel("addDesk");
+        let label = GxGame_1.default.gGB("addDesk");
         if (label) {
             let number = new Date().valueOf();
             if (number - this.ovDesktopLastTime > 60 * 1000) {
@@ -1630,15 +2024,15 @@ class BaseGxGame {
     }
     static closebox() {
         /*  if (GxConstant.IS_OPPO_GAME || GxConstant.IS_VIVO_GAME) {
-              let label = GxGame.getLabel("switch");
-              if (label) {
-                  var gailv = GxGame.getValue("gailv")
-                  if (Math.round(Math.random() * 99 + 1) < gailv) {
-                      this.Ad().showVideo((res) => {
-                      })
+                  let label = GxGame.gGB("z1");
+                  if (label) {
+                      var gailv = GxGame.gGN("gailv")
+                      if (Math.round(Math.random() * 99 + 1) < gailv) {
+                          this.Ad().showVideo((res) => {
+                          })
+                      }
                   }
-              }
-          }*/
+              }*/
     }
     /**
      * 上报OCPX（目前仅支持oppo）
@@ -1648,45 +2042,45 @@ class BaseGxGame {
         console.warn("禁用upload ocpx");
         return;
         /*     if (!GxConstant.IS_OPPO_GAME) {
-                 return Log.w('当前功能仅支持 OPPO 平台')
-             }
-
-             Log.i(`上报类型 :${type}`)
-             let num = 0;
-             let can_report = false;
-             let desc = '';
-             if (type == 'gads') {
-                 num = ++UserData.gads;
-                 desc = '次数';
-             } else if (type == 'gtime') {
-                 num = ++UserData.gtime;
-                 desc = '时长';
-             } else if (type == 'glv') {
-                 num = ++UserData.glv;
-                 desc = '关卡';
-             }
-
-             if (num > 1 && num < 25) {
-                 can_report = true;
-             } else {
-                 return Log.w(`类型：${type}，${desc}：${num} 无需上报`)
-             }
-
-             if (!can_report) return Log.e(`上报失败，上报类型错误【${type}】`);
-
-             if (UserData.deviceid) {
-                 if (this.canReportOcpx) {
-                     Log.i(`OCPX [类型: ${type}, 数值: ${num}] 数据上传...`)
-                     const url = `https://ocpx.sjzgxwl.com/oppo/upload/ocpx/${Constant.GID}?deviceid=${UserData.deviceid}&pkg=${this.gameInfo.package}&type=${type}&val=${num}`;
-                     HttpManager.send(url).then(res => {
-                         Log.i('OCPX 数据上传成功')
-                     });
-                 } else {
-                     Log.w('OCPX 数据上报停用')
+                     return Log.w('当前功能仅支持 OPPO 平台')
                  }
-             } else {
-                 Log.e(`上报失败，DeviceID 为空！`);
-             }*/
+
+                 Log.i(`上报类型 :${type}`)
+                 let num = 0;
+                 let can_report = false;
+                 let desc = '';
+                 if (type == 'gads') {
+                     num = ++UserData.gads;
+                     desc = '次数';
+                 } else if (type == 'gtime') {
+                     num = ++UserData.gtime;
+                     desc = '时长';
+                 } else if (type == 'glv') {
+                     num = ++UserData.glv;
+                     desc = '关卡';
+                 }
+
+                 if (num > 1 && num < 25) {
+                     can_report = true;
+                 } else {
+                     return Log.w(`类型：${type}，${desc}：${num} 无需上报`)
+                 }
+
+                 if (!can_report) return Log.e(`上报失败，上报类型错误【${type}】`);
+
+                 if (UserData.deviceid) {
+                     if (this.canReportOcpx) {
+                         Log.i(`OCPX [类型: ${type}, 数值: ${num}] 数据上传...`)
+                         const url = `https://ocpx.sjzgxwl.com/oppo/upload/ocpx/${Constant.GID}?deviceid=${UserData.deviceid}&pkg=${this.gameInfo.package}&type=${type}&val=${num}`;
+                         HttpManager.send(url).then(res => {
+                             Log.i('OCPX 数据上传成功')
+                         });
+                     } else {
+                         Log.w('OCPX 数据上报停用')
+                     }
+                 } else {
+                     Log.e(`上报失败，DeviceID 为空！`);
+                 }*/
     }
     static countdown(label, istime) {
         if (GxConstant_1.default.IS_QQ_GAME) {
@@ -1834,7 +2228,10 @@ class BaseGxGame {
         }
     }
     static showCancelAccountWithParent(parentNode) {
-        if (GxConstant_1.default.IS_HUAWEI_GAME || ((GxConstant_1.default.IS_ANDROID_H5 || GxConstant_1.default.IS_ANDROID_NATIVE)) && GxUtils_1.default.getNativePlatform() == GxEnum_1.PLATFORM.HUAWEI) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.showCancelAccountBtn, {});
+        if (GxConstant_1.default.IS_HUAWEI_GAME ||
+            ((GxConstant_1.default.IS_ANDROID_H5 || GxConstant_1.default.IS_ANDROID_NATIVE) &&
+                GxUtils_1.default.getNativePlatform() == GxEnum_1.PLATFORM.HUAWEI)) {
             if (parentNode == null) {
                 GxLog_1.default.e("showCancelAccount parent is null ");
                 return;
@@ -1852,12 +2249,12 @@ class BaseGxGame {
                         if (GxConstant_1.default.IS_HUAWEI_GAME) {
                             // @ts-ignore
                             qg.showModal({
-                                title: '注销账号提示',
-                                content: '确定注销账号吗？注销后将无法恢复！',
+                                title: "注销账号提示",
+                                content: "确定注销账号吗？注销后将无法恢复！",
                                 confirmText: "确定注销",
                                 success(res) {
                                     if (res.confirm) {
-                                        console.log('用户点击确定');
+                                        console.log("用户点击确定");
                                         cc.sys.localStorage.clear();
                                         // @ts-ignore
                                         qg.exitApplication({
@@ -1873,7 +2270,7 @@ class BaseGxGame {
                                         });
                                     }
                                     else if (res.cancel) {
-                                        console.log('用户点击取消');
+                                        console.log("用户点击取消");
                                     }
                                 }
                             });
@@ -1908,6 +2305,9 @@ class BaseGxGame {
             GxLog_1.default.e("不是华为apk或者rpk不显示注销账号按钮");
         }
     }
+    static onClickBtn(type) {
+        GxGame_1.default.Ad().onClickBtn(type);
+    }
 }
 /**拒绝是否可以继续游戏 */
 BaseGxGame.canPlayWithRefuse = false;
@@ -1923,13 +2323,15 @@ BaseGxGame.btnAddDesktopSp = null;
 BaseGxGame.btnCancelAccountSp = null;
 BaseGxGame.screenWidth = 0;
 BaseGxGame.initPlatformEnd = false;
+BaseGxGame.btnTTBoxSp = null;
+BaseGxGame.havettreward = false;
 BaseGxGame.screenHeight = 0;
 /**用户信息 */
 BaseGxGame.userInfo = {
-    uid: '',
-    openid: '',
-    avatarUrl: '',
-    nickName: ''
+    uid: "",
+    openid: "",
+    avatarUrl: "",
+    nickName: ""
 };
 //是否正在审核
 BaseGxGame.isShenHe = false;
@@ -1937,13 +2339,13 @@ BaseGxGame.isH5Hall = false;
 /**分享文字 */
 BaseGxGame.shareWord = ["", ""];
 /**分享图片 */
-BaseGxGame.sharePath = '';
-/**场景/地区屏蔽 */
-BaseGxGame.inBlockArea = false;
+BaseGxGame.sharePath = "";
 //头条更多游戏
 BaseGxGame.recommedList = [];
 BaseGxGame.uiGroup = "";
 BaseGxGame.enterMainCount = 0; //目前只有ov在用
+/*游戏的唯一标识 app id或者包名*/
+BaseGxGame.appId = "";
 /**
  * 广告配置
  * 【注】SDK已接
@@ -1953,24 +2355,24 @@ BaseGxGame.adConfig = {
     canRefresh: false,
     useNative: false,
     /*  /!**Banner广告位 *!/
-      adunit_banner: [],
-      /!**原生广告位 *!/
-      adunit_native: [],
-      /!**插屏广告位 *!/
-      adunit_intestital: null,
-      /!**激励视频广告位 *!/
-      adunit_video: null,
-      /!**原生模板banner *!/
-      adunit_custom_banner: null,
-      /!**原生模板插屏 *!/
-      adunit_custom_inter: null,
-      adunit_appid: null,
-      /!**九宫格广告位 *!/
-      adunit_portal: null,
-      /!**互推盒子 *!/
-      adunit_game_banner: null,
-      /!**是否主动展示九宫格 *!/
-      showGamePortal: true,*/
+          adunit_banner: [],
+          /!**原生广告位 *!/
+          adunit_native: [],
+          /!**插屏广告位 *!/
+          adunit_intestital: null,
+          /!**激励视频广告位 *!/
+          adunit_video: null,
+          /!**原生模板banner *!/
+          adunit_custom_banner: null,
+          /!**原生模板插屏 *!/
+          adunit_custom_inter: null,
+          adunit_appid: null,
+          /!**九宫格广告位 *!/
+          adunit_portal: null,
+          /!**互推盒子 *!/
+          adunit_game_banner: null,
+          /!**是否主动展示九宫格 *!/
+          showGamePortal: true,*/
     /**banner刷新时间间隔，默认-1s 只有oppo是 5*/
     bannerUpdateTime: -1,
     /**原生广告刷新时间间隔，默认30s */
@@ -2001,10 +2403,10 @@ BaseGxGame.ovDesktopCount = 0;
 BaseGxGame.ovDesktopLastTime = 0;
 // 游戏信息，用于ocpx上报
 BaseGxGame.gameInfo = {
-    package: '',
-    name: '',
-    versionName: '',
-    versionCode: ''
+    package: "",
+    name: "",
+    versionName: "",
+    versionCode: ""
 };
 BaseGxGame.canReportOcpx = false;
 //需要跳出倒计时，用于结算页面是隐藏不是销毁的游戏

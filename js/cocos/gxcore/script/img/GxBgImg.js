@@ -1,4 +1,10 @@
 "use strict";
+// Learn TypeScript:
+//  - https://docs.cocos.com/creator/manual/en/scripting/typescript.html
+// Learn Attribute:
+//  - https://docs.cocos.com/creator/manual/en/scripting/reference/attributes.html
+// Learn life-cycle callbacks:
+//  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
     function accept(f) { if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected"); return f; }
     var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
@@ -41,48 +47,70 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const GxGame_1 = __importDefault(require("../GxGame"));
+const GxImgMgr_1 = __importDefault(require("./GxImgMgr"));
 const { ccclass, property } = cc._decorator;
-let Gx_GameOverAD = (() => {
+let ObjImgName = {
+    NONE: 0,
+    bgUrl: 1,
+    lvUrl: 2
+};
+let ImgNameEnum = cc.Enum(ObjImgName);
+let GxBgImg = (() => {
     let _classDecorators = [ccclass];
     let _classDescriptor;
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    var Gx_GameOverAD = _classThis = class extends _classSuper {
+    let _instanceExtraInitializers = [];
+    let _imgName_decorators;
+    let _imgName_initializers = [];
+    var GxBgImg = _classThis = class extends _classSuper {
+        constructor() {
+            super(...arguments);
+            this.imgName = (__runInitializers(this, _instanceExtraInitializers), __runInitializers(this, _imgName_initializers, ImgNameEnum.NONE));
+            // update (dt) {}
+        }
+        // LIFE-CYCLE CALLBACKS:
         onLoad() {
+            this.node.opacity = 0;
+            let component = this.node.getComponent(cc.Sprite);
+            if (!component) {
+                component = this.node.addComponent(cc.Sprite);
+            }
+            if (component && this.imgName != ImgNameEnum.NONE) {
+                let strings = Object.keys(ObjImgName);
+                GxImgMgr_1.default.getInstance().getImgByName(strings[this.imgName], (sp) => {
+                    if (sp) {
+                        if (component && component.isValid) {
+                            component.spriteFrame = sp;
+                            this.node.opacity = 255;
+                        }
+                    }
+                    else {
+                        if (this && this.node && this.node.isValid) {
+                            this.node.opacity = 255;
+                        }
+                    }
+                });
+            }
+            else {
+                this.node.opacity = 255;
+            }
         }
         start() {
         }
-        show(on_show, on_close, on_get) {
-            this.onShow = on_show;
-            this.onClose = on_close;
-            this.onGet = on_get;
-            this.onShow && this.onShow();
-            cc.director.getScene().addChild(this.node);
-        }
-        onDestroy() {
-            this.onClose && this.onClose();
-        }
-        onCallBack(e, type) {
-            switch (type) {
-                case "点击":
-                    GxGame_1.default.Ad().showVideo((res) => {
-                    }, "GxGameOverAd");
-                    this.node.destroy();
-                    break;
-            }
-        }
     };
-    __setFunctionName(_classThis, "Gx_GameOverAD");
+    __setFunctionName(_classThis, "GxBgImg");
     (() => {
         var _a;
         const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create((_a = _classSuper[Symbol.metadata]) !== null && _a !== void 0 ? _a : null) : void 0;
+        _imgName_decorators = [property({ type: cc.Enum(ImgNameEnum) })];
+        __esDecorate(null, null, _imgName_decorators, { kind: "field", name: "imgName", static: false, private: false, access: { has: obj => "imgName" in obj, get: obj => obj.imgName, set: (obj, value) => { obj.imgName = value; } }, metadata: _metadata }, _imgName_initializers, _instanceExtraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
-        Gx_GameOverAD = _classThis = _classDescriptor.value;
+        GxBgImg = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
         __runInitializers(_classThis, _classExtraInitializers);
     })();
-    return Gx_GameOverAD = _classThis;
+    return GxBgImg = _classThis;
 })();
-exports.default = Gx_GameOverAD;
+exports.default = GxBgImg;

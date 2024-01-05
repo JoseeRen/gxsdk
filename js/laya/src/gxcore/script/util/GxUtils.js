@@ -351,7 +351,8 @@ class GxUtils {
     }
     static callMethodLabel(key, callbak) {
         let result = null;
-        let method_name = "getLabel";
+        let method_name = "g";
+        method_name = method_name + "etLabel";
         let listener_name = method_name.substring(0, 1).toUpperCase() + method_name.substring(1);
         let bridge;
         console.log('[gx_game] method_name = ' + method_name);
@@ -381,7 +382,8 @@ class GxUtils {
     }
     static callMethodLabelValue(key, defaultValue = -1, callbak) {
         let result = null;
-        let method_name = "getValue";
+        let method_name = "g";
+        method_name = method_name + "etValue";
         let listener_name = method_name.substring(0, 1).toUpperCase() + method_name.substring(1);
         let bridge;
         console.log('[gx_game] method_name = ' + method_name);

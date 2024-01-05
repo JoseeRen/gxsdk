@@ -25,6 +25,9 @@ class QQAdapter extends BaseAdapter_1.default {
         this.appId = "";
         this.openId = "";
         this._shareToFriendCallback = null;
+        this.isShowBlock = false;
+        this.blockShowCount = 0; //积木显示次数,两个积木参数循环调用
+        this.shuXinTime = -1;
     }
     static getInstance() {
         if (this.instance == null) {
@@ -37,7 +40,11 @@ class QQAdapter extends BaseAdapter_1.default {
             return;
         this.isInitAd = true;
         // this.initsceneid();
-        OpenDataUtil_1.default.initChannel(GxConstant_1.default.IS_WECHAT_GAME ? "wx" : "qq");
+        try {
+            OpenDataUtil_1.default.initChannel(GxConstant_1.default.IS_WECHAT_GAME ? "wx" : "qq");
+        }
+        catch (error) {
+        }
         this.initOpenId();
         super.initAd();
         this.initBanner();
@@ -45,18 +52,18 @@ class QQAdapter extends BaseAdapter_1.default {
         this.initVideo();
         // this.initQQBlockAd();
         // this.initQQAppBox();
-        if (GxGame_1.default.getLabel("switch")) {
-            var time = GxGame_1.default.getValue("time", 60);
+        if (GxGame_1.default.gGB("w")) {
+            var time = GxGame_1.default.gGN("t", 60);
             setTimeout(() => {
                 this.canshowovervideo = true;
             }, time * 1000);
         }
-        if (GxGame_1.default.getLabel("control")) {
-            var time = GxGame_1.default.getValue("contime", 60);
+        if (GxGame_1.default.gGB("c")) {
+            var time = GxGame_1.default.gGN("ct", 60);
             setTimeout(() => {
                 this.canshowovervideo2 = true;
                 this.showVideo((res) => {
-                }, "qqGameEnd");
+                }, "GxQQInitAd");
             }, time * 1000);
         }
     }
@@ -114,19 +121,19 @@ class QQAdapter extends BaseAdapter_1.default {
                                     self.initSubmsg();
                                 }
                                 else {
-                                    self.logw('登录失败！' + res.data["msg"]);
+                                    self.logw("登录失败！" + res.data["msg"]);
                                 }
                             }, (res) => {
-                                self.logw('登录失败！' + res["errMsg"]);
+                                self.logw("登录失败！" + res["errMsg"]);
                                 self.logw(res);
                             });
                         }
                         else {
-                            self.logw('获取登录code失败！' + res.errMsg);
+                            self.logw("获取登录code失败！" + res.errMsg);
                         }
                     },
                     fail(res) {
-                        self.logw('qq login失败！' + res.errMsg);
+                        self.logw("qq login失败！" + res.errMsg);
                     }
                 });
             }
@@ -212,12 +219,12 @@ class QQAdapter extends BaseAdapter_1.default {
         }
     }
     showGameOverAD() {
-        if (GxGame_1.default.getLabel("switch")) {
+        if (GxGame_1.default.gGB("w")) {
             if (this.canshowovervideo == true) {
                 this.showVideo((res) => {
-                }, "qqGameEnd");
+                }, "GxQQGameOverAD");
                 this.canshowovervideo = false;
-                var time = GxGame_1.default.getValue("time", 60);
+                var time = GxGame_1.default.gGN("t", 60);
                 setTimeout(() => {
                     this.canshowovervideo = true;
                 }, time * 1000);
@@ -298,7 +305,7 @@ class QQAdapter extends BaseAdapter_1.default {
             });
         }
         this.bannerAd.onError(err => {
-            this.loge('normal banner error: ', JSON.stringify(err));
+            this.loge("normal banner error: ", JSON.stringify(err));
             this.loge("banner 参数：" + GxAdParams_1.AdParams.qq.banner);
             if (err && (err.errCode == 30002 || err.errCode == 1001)) {
                 this.logi("销毁banner");
@@ -456,6 +463,10 @@ class QQAdapter extends BaseAdapter_1.default {
         super.initBanner();
     }
     showBanner() {
+        let label = GxGame_1.default.gGB("b");
+        if (!label) {
+            return;
+        }
         this.hideBanner();
         this.bannerDelayTimer = GxTimer_1.default.once(() => {
             if (GxGame_1.default.adConfig.bannerUpdateTime > 0) {
@@ -474,7 +485,7 @@ class QQAdapter extends BaseAdapter_1.default {
         this.destroyCustomBanner();
     }
     initVideo() {
-        if (GxAdParams_1.AdParams.qq.video == null || GxAdParams_1.AdParams.qq.video == '')
+        if (GxAdParams_1.AdParams.qq.video == null || GxAdParams_1.AdParams.qq.video == "")
             return;
         this.destroyVideo();
         // @ts-ignore
@@ -489,26 +500,29 @@ class QQAdapter extends BaseAdapter_1.default {
         });
         this.videoAd.onError(function (err) {
             // Utils.emit(EVENT_TYPE.AD_ERROR, 0);
+            self._videoErrorEvent();
         });
         this.videoAd.onClose(res => {
             GxAudioUtil_1.default.setMusicVolume(1);
             GxAudioUtil_1.default.setSoundVolume(1);
             if (res && res.isEnded) {
                 self.logi("正常播放结束，可以下发游戏奖励");
+                self._videoCompleteEvent();
                 this.videocallback && this.videocallback(true);
             }
             else {
+                self._videoCloseEvent();
                 this.videocallback && this.videocallback(false);
             }
             this.isShowingVideo = false;
             if (this.canshowovervideo2) {
                 this.canshowovervideo2 = false;
-                if (GxGame_1.default.getLabel("control")) {
-                    var time = GxGame_1.default.getValue("contime", 60);
+                if (GxGame_1.default.gGB("c")) {
+                    var time = GxGame_1.default.gGN("ct", 60);
                     setTimeout(() => {
                         this.canshowovervideo2 = true;
                         this.showVideo((res) => {
-                        }, "qqGameEnd");
+                        }, "GxQQGameEnd");
                     }, time * 1000);
                 }
             }
@@ -517,14 +531,18 @@ class QQAdapter extends BaseAdapter_1.default {
         this.videoAd.load();
     }
     showVideo(complete, flag = "") {
+        if (this.isShowingVideo) {
+            complete && complete(false);
+            this._videoErrorEvent();
+            return;
+        }
+        super.showVideo(null, flag);
         if (this.videoAd == null) {
             this.initVideo();
         }
         if (this.videoAd == null) {
             complete && complete(true);
-            return;
-        }
-        if (this.isShowingVideo) {
+            this._videoErrorEvent();
             return;
         }
         this.videocallback = complete;
@@ -533,9 +551,10 @@ class QQAdapter extends BaseAdapter_1.default {
             GxAudioUtil_1.default.setSoundVolume(0);
             this.isShowingVideo = true;
         }).catch(() => {
-            this.createToast('暂无视频，请稍后再试');
+            this.createToast("暂无视频，请稍后再试");
             // this.videoAd.load()
             this.initVideo();
+            this._videoErrorEvent();
         });
     }
     destroyVideo() {
@@ -578,7 +597,7 @@ class QQAdapter extends BaseAdapter_1.default {
             }).catch((e) => {
                 this.logi(e);
                 this.logi("普通插屏展示失败");
-                // if (GxGame.getLabel("switch")) {
+                // if (GxGame.gGB("w")) {
                 //   this.showQQAppBox(on_show, on_close)
                 // } else {
                 on_close && on_close();
@@ -586,8 +605,8 @@ class QQAdapter extends BaseAdapter_1.default {
             });
         }).catch(err => {
             this.interAd.offLoad(newVar);
-            this.logi('普通插屏加载失败' + JSON.stringify(err));
-            // if (GxGame.getLabel("switch")) {
+            this.logi("普通插屏加载失败" + JSON.stringify(err));
+            // if (GxGame.gGB("w")) {
             //   this.showQQAppBox(on_show, on_close)
             // } else {
             on_close && on_close();
@@ -622,7 +641,7 @@ class QQAdapter extends BaseAdapter_1.default {
         setTimeout(() => {
             this.hideNativeInterstitial();
             // this.hideBanner();
-            // if (GxGame.getLabel("switch")) {
+            // if (GxGame.gGB("w")) {
             //     if (this.interShowCount % 2 == 0) {
             //         this.showInterstitial(on_show, on_hide)
             //     } else {
@@ -632,10 +651,10 @@ class QQAdapter extends BaseAdapter_1.default {
             // } else {
             this.showInterstitial(on_show, on_hide);
             // }
-        }, (GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) ? 0 : delay_time * 1000);
+        }, (GxGame_1.default.isShenHe) ? 0 : delay_time * 1000);
     }
     showOtherNativeInterstitial(on_show, on_hide, delay_time = 0) {
-        if (GxGame_1.default.getLabel("switch")) {
+        if (GxGame_1.default.gGB("w")) {
             this.showNativeInterstitial(on_show, on_hide, delay_time);
         }
         else {
@@ -661,21 +680,38 @@ class QQAdapter extends BaseAdapter_1.default {
     /**
      * 盒子9宫格
      */
-    initQQBlockAd(on_show, on_hide, show_toast = true, image = '', marginTop = 300) {
+    initQQBlockAd(on_show, on_hide, show_toast = true, image = "", marginTop = 300) {
         if (!GxAdParams_1.AdParams.qq.block) {
             on_hide && on_hide();
             return;
         }
-        const { screenHeight, screenWidth,
+        const { screenHeight, screenWidth
         // @ts-ignore
          } = qq.getSystemInfoSync();
+        let ad_id = GxAdParams_1.AdParams.qq.block;
+        if (this.blockShowCount % 2 == 0) {
+            ad_id = GxAdParams_1.AdParams.qq.block;
+            if (!ad_id || ad_id.length == 0) {
+                ad_id = GxAdParams_1.AdParams.qq.block2;
+            }
+        }
+        else {
+            ad_id = GxAdParams_1.AdParams.qq.block2;
+            if (!ad_id || ad_id.length == 0) {
+                ad_id = GxAdParams_1.AdParams.qq.block;
+            }
+        }
+        this.logi("block :" + ad_id);
+        this.blockShowCount++;
         // @ts-ignore
         this.blockAd = qq.createBlockAd({
             adUnitId: GxAdParams_1.AdParams.qq.block,
+            size: 1,
+            orientation: "landscape",
             style: {
                 // top: marginTop
-                top: screenHeight / 6,
-                left: 10,
+                top: screenHeight / 2,
+                left: 10
             }
         });
         if (this.blockAdTimer == null) {
@@ -689,13 +725,15 @@ class QQAdapter extends BaseAdapter_1.default {
         this.blockAd.onError((err) => {
             this.logi("QQ游戏积木广告获取失败");
             this.loge(err);
-            this.logi("QQ游戏积木广告获取失败");
             on_hide && on_hide();
         });
         this.blockAd.onResize(size => {
-            this.logi("改变size");
-            this.blockAd.style.left = ((screenWidth - size.width - 10));
+            // this.logi("改变size");
+            // this.blockAd.style.left = ((screenWidth - size.width - 10));
         });
+        this.isShowBlock = true;
+        this.destorBlock();
+        this.shuaXinBlock();
         // this.blockAd.onClose(() => {
         //     on_hide && on_hide();
         //     if (this.blockAd.isDestroyed) {
@@ -705,7 +743,22 @@ class QQAdapter extends BaseAdapter_1.default {
         //     this.blockAd.show()
         // })
     }
-    showQQBlockAd(on_show, on_hide, show_toast = false, image = '', marginTop = 300) {
+    shuaXinBlock() {
+        this.shuXinTime = setTimeout(() => {
+            this.initQQBlockAd();
+        }, 5 * 1000);
+    }
+    destorBlock() {
+        if (this.shuXinTime = null) {
+            // clearTimeout(this.shuXinTime);
+            clearInterval(this.shuXinTime);
+        }
+    }
+    showQQBlockAd(on_show, on_hide, show_toast = false, image = "", marginTop = 300) {
+        if (this.isShowBlock) {
+            console.log("只能主动调用一次");
+            return;
+        }
         // @ts-ignore
         if (qq.createBlockAd && GxAdParams_1.AdParams.qq.block) {
             // if (this.blockAd == null) {
@@ -741,7 +794,7 @@ class QQAdapter extends BaseAdapter_1.default {
         }
         else {
             on_hide && on_hide();
-            this.logi('暂不支持互推盒子相关 API');
+            this.logi("暂不支持互推盒子相关 API");
         }
     }
     hideQQBlockAd() {
@@ -800,7 +853,7 @@ class QQAdapter extends BaseAdapter_1.default {
             }
             this.appBox.load().then(() => {
                 this.appBox.show().then(() => {
-                    this.logi('appBox button show success');
+                    this.logi("appBox button show success");
                     let closeCallback = () => {
                         this.logi("appbox close");
                         this.appBox.offClose(closeCallback);
@@ -842,7 +895,7 @@ class QQAdapter extends BaseAdapter_1.default {
         }
         else {
             on_close && on_close();
-            this.logi('暂不支持appBox相关 API');
+            this.logi("暂不支持appBox相关 API");
         }
     }
     hideQQAppBox() {
@@ -890,7 +943,7 @@ class QQAdapter extends BaseAdapter_1.default {
             });
         }
         else {
-            this.logi('不支持添加桌面');
+            this.logi("不支持添加桌面");
             on_fail && on_fail();
         }
     }
@@ -992,6 +1045,11 @@ class QQAdapter extends BaseAdapter_1.default {
         return [];
     }
     initSubmsg() {
+        // @ts-ignore
+        if (qq.uma) {
+            // @ts-ignore
+            qq.uma.setOpenid(this.openId);
+        }
         let subIds = this.getSubIds();
         let self = this;
         for (let i = 0; i < subIds.length; i++) {
@@ -1008,11 +1066,11 @@ class QQAdapter extends BaseAdapter_1.default {
                     }
                 }
                 else {
-                    self.logw('获取失败！' + res.data["msg"]);
+                    self.logw("获取失败！" + res.data["msg"]);
                     this.waitSubIds.push(tmplId);
                 }
             }, (res) => {
-                self.logw('获取失败2！' + res["errMsg"]);
+                self.logw("获取失败2！" + res["errMsg"]);
                 self.logw(res);
                 this.waitSubIds.push(tmplId);
             });
@@ -1027,11 +1085,11 @@ class QQAdapter extends BaseAdapter_1.default {
                 callback && callback(true);
             }
             else {
-                self.logw('订阅失败！' + res.data["msg"]);
+                self.logw("订阅失败！" + res.data["msg"]);
                 callback && callback(false);
             }
         }, (res) => {
-            self.logw('订阅失败2！' + res["errMsg"]);
+            self.logw("订阅失败2！" + res["errMsg"]);
             self.logw(res);
             callback && callback(false);
         });

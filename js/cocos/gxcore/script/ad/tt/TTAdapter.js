@@ -34,21 +34,17 @@ const GxEnum_1 = require("../../core/GxEnum");
 const GxAdParams_1 = require("../../GxAdParams");
 const GxConstant_1 = __importDefault(require("../../core/GxConstant"));
 const DataStorage_1 = __importDefault(require("../../util/DataStorage"));
+const TTAdMonitor_1 = __importDefault(require("./TTAdMonitor"));
+/*获取adid  创建 id   向服务器发请求 获取 配置*/
 class TTAdapter extends BaseAdapter_1.default {
     constructor() {
         super(...arguments);
         this.shareRcorderLayer = null;
         this.recorderTime = 0;
-        this.gameTime = 0;
-        this.videoReward = 0;
-        this.reported = false;
-        this.checkInterval = 30; //10秒检查一次
+        this.canReward = false;
         this.openId = '';
-        this.ecpmObj = {
-            targetEcpm: 300,
-            gameTime: 10,
-            targetVideo: 2, //目标激励视频次数
-        };
+        this.anonymousId = '';
+        this.getOpenidTry = 0;
     }
     static getInstance() {
         if (this.instance == null) {
@@ -61,166 +57,51 @@ class TTAdapter extends BaseAdapter_1.default {
             return;
         this.isInitAd = true;
         super.initAd();
-        this.initBanner();
-        this.initVideo();
-        this.initRecorder();
-        this.initAdMonitor();
-    }
-    initAdMonitor() {
-        console.log('获取到的clickId:' + this.getClickId());
-        this.getOpenId(() => {
-            this.getAdConfig();
-            this.ttReport();
-        });
         //@ts-ignore
         if (tt.getEnvInfoSync) {
             //@ts-ignore
             GxAdParams_1.AdParams.tt.appId = tt.getEnvInfoSync().microapp.appId;
         }
         console.log('当前appid:' + GxAdParams_1.AdParams.tt.appId);
-        //10秒检查 一次
-        setInterval(() => {
-            this.checkAdTarget();
-        }, this.checkInterval * 1000);
-    }
-    getClickId() {
-        let launchOptionsSync = tt.getLaunchOptionsSync();
-        let query = launchOptionsSync.query;
-        let clickId = query.clickid;
-        if (!!clickId) {
-        }
-        else {
-            clickId = DataStorage_1.default.getItem('__clickid__');
-        }
-        return clickId;
-    }
-    rewardAdEnd() {
-        this.videoReward++;
-        this.checkAdTarget();
-    }
-    getAdConfig() {
-        let self = this;
-        self.requestGet(`https://api.sjzgxwl.com/tt/getConfig?appId=${GxAdParams_1.AdParams.tt.appId}&openId=${self.openId}&name=${GxAdParams_1.AdParams.tt.ecpmConfigName}`, (res) => {
-            self.logi(res.data);
-            if (res.data.code == 1) {
-                self.logi('获取ecpm配置成功：');
-                self.ecpmObj = JSON.parse(res.data.data.content);
+        this.initBanner();
+        this.initVideo();
+        this.initRecorder();
+        // this.initAdMonitor()
+        this.getOpenId((openId, anonymousId) => {
+            // @ts-ignore
+            if (tt.uma) {
+                // @ts-ignore
+                tt.uma.setAnonymousid(anonymousId);
+                // @ts-ignore
+                tt.uma.setOpenid(openId);
             }
-            else {
-                self.logw('获取ecpm配置失败！' + res.data['msg']);
-                setTimeout(() => {
-                    self.getAdConfig();
-                }, 2000);
-            }
-        }, (res) => {
-            self.logw('获取ecpm配置失败！' + res['errMsg']);
-            setTimeout(() => {
-                self.getAdConfig();
-            }, 2000);
+            TTAdMonitor_1.default.getInstance().initAdMonitor(openId);
+            // this.getAdConfig()
+            // this.ttReport()
         });
-    }
-    checkAdTarget() {
-        this.gameTime += this.checkInterval;
-        //玩游戏大于等于10分钟
-        if ((this.gameTime >= this.ecpmObj.gameTime * 60 &&
-            this.videoReward >= this.ecpmObj.targetVideo) ||
-            window['rywDEBUG']) {
-            if (DataStorage_1.default.getItem('__ttTaq__') == 'true') {
-                console.log('本地已经有上报记录了');
-                return;
+        // @ts-ignore
+        tt.onShow((res) => {
+            console.log('启动场景字段：', res.launch_from, ', ', res.location);
+            if (res.launch_from == 'homepage' || res.location == 'sidebar_card') {
+                console.log('是从侧边栏启动的');
+                this.canReward = true;
             }
-            if (this.reported) {
-                console.log('正在上报');
-                return;
-            }
-            this.reported = true;
-            let da = new Date();
-            var year = da.getFullYear() + '年';
-            var month = da.getMonth() + 1 + '月';
-            var date = da.getDate() + '日';
-            let data = [year, month, date].join('-');
-            /*     let item = DataStorage.getItem("__tt_lastTime__");
-                             if (!item || item == "" || item == null) {
-                                 DataStorage.setItem("__tt_lastTime__", data)
-                                 item = data;
-                             }
-                             if (item != data) {
-                                 console.log("不是当天的用户 不激活了")
-                                 return;
-                             }*/
-            let self = this;
-            self.getOpenId((openId) => {
-                self.requestGet(`https://api.sjzgxwl.com/tt/getEcpm?appId=${GxAdParams_1.AdParams.tt.appId}&openId=${self.openId}`, (res) => {
-                    self.logi(res.data);
-                    if (res.data.code == 1) {
-                        self.logi('获取ecpm成功：');
-                        let records = res.data.data.records;
-                        let length = records.length;
-                        let allConst = 0;
-                        for (let i = 0; i < length; i++) {
-                            let record = records[i];
-                            allConst += record.cost;
-                        }
-                        console.log('总共的const:' + allConst);
-                        let ecpm = ((allConst / 100000) * 1000) / length;
-                        if (allConst <= 0 || length <= 0) {
-                            // self.reported = false;
-                            // console.log("ecpm没达到" + self.ecpmObj.targetEcpm + "  现在是0")
-                            // return
-                            ecpm = 0;
-                        }
-                        console.log('当前计算的ecmp:' + ecpm);
-                        if (ecpm >= self.ecpmObj.targetEcpm) {
-                            console.log('ecpm达到' + self.ecpmObj.targetEcpm + ' 上报');
-                            //@ts-ignore
-                            /* tt.sendtoTAQ({
-                                                 event_type: 'game_addiction', //event_type 需替换为真实投放的事件英文名称，参考上面链接
-                                                 extra: {
-                                                     //extra 中的属性需替换为当前事件真实可回传的附加属性字段
-                                                     product_name: 'ecpm',
-                                                     product_price: ecpm,
-                                                 },
-                                             })*/
-                            self.sendToTAQ('game_addiction', (res) => {
-                                //服务端控制 每次上报
-                                // DataStorage.setItem('__ttTaq__', 'true')
-                                if (res) {
-                                }
-                                else {
-                                    self.reported = false;
-                                }
-                            });
-                        }
-                        else {
-                            self.reported = false;
-                            console.log('ecpm没达到' + self.ecpmObj.targetEcpm);
-                        }
-                    }
-                    else {
-                        self.logw('获取ecpm失败！' + res.data['msg']);
-                        self.reported = false;
-                    }
-                }, (res) => {
-                    self.logw('获取ecpm失败！' + res['errMsg']);
-                    self.logw(res);
-                    self.reported = false;
-                });
-            });
-        }
-        else {
-            console.log('时间：' +
-                (this.gameTime >= this.ecpmObj.gameTime * 60) +
-                '激励次数：' +
-                (this.videoReward >= this.ecpmObj.targetVideo));
-        }
+        });
     }
     getOpenId(callback) {
         let self = this;
         let item = DataStorage_1.default.getItem('__gx_openId__', null);
-        if (item != null) {
+        let anonymousId = DataStorage_1.default.getItem('__gx_anonymousId__', null);
+        if (!!item && !!anonymousId) {
             console.log('获取到缓存的openid：' + item);
+            console.log('获取到缓存的anonymousId：' + anonymousId);
             self.openId = item;
-            callback && callback(item);
+            self.anonymousId = anonymousId;
+            callback && callback(item, anonymousId);
+            return;
+        }
+        if (self.getOpenidTry >= 5) {
+            console.warn("获取openId重试最大次数了");
             return;
         }
         window['tt'].login({
@@ -228,32 +109,51 @@ class TTAdapter extends BaseAdapter_1.default {
             success(res) {
                 console.log(`login 调用成功${res.code} ${res.anonymousCode}`);
                 if (res.code) {
-                    self.requestGet(`${GxConstant_1.default.Code2SessionUrl}?appId=${GxAdParams_1.AdParams.tt.appId}&code=${res.code}`, (res) => {
+                    self.requestGet(`${GxConstant_1.default.Code2SessionUrl}?appId=${GxAdParams_1.AdParams.tt.appId}&code=${res.code}&anonymousCode=${res.anonymousCode}`, (res) => {
                         self.logi(res.data);
                         if (res.data.code == 1) {
                             self.openId = res.data.data.openid;
+                            self.anonymousId = res.data.data.anonymousid;
                             self.logi('获取openid成功：' + self.openId);
+                            self.logi('获取anonymousId成功：' + self.anonymousId);
                             DataStorage_1.default.setItem('__gx_openId__', self.openId);
-                            callback && callback(self.openId);
+                            DataStorage_1.default.setItem('__gx_anonymousId__', self.anonymousId);
+                            callback && callback(self.openId, self.anonymousId);
                         }
                         else {
                             self.logw('登录失败！' + res.data['msg']);
-                            self.reported = false;
+                            // self.reported = false
+                            setTimeout(() => {
+                                self.getOpenidTry++;
+                                self.getOpenId(callback);
+                            }, 3000);
                         }
                     }, (res) => {
                         self.logw('登录失败！' + res['errMsg']);
                         self.logw(res);
-                        self.reported = false;
+                        // self.reported = false
+                        setTimeout(() => {
+                            self.getOpenidTry++;
+                            self.getOpenId(callback);
+                        }, 3000);
                     });
                 }
                 else {
                     console.log('登录没code');
-                    self.reported = false;
+                    // self.reported = false
+                    setTimeout(() => {
+                        self.getOpenidTry++;
+                        self.getOpenId(callback);
+                    }, 3000);
                 }
             },
             fail(res) {
                 console.log(`login 调用失败`);
-                self.reported = false;
+                // self.reported = false
+                setTimeout(() => {
+                    self.getOpenidTry++;
+                    self.getOpenId(callback);
+                }, 3000);
             },
         });
     }
@@ -310,8 +210,10 @@ class TTAdapter extends BaseAdapter_1.default {
         this.bannerAd = null;
     }
     initVideo() {
-        if (GxAdParams_1.AdParams.tt.video == null || GxAdParams_1.AdParams.tt.video.length <= 0)
+        if (GxAdParams_1.AdParams.tt.video == null || GxAdParams_1.AdParams.tt.video.length <= 0) {
+            console.warn('激励视频参数空');
             return;
+        }
         this.destroyVideo();
         // @ts-ignore
         this.videoAd = tt.createRewardedVideoAd({
@@ -323,27 +225,36 @@ class TTAdapter extends BaseAdapter_1.default {
         });
         this.videoAd.onError((err) => {
             console.log('激励视频-失败', err);
+            this._videoErrorEvent();
         });
         this.videoAd.onClose((res) => {
             console.log('激励视频关闭');
             this.recorderResume();
             if (res && res.isEnded) {
-                this.videoReward++;
-                this.checkAdTarget();
+                TTAdMonitor_1.default.getInstance().rewardAdEnd();
+                // this.videoReward++
+                //
+                // this.checkAdTarget()
                 console.log('激励视频完成');
                 this.videocallback && this.videocallback(true);
+                this._videoCompleteEvent();
             }
             else {
+                this._videoCloseEvent();
                 this.videocallback && this.videocallback(false);
             }
             this.videoAd.load();
         });
     }
     showVideo(complete, flag = '') {
+        super.showVideo(null, flag);
         if (this.videoAd == null)
             this.initVideo();
-        if (this.videoAd == null)
+        if (this.videoAd == null) {
+            this._videoErrorEvent();
+            complete && complete(false);
             return;
+        }
         this.videocallback = complete;
         this.videoAd
             .show()
@@ -361,6 +272,7 @@ class TTAdapter extends BaseAdapter_1.default {
             })
                 .catch(() => {
                 this.videoAd.load();
+                this._videoErrorEvent();
                 // @ts-ignore
                 tt.showModal({
                     title: '暂无广告',
@@ -393,6 +305,7 @@ class TTAdapter extends BaseAdapter_1.default {
     }
     /**普通插屏 */
     showInterstitial(on_show, on_close) {
+        // @ts-ignore
         // @ts-ignore
         if (!tt.createInterstitialAd ||
             GxAdParams_1.AdParams.tt.inter == null ||
@@ -464,7 +377,7 @@ class TTAdapter extends BaseAdapter_1.default {
                         on_show && on_show();
                     }, on_hide);
             }
-        }, GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea ? 0 : delay_time * 1000);
+        }, GxGame_1.default.isShenHe ? 0 : delay_time * 1000);
     }
     hideNativeInterstitial() {
         super.hideNativeInterstitial();
@@ -550,6 +463,7 @@ class TTAdapter extends BaseAdapter_1.default {
         tt.shareAppMessage({
             channel: 'video',
             query: '',
+            templateId: GxAdParams_1.AdParams.tt.shareTemplateId,
             title: GxAdParams_1.AdParams.tt.gameName,
             desc: GxAdParams_1.AdParams.tt.gameName,
             extra: {
@@ -613,8 +527,8 @@ class TTAdapter extends BaseAdapter_1.default {
             this.shareRcorderLayer === undefined ||
             !cc.isValid(this.shareRcorderLayer.node, true)) {
             /* let node = cc.instantiate(Utils.getRes('hs_ui/ui_share_rcorder', cc.Prefab));
-                              this.shareRcorderLayer = node.getComponent('hs_ui_share_rcorder');
-                              this.shareRcorderLayer && this.shareRcorderLayer.show(on_succ, on_fail);*/
+                                    this.shareRcorderLayer = node.getComponent('hs_ui_share_rcorder');
+                                    this.shareRcorderLayer && this.shareRcorderLayer.show(on_succ, on_fail);*/
         }
     }
     requestGet(url, successCallback, failCallback) {
@@ -638,110 +552,6 @@ class TTAdapter extends BaseAdapter_1.default {
     logw(...data) {
         super.LOGW('[TTAdapter]', ...data);
     }
-    ttReport() {
-        let item = DataStorage_1.default.getItem('tt_event_active');
-        item = 'nosuccess';
-        //每次激活都上报   服务器控制多次上报
-        if (item != 'success') {
-            //保存激活状态
-            this.sendToTAQ('active', (res) => {
-                if (res) {
-                    console.log('上报激活成功');
-                    DataStorage_1.default.setItem('__clickid__', this.getClickId());
-                    DataStorage_1.default.setItem('tt_event_active', 'success');
-                    let item1 = DataStorage_1.default.getItem('tt_install_time');
-                    if (!item1) {
-                        DataStorage_1.default.setItem('tt_install_time', new Date().valueOf() + '');
-                    }
-                }
-                else {
-                    console.log('上报激活失败');
-                }
-            });
-            /*  tt.sendtoTAQ({
-                        event_type: 'active', //event_type 需替换为真实投放的事件英文名称，参考上面链接
-                        extra: {
-                            //extra 中的属性需替换为当前事件真实可回传的附加属性字段
-                            product_name: '激活游戏',
-                            product_price: 1,
-                        },
-                    })*/
-        }
-        let installTime = DataStorage_1.default.getItem('tt_install_time');
-        if (!!installTime) {
-            installTime = parseInt(installTime);
-        }
-        else {
-            installTime = new Date().valueOf();
-        }
-        let installDate = new Date(new Date(installTime).toLocaleDateString()).valueOf();
-        let curDate = new Date().valueOf();
-        let number = curDate - installDate;
-        let number1 = Math.floor(number / 24 / 60 / 60 / 1000);
-        if (number1 >= 1 && number1 <= 6) {
-            let arr = [
-                'next_day_open',
-                'retention_3d',
-                'retention_4d',
-                'retention_5d',
-                'retention_6d',
-                'retention_7d',
-            ];
-            let eventName = arr[number1 - 1];
-            let item = DataStorage_1.default.getItem('tt_event_' + eventName);
-            item = 'nosuccess';
-            //每次达成都上报    服务器控制多次上报
-            if (item != 'success') {
-                //保存激活状态
-                console.log('上报事件：' + eventName);
-                /* tt.sendtoTAQ({
-                             event_type: eventName, //event_type 需替换为真实投放的事件英文名称，参考上面链接
-                             extra: {
-                                 //extra 中的属性需替换为当前事件真实可回传的附加属性字段
-                                 product_name: '',
-                                 product_price: 1,
-                             },
-                         })*/
-                this.sendToTAQ(eventName, (res) => {
-                    if (res) {
-                        console.log('上报事件：' + eventName + ':成功');
-                        DataStorage_1.default.setItem('tt_event_' + eventName, 'success');
-                    }
-                    else {
-                        console.log('上报事件：' + eventName + ':失败');
-                    }
-                });
-            }
-            else {
-                console.log(eventName + '已经上报过了');
-            }
-        }
-        else {
-            console.log('传的number不能用：' + number1);
-        }
-    }
-    sendToTAQ(event, callback) {
-        let clickId = this.getClickId();
-        if (!clickId) {
-            console.warn('clickId空  不上报 了');
-            callback(false);
-            return;
-        }
-        let self = this;
-        self.getOpenId((openId) => {
-            self.requestGet(`https://api.sjzgxwl.com/tt/report?eventType=${event}&openId=${self.openId}&clickId=${clickId}`, (res) => {
-                self.logi(res.data);
-                if (res.data.code == 1) {
-                    callback(true);
-                }
-                else {
-                    callback(false);
-                }
-            }, (res) => {
-                callback(false);
-            });
-        });
-    }
     addDesktop(callback) {
         // @ts-ignore
         tt.addShortcut({
@@ -758,14 +568,14 @@ class TTAdapter extends BaseAdapter_1.default {
         // @ts-ignore
         tt.checkShortcut({
             success(res) {
-                console.log("检查快捷方式", res.status);
+                console.log('检查快捷方式', res.status);
                 if (res.status.exist) {
-                    console.log("隐藏桌面");
+                    console.log('隐藏桌面');
                     callback && callback();
                 }
             },
             fail(res) {
-                console.log("检查快捷方式失败", res.errMsg);
+                console.log('检查快捷方式失败', res.errMsg);
             },
         });
     }

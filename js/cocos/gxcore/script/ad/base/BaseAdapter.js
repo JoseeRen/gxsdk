@@ -18,6 +18,7 @@ const GxUtils_1 = __importDefault(require("../../util/GxUtils"));
 const GxGame_1 = __importDefault(require("../../GxGame"));
 const GxLog_1 = __importDefault(require("../../util/GxLog"));
 const TDSDK_1 = __importDefault(require("../../td/TDSDK"));
+const GxChecker_1 = __importDefault(require("../../GxChecker"));
 var RECORDER_STATE;
 (function (RECORDER_STATE) {
     RECORDER_STATE[RECORDER_STATE["NO"] = 0] = "NO";
@@ -63,6 +64,8 @@ class BaseAd {
         this.ismailiang = false; //是买量用户吗
         this.waitSubIds = [];
         this.manifestInfo = null;
+        this.canReward = false; //头条侧边框奖励用
+        this.curVideoFlag = "";
     }
     static getInstance() {
         if (this.instance == null) {
@@ -72,11 +75,12 @@ class BaseAd {
     }
     /**广告初始化 */
     initAd() {
-        console.log('[gx_game]广告初始化');
+        console.log("[gx_game]广告初始化");
     }
     setManifestInfo(info) {
         this.manifestInfo = info;
         TDSDK_1.default.getInstance().initApp(info.package, info.name, info.versionName, info.versionCode);
+        console.log("[gx_game]设置info");
     }
     showAuthorize(on_agree, on_refuse) {
         ResUtil_1.default.loadPrefab("gx/prefab/authorize", (err, prefab) => {
@@ -84,56 +88,64 @@ class BaseAd {
                 on_refuse();
                 return;
             }
-            if (this.authorizeView == null || !cc.isValid(this.authorizeView.node, true)) {
+            if (this.authorizeView == null ||
+                !cc.isValid(this.authorizeView.node, true)) {
                 let node = cc.instantiate(prefab);
                 if (!!GxGame_1.default.uiGroup) {
                     node.group = GxGame_1.default.uiGroup;
                 }
-                this.authorizeView = node.getComponent('Gx_authorize');
+                this.authorizeView = node.getComponent("Gx_authorize");
                 this.authorizeView.show(on_agree, on_refuse);
             }
         });
     }
     /*    type {
-        user = 'user',
-        privacy = 'privacy'
-    }*/
+          user = 'user',
+          privacy = 'privacy'
+      }*/
     showPrivacy(type = "privacy") {
         ResUtil_1.default.loadPrefab("gx/prefab/privacy", (err, prefab) => {
-            if (this.privacyView == null || !cc.isValid(this.privacyView.node, true)) {
+            if (this.privacyView == null ||
+                !cc.isValid(this.privacyView.node, true)) {
                 let node = cc.instantiate(prefab);
                 if (!!GxGame_1.default.uiGroup) {
                     node.group = GxGame_1.default.uiGroup;
                 }
-                this.privacyView = node.getComponent('Gx_privacy');
+                this.privacyView = node.getComponent("Gx_privacy");
                 this.privacyView.show(type);
             }
         });
     }
     /**qq常量策略 结束游戏  ov结束游戏的全屏点击*/
     showGameOverAD() {
-        if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_VIVO_GAME) {
-            ResUtil_1.default.loadPrefab("gx/prefab/GameOverAD", (err, prefab) => {
-                if (this.privacyView == null || !cc.isValid(this.privacyView.node, true)) {
-                    let node = cc.instantiate(prefab);
-                    if (!!GxGame_1.default.uiGroup) {
-                        node.group = GxGame_1.default.uiGroup;
-                    }
-                    this.privacyView = node.getComponent('Gx_GameOverAD');
-                    this.privacyView.show();
-                }
-            });
-        }
+        /*  if (GxConstant.IS_OPPO_GAME || GxConstant.IS_VIVO_GAME) {
+
+                  ResUtil.loadPrefab("gx/prefab/GameOverAD", (err, prefab) => {
+                      if (this.privacyView == null || !cc.isValid(this.privacyView.node, true)) {
+                          let node = cc.instantiate(prefab);
+                          if (!!GxGame.uiGroup) {
+                              node.group = GxGame.uiGroup;
+                          }
+                          this.privacyView = node.getComponent('Gx_GameOverAD');
+                          this.privacyView.show();
+                      }
+                  })
+              }*/
     }
     /////////////////////////public/////////////////////////
     canIn() {
-        if (GxConstant_1.default.IS_OPPO_GAME) {
-            let value = GxGame_1.default.getValue("ysgl", 0);
-            let number = Math.random() * 100;
-            if (number < value) {
-                return true;
-            }
-        }
+        /*   if (GxConstant.IS_OPPO_GAME) {
+
+                   let value = GxGame.gGN("ysgl", 0);
+
+                   let number = Math.random() * 100;
+                   if (number < value) {
+
+                       return true;
+                   }
+
+
+               }*/
         return false;
     }
     /**
@@ -141,14 +153,18 @@ class BaseAd {
      * 优先展示原生Banner，若广告ID不存在/无广告数据，自动切换普通Banner
      */
     showBanner(showCallback, failedCallback) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.ad_banner_show);
     }
     /**隐藏Banner */
     hideBanner() {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.ad_banner_hide);
         if (this.bannerTimer)
             this.bannerTimer.clear();
         if (this.bannerDelayTimer)
             this.bannerDelayTimer.clear();
-        if (this.bannerNode && this.bannerNode !== undefined && cc.isValid(this.bannerNode.node, true)) {
+        if (this.bannerNode &&
+            this.bannerNode !== undefined &&
+            cc.isValid(this.bannerNode.node, true)) {
             this.bannerNode.node.destroy();
         }
         this.bannerNode = null;
@@ -158,7 +174,24 @@ class BaseAd {
      * @param complete 参数表示是否完成
      */
     showVideo(complete, flag = "") {
+        this.curVideoFlag = flag;
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.ad_video, { flag });
+        if (!!flag) {
+            GxGame_1.default.gameEvent("reward_" + flag);
+        }
+        else {
+            console.warn("视频点没有加flag");
+        }
         complete && complete(true);
+    }
+    _videoCompleteEvent() {
+        GxGame_1.default.gameEvent("reward_complete_" + this.curVideoFlag);
+    }
+    _videoErrorEvent() {
+        GxGame_1.default.gameEvent("reward_error_" + this.curVideoFlag);
+    }
+    _videoCloseEvent() {
+        GxGame_1.default.gameEvent("reward_close_" + this.curVideoFlag);
     }
     /**
      * 上报原生广告曝光
@@ -167,9 +200,10 @@ class BaseAd {
     reportAdShow(native_data) {
         if (!native_data || native_data === undefined)
             return;
-        native_data.ad && native_data.ad.reportAdShow({
-            adId: native_data.adId
-        });
+        native_data.ad &&
+            native_data.ad.reportAdShow({
+                adId: native_data.adId
+            });
         for (let i in this._native_data_cache) {
             if (this._native_data_cache[i].adId == native_data.adId) {
                 this._native_data_cache[i].state = GxEnum_1.ad_native_state.show;
@@ -184,9 +218,10 @@ class BaseAd {
     reportAdClick(native_data) {
         if (!native_data || native_data === undefined)
             return;
-        native_data.ad && native_data.ad.reportAdClick({
-            adId: native_data.adId
-        });
+        native_data.ad &&
+            native_data.ad.reportAdClick({
+                adId: native_data.adId
+            });
         this.remove_native_data(native_data);
     }
     /**
@@ -204,7 +239,9 @@ class BaseAd {
                     }
                 }
                 if (this.check_native_data_list_is_reprot(cur_data_cache)) {
-                    return cur_data_cache.length > 0 ? cur_data_cache[GxUtils_1.default.randomInt(0, cur_data_cache.length - 1)] : null;
+                    return cur_data_cache.length > 0
+                        ? cur_data_cache[GxUtils_1.default.randomInt(0, cur_data_cache.length - 1)]
+                        : null;
                 }
                 else {
                     //有数据没有上报过曝光  用最新数据
@@ -220,13 +257,15 @@ class BaseAd {
         }
         else {
             if (ad_type == GxEnum_1.ad_native_type.banner) {
-                if (this._native_custom_banner_cache && this._native_custom_banner_cache.length > 0) {
+                if (this._native_custom_banner_cache &&
+                    this._native_custom_banner_cache.length > 0) {
                     return this._native_custom_banner_cache.shift();
                 }
                 return null;
             }
             else {
-                if (this._native_custom_inter_cache && this._native_custom_inter_cache.length > 0) {
+                if (this._native_custom_inter_cache &&
+                    this._native_custom_inter_cache.length > 0) {
                     return this._native_custom_inter_cache.shift();
                 }
                 return null;
@@ -251,7 +290,9 @@ class BaseAd {
     }
     /**隐藏原生大图 */
     hideInterstitialNative() {
-        if (this.innerInter && this.innerInter !== undefined && cc.isValid(this.innerInter.node, true)) {
+        if (this.innerInter &&
+            this.innerInter !== undefined &&
+            cc.isValid(this.innerInter.node, true)) {
             this.innerInter.node.destroy();
         }
         this.innerInter = null;
@@ -264,6 +305,7 @@ class BaseAd {
      * @returns
      */
     showNativeInterstitial(on_show, on_hide, delay_time = 0) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.ad_inter, {});
     }
     /**
      * 原生插屏  vivo专用的  有switch控制
@@ -273,10 +315,13 @@ class BaseAd {
      * @returns
      */
     showOtherNativeInterstitial(on_show, on_hide, delay_time = 0) {
+        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.ad_otherInter, {});
     }
     /**隐藏原生插屏 */
     hideNativeInterstitial() {
-        if (this.nativeInter && this.nativeInter !== undefined && cc.isValid(this.nativeInter.node, true)) {
+        if (this.nativeInter &&
+            this.nativeInter !== undefined &&
+            cc.isValid(this.nativeInter.node, true)) {
             this.nativeInter.node.destroy();
         }
         this.nativeInter = null;
@@ -295,7 +340,9 @@ class BaseAd {
     }
     /**隐藏原生ICON */
     hideNativeIcon() {
-        if (this.nativeIcon && this.nativeIcon !== undefined && cc.isValid(this.nativeIcon.node, true)) {
+        if (this.nativeIcon &&
+            this.nativeIcon !== undefined &&
+            cc.isValid(this.nativeIcon.node, true)) {
             this.nativeIcon.node.destroy();
         }
         this.nativeIcon = null;
@@ -303,10 +350,10 @@ class BaseAd {
     /**获取平台版本 */
     platformVersion() {
         if (GxConstant_1.default.IS_OPPO_GAME) {
-            return window["qg"].getSystemInfoSync()['platformVersion'];
+            return window["qg"].getSystemInfoSync()["platformVersion"];
         }
         else if (GxConstant_1.default.IS_VIVO_GAME) {
-            return window["qg"].getSystemInfoSync()['platformVersionCode'];
+            return window["qg"].getSystemInfoSync()["platformVersionCode"];
         }
         return 0;
     }
@@ -338,11 +385,11 @@ class BaseAd {
      */
     createToast(desc) {
         if (this.toastView == null || !cc.isValid(this.toastView.node, true)) {
-            let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/toast', cc.Prefab));
+            let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/toast", cc.Prefab));
             if (!!GxGame_1.default.uiGroup) {
                 node.group = GxGame_1.default.uiGroup;
             }
-            this.toastView = node.getComponent('Gx_toast');
+            this.toastView = node.getComponent("Gx_toast");
         }
         this.toastView && this.toastView.show && this.toastView.show(desc);
     }
@@ -361,7 +408,7 @@ class BaseAd {
      * @param image 按钮图片（vivo）
      * @param marginTop 距顶部距离（vivo）
      */
-    showGamePortal(on_show, on_hide, show_toast = true, image = '', marginTop = 300) {
+    showGamePortal(on_show, on_hide, show_toast = true, image = "", marginTop = 300) {
     }
     /**隐藏九宫格 */
     hideGamePortal() {
@@ -387,7 +434,7 @@ class BaseAd {
      * 主动点击跳转广告
      */
     clickNative() {
-        if (this.isGameCd || GxGame_1.default.inBlockArea) {
+        if (this.isGameCd) {
             return console.log("[gx_game]广告CD中");
         }
         let native_data = this.getLocalNativeData(GxEnum_1.ad_native_type.inter1);
@@ -432,7 +479,6 @@ class BaseAd {
     }
     showRecorderLayer(on_succ, on_fail) {
     }
-    ;
     /**
      * 平台登入
      * @param on_succ
@@ -450,11 +496,15 @@ class BaseAd {
     hideQQBlockAd() {
     }
     // showCustomInter(){}
-    showCustomLeft() { }
-    showCustomRight() { }
+    showCustomLeft() {
+    }
+    showCustomRight() {
+    }
     // hideCustomInter(){}
-    hideCustomLeft() { }
-    hideCustomRight() { }
+    hideCustomLeft() {
+    }
+    hideCustomRight() {
+    }
     /**
      * 砸宝箱
      * @param on_show 展示回调
@@ -463,9 +513,9 @@ class BaseAd {
      * @param is_banner 误触使用视频还是banner  true banner  默认视频
      */
     showCrazyPoint(on_show, on_close, on_get, is_banner = false) {
-        if (GxGame_1.default.getLabel("crazy")) {
-            let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/crazypoint', cc.Prefab));
-            let crazyPoint = node.getComponent('Gx_crazypoint');
+        if (GxGame_1.default.gGB("crazy")) {
+            let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/crazypoint", cc.Prefab));
+            let crazyPoint = node.getComponent("Gx_crazypoint");
             node.parent = cc.director.getScene();
             node.zIndex = cc.macro.MAX_ZINDEX - 1;
             crazyPoint.show(on_show, on_close, on_get, is_banner);
@@ -481,10 +531,10 @@ class BaseAd {
      * @param on_get 回传获取的金币数
      */
     showGameBox(on_show, on_close, on_get) {
-        if (GxGame_1.default.getLabel("switch")) {
-            let res = GxUtils_1.default.getRes('gx/prefab/gameBox', cc.Prefab);
+        if (GxGame_1.default.gGB("z1")) {
+            let res = GxUtils_1.default.getRes("gx/prefab/gameBox", cc.Prefab);
             let node = cc.instantiate(res);
-            let crazyPoint = node.getComponent('Gx_gameBox');
+            let crazyPoint = node.getComponent("Gx_gameBox");
             node.parent = cc.director.getScene();
             node.zIndex = cc.macro.MAX_ZINDEX - 1;
             crazyPoint.show(on_show, on_close, (num) => {
@@ -512,32 +562,32 @@ class BaseAd {
         this.gameBoxNumListener = callback;
     }
     /*    /!**
-         * 展示软著信息
-         * @param company 著作权人
-         * @param copyright 软著登记号
-         *!/
-        showCompany(company = null, copyright = null) {
-            cc.loader.loadRes('gx/prefab/company', cc.Prefab, (err, prefab: cc.Prefab) => {
-                if (err) {
-                    return console.error('[gx_game] company load error: ' + JSON.stringify(err));
-                }
-                if (this.companyView == null || !cc.isValid(this.companyView.node, true)) {
-                    let node = cc.instantiate(prefab, cc.Prefab));
-                    this.companyView = node.getComponent('company');
-                    this.companyView.show(company, copyright);
-                }
-            })
-        }
+           * 展示软著信息
+           * @param company 著作权人
+           * @param copyright 软著登记号
+           *!/
+          showCompany(company = null, copyright = null) {
+              cc.loader.loadRes('gx/prefab/company', cc.Prefab, (err, prefab: cc.Prefab) => {
+                  if (err) {
+                      return console.error('[gx_game] company load error: ' + JSON.stringify(err));
+                  }
+                  if (this.companyView == null || !cc.isValid(this.companyView.node, true)) {
+                      let node = cc.instantiate(prefab, cc.Prefab));
+                      this.companyView = node.getComponent('company');
+                      this.companyView.show(company, copyright);
+                  }
+              })
+          }
 
-        /!**
-         * 隐藏软著信息
-         *!/
-        hideCompany() {
-            if (this.companyView && this.companyView !== undefined && cc.isValid(this.companyView.node, true)) {
-                this.companyView.node.destroy();
-            }
-            this.companyView = null;
-        }*/
+          /!**
+           * 隐藏软著信息
+           *!/
+          hideCompany() {
+              if (this.companyView && this.companyView !== undefined && cc.isValid(this.companyView.node, true)) {
+                  this.companyView.node.destroy();
+              }
+              this.companyView = null;
+          }*/
     ////////////////////////////// 原生接口 //////////////////////////////
     /**展示插屏视频（小米原生） */
     showInterVideo(on_show, on_close) {
@@ -575,14 +625,14 @@ class BaseAd {
     initNativeAd() {
     }
     get_time() {
-        if (window['cc']) {
-            return window['cc'].sys.now();
+        if (window["cc"]) {
+            return window["cc"].sys.now();
         }
-        else if (window['Laya']) {
-            return window['Laya'].timer.currTimer;
+        else if (window["Laya"]) {
+            return window["Laya"].timer.currTimer;
         }
         else {
-            return (new Date()).getTime();
+            return new Date().getTime();
         }
     }
     /**
@@ -645,7 +695,8 @@ class BaseAd {
     is_limit_native_length(ad_type) {
         let count = 0;
         for (let i in this._native_data_cache) {
-            if (this._native_data_cache[i].type == ad_type && this._native_data_cache[i].state != GxEnum_1.ad_native_state.click) {
+            if (this._native_data_cache[i].type == ad_type &&
+                this._native_data_cache[i].state != GxEnum_1.ad_native_state.click) {
                 ++count;
             }
         }
@@ -654,31 +705,31 @@ class BaseAd {
     /////////////////////////private/////////////////////////
     _setClickNative(type, cbk, rto = null) {
         /*    if (this.isGameCd || GxGame.inBlockArea) {
-                cbk && cbk();
-                return console.log("[gx_game]广告CD中");
-            }
-            let time = 0;
-
-            if (type == ad_native_type.inter2 && this.innerInter && !this.innerInter.destroyed) {
-
-                rto = rto || GxGame.adConfig.nativeInnerInstitialClickWarp;
-
-                if (GxUtils.randomInt(1, 100) <= rto && !this.innerInter.has_click_warp) {
-                    this.innerInter.click_adv_warp();
-                    time = 500;
+                    cbk && cbk();
+                    return console.log("[gx_game]广告CD中");
                 }
-            } else if (type == ad_native_type.banner && this.bannerNode && !this.bannerNode.destroyed) {
+                let time = 0;
 
-                rto = rto || GxGame.adConfig.nativeBannerClickWarp;
+                if (type == ad_native_type.inter2 && this.innerInter && !this.innerInter.destroyed) {
 
-                if (GxUtils.randomInt(1, 100) <= rto && !this.bannerNode.has_click_warp) {
-                    this.bannerNode.click_adv_warp();
-                    time = 500;
+                    rto = rto || GxGame.adConfig.nativeInnerInstitialClickWarp;
+
+                    if (GxUtils.randomInt(1, 100) <= rto && !this.innerInter.has_click_warp) {
+                        this.innerInter.click_adv_warp();
+                        time = 500;
+                    }
+                } else if (type == ad_native_type.banner && this.bannerNode && !this.bannerNode.destroyed) {
+
+                    rto = rto || GxGame.adConfig.nativeBannerClickWarp;
+
+                    if (GxUtils.randomInt(1, 100) <= rto && !this.bannerNode.has_click_warp) {
+                        this.bannerNode.click_adv_warp();
+                        time = 500;
+                    }
                 }
-            }
-            setTimeout(() => {
-                cbk && cbk();
-            }, time);*/
+                setTimeout(() => {
+                    cbk && cbk();
+                }, time);*/
     }
     LOG(...data) {
         GxLog_1.default.i(...data);
@@ -705,6 +756,8 @@ class BaseAd {
     rewardAdEnd() {
     }
     ttReport() {
+    }
+    onClickBtn(type) {
     }
 }
 BaseAd.instance = null;

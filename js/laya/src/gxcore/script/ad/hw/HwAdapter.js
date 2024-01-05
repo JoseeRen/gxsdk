@@ -220,8 +220,10 @@ class HwAdapter extends BaseAdapter_1.default {
     showVideo(complete, flag = "") {
         if (this.videoShowing) {
             this.logi("video showing");
+            complete && complete(false);
             return;
         }
+        super.showVideo(null, flag);
         this.videoShowing = true;
         setTimeout(() => {
             this.videoShowing = false;
@@ -455,10 +457,10 @@ class HwAdapter extends BaseAdapter_1.default {
                       }, on_hide);
                   }*/
             }
-        }, (GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) ? 0 : delay_time * 1000);
+        }, (GxGame_1.default.isShenHe) ? 0 : delay_time * 1000);
     }
     showOtherNativeInterstitial(on_show, on_hide, delay_time = 0) {
-        if (GxGame_1.default.getLabel("switch")) {
+        if (GxGame_1.default.gGB("z1")) {
             this.showNativeInterstitial(on_show, on_hide, delay_time);
         }
         else {
@@ -600,8 +602,8 @@ class HwAdapter extends BaseAdapter_1.default {
         this.addIconNode = new gx_ui_add_icon_1.default();
         this.addIconNode.show(on_close, on_succ);
         /*   if (this.addIconNode && this.addIconNode !== undefined && cc.isValid(this.addIconNode.node, true)) return;
-   
-   
+
+
            let node = cc.instantiate(Utils.getRes('gx/prefab/add_icon', cc.Prefab));
            this.addIconNode = node.getComponent('Gx_add_icon');
            this.addIconNode && this.addIconNode.show(on_succ);*/
@@ -679,15 +681,15 @@ class HwAdapter extends BaseAdapter_1.default {
                     /*   let node = new cc.Node();
                        node.addComponent(cc.Label).string = "重新登录"
                        node.on(cc.Node.EventType.TOUCH_START, () => {
-   
+
                            node.removeFromParent(true)
                            console.log("点击登录了")
-   
+
                            self.login(on_succ,on_fail);
                        }, this);
                        node.parent = cc.find("Canvas")
                        node.zIndex = cc.macro.MAX_ZINDEX;
-   
+
                        node.y = -240;*/
                     on_fail && on_fail(code);
                     // @ts-ignore

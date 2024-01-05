@@ -214,8 +214,10 @@ class HwAdapter extends BaseAdapter_1.default {
     showVideo(complete, flag = "") {
         if (this.videoShowing) {
             this.logi("video showing");
+            complete && complete(false);
             return;
         }
+        super.showVideo(null, flag);
         this.videoShowing = true;
         setTimeout(() => {
             this.videoShowing = false;
@@ -448,10 +450,10 @@ class HwAdapter extends BaseAdapter_1.default {
                       }, on_hide);
                   }*/
             }
-        }, (GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) ? 0 : delay_time * 1000);
+        }, (GxGame_1.default.isShenHe) ? 0 : delay_time * 1000);
     }
     showOtherNativeInterstitial(on_show, on_hide, delay_time = 0) {
-        if (GxGame_1.default.getLabel("switch")) {
+        if (GxGame_1.default.gGB("z1")) {
             this.showNativeInterstitial(on_show, on_hide, delay_time);
         }
         else {

@@ -187,7 +187,7 @@ class BaiDuAdapter extends BaseAdapter_1.default {
         this.videoAd = null;
     }
     showInterstitialNative(parent, on_click, on_show, on_hide) {
-        if (this.isGameCd || GxGame_1.default.inBlockArea) {
+        if (this.isGameCd) {
             this.showBanner();
             on_hide && on_hide();
             return console.log("%c[gx_game]广告CD中", "color: #33ccff");

@@ -166,7 +166,7 @@ let Gx_crazypoint = (() => {
                 else {
                     GxGame_1.default.Ad().showVideo((res) => {
                         this.onGet && this.onGet(res);
-                    }, "crazyPoint");
+                    }, "GxCrazyPoint");
                 }
             }
         }

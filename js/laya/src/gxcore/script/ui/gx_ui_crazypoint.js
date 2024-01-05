@@ -112,7 +112,8 @@ class gx_ui_crazypoint extends layaMaxUI_1.ui.gxui.gx_ui_crazypointUI {
         }
         else if (this.time > 20 && !this.IsClickdaji) {
             this.IsClickdaji = true;
-            GxGame_1.default.Ad().showVideo();
+            GxGame_1.default.Ad().showVideo((res) => {
+            }, "GxCrazyPoint");
             // this.showbanner();
         }
     }

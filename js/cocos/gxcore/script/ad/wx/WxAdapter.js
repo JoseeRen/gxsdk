@@ -45,8 +45,8 @@ class WxAdapter extends BaseAdapter_1.default {
         this._showedCustomInter = true;
         this._loadEndCustomInter = true;
         this.interCount = 0; //插屏显示次数
-        this.appId = "";
-        this.openId = "";
+        this.appId = '';
+        this.openId = '';
         this._shareToFriendCallback = null;
         this.normalInterShowed = true;
     }
@@ -60,11 +60,11 @@ class WxAdapter extends BaseAdapter_1.default {
         if (this.isInitAd)
             return;
         this.isInitAd = true;
-        OpenDataUtil_1.default.initChannel(GxConstant_1.default.IS_WECHAT_GAME ? "wx" : "qq");
+        OpenDataUtil_1.default.initChannel(GxConstant_1.default.IS_WECHAT_GAME ? 'wx' : 'qq');
         this.initOpenId();
         super.initAd();
         GxGame_1.default.adConfig.interTick = 0;
-        this.initBanner();
+        // this.initBanner();
         this.initVideo();
         this.initCustomInter();
         this.initCustomLeft();
@@ -76,80 +76,81 @@ class WxAdapter extends BaseAdapter_1.default {
         // @ts-ignore
         wx.onShareMessageToFriend((res) => {
             // https://developers.weixin.qq.com/minigame/dev/api/share/wx.onShareMessageToFriend.html
-            this.logi("定向分享结果：" + res.success);
+            this.logi('定向分享结果：' + res.success);
             if (res && res.success) {
-                this.logi("定向分享成功");
+                this.logi('定向分享成功');
             }
             else {
-                this.logi("定向分享失败");
+                this.logi('定向分享失败');
             }
-            this._shareToFriendCallback && this._shareToFriendCallback(res && res.success);
+            this._shareToFriendCallback &&
+                this._shareToFriendCallback(res && res.success);
             this._shareToFriendCallback = null;
         });
+        if (window['qq']) {
+            this.appId = GxAdParams_1.AdParams.qq.appId;
+        }
+        else {
+            this.appId = GxAdParams_1.AdParams.wx.appId;
+        }
         // let item = cc.sys.localStorage.getItem("__gx_openId");
-        let item1 = DataStorage_1.default.getItem("__gx_openId__", "");
+        let item1 = DataStorage_1.default.getItem('__gx_openId__', '');
         if (!!item1) {
             this.openId = item1;
-            this.logi("获取到缓存的openId:" + this.openId);
+            this.logi('获取到缓存的openId:' + this.openId);
             this.initSubmsg();
             return;
         }
         try {
-            if (window["qq"]) {
-                this.appId = GxAdParams_1.AdParams.qq.appId;
-            }
-            else {
-                this.appId = GxAdParams_1.AdParams.wx.appId;
-            }
             let self = this;
             if (!!this.appId) {
-                this.logi("获取到appid:" + this.appId);
+                this.logi('获取到appid:' + this.appId);
                 // @ts-ignore
                 wx.login({
                     success(res) {
                         if (res.code) {
                             // 发起网络请求
-                            self.logi("获取code成功：" + res.code);
+                            self.logi('获取code成功：' + res.code);
                             self.requestGet(`${GxConstant_1.default.Code2SessionUrl}?appId=${self.appId}&code=${res.code}`, (res) => {
                                 self.logi(res.data);
                                 if (res.data.code == 1) {
                                     self.openId = res.data.data.openid;
-                                    self.logi("获取openid成功：" + self.openId);
-                                    DataStorage_1.default.setItem("__gx_openId__", self.openId);
+                                    self.logi('获取openid成功：' + self.openId);
+                                    DataStorage_1.default.setItem('__gx_openId__', self.openId);
                                     self.initSubmsg();
                                 }
                                 else {
-                                    self.logw('登录失败！' + res.data["msg"]);
+                                    self.logw('登录失败！' + res.data['msg']);
                                 }
                             }, (res) => {
-                                self.logw('登录失败！' + res["errMsg"]);
+                                self.logw('登录失败！' + res['errMsg']);
                                 self.logw(res);
                             });
                             /*             wx.request({
-                                             // url: `http://192.168.1.242:19210/openid/code2Session/v2?appId=${self.appId}&code=${res.code}`,
-                                             url: `${GxConstant.Code2SessionUrl}?appId=${self.appId}&code=${res.code}`,
+                                                           // url: `http://192.168.1.242:19210/openid/code2Session/v2?appId=${self.appId}&code=${res.code}`,
+                                                           url: `${GxConstant.Code2SessionUrl}?appId=${self.appId}&code=${res.code}`,
 
-                                             success(res) {
-                                                 console.log(res.data)
-                                                 if (res.data.code == 1) {
-                                                     self.openId = res.data.data.openid;
+                                                           success(res) {
+                                                               console.log(res.data)
+                                                               if (res.data.code == 1) {
+                                                                   self.openId = res.data.data.openid;
 
-                                                     self.logi("获取openid成功：" + self.openId);
+                                                                   self.logi("获取openid成功：" + self.openId);
 
-                                                     DataStorage.setItem("__gx_openId__", self.openId)
-                                                     self.initSubmsg()
+                                                                   DataStorage.setItem("__gx_openId__", self.openId)
+                                                                   self.initSubmsg()
 
-                                                 } else {
-                                                     self.logw('登录失败！' + res.data["msg"])
+                                                               } else {
+                                                                   self.logw('登录失败！' + res.data["msg"])
 
-                                                 }
-                                             },
-                                             fail(res) {
-                                                 self.logw('登录失败！' + res["errMsg"])
-                                                 self.logw(res)
+                                                               }
+                                                           },
+                                                           fail(res) {
+                                                               self.logw('登录失败！' + res["errMsg"])
+                                                               self.logw(res)
 
-                                             }
-                                         })*/
+                                                           }
+                                                       })*/
                         }
                         else {
                             self.logw('获取登录code失败！' + res.errMsg);
@@ -157,16 +158,16 @@ class WxAdapter extends BaseAdapter_1.default {
                     },
                     fail(res) {
                         self.logw('wx login失败！' + res.errMsg);
-                    }
+                    },
                 });
             }
             else {
-                self.logw("获取wx appid失败或者 GxAdParams中没有配置wx或者 qq的appid");
+                self.logw('获取wx appid失败或者 GxAdParams中没有配置wx或者 qq的appid');
             }
         }
         catch (e) {
             this.logw(e);
-            this.logw("读取project.config.json失败");
+            this.logw('读取project.config.json失败');
         }
     }
     initBanner() {
@@ -199,7 +200,7 @@ class WxAdapter extends BaseAdapter_1.default {
                 left: 0,
                 top: GxGame.screenHeight,
                 width: GxGame.screenWidth / 2
-            }*/
+            }*/,
         });
         this.bannerAd.onLoad(() => {
             console.log(' banner 加载完成');
@@ -207,33 +208,41 @@ class WxAdapter extends BaseAdapter_1.default {
         this.bannerAd.onError((err) => {
             console.log(' banner 广告错误' + JSON.stringify(err));
         });
-        this.bannerAd.onResize(res => {
+        this.bannerAd.onResize((res) => {
             /*    this.bannerAd.style.top = GxGame.screenHeight - res.height
-                this.bannerAd.style.left = (GxGame.screenWidth - res.width) / 2;*/
+                      this.bannerAd.style.left = (GxGame.screenWidth - res.width) / 2;*/
         });
     }
     showBanner() {
-        if (this.bannerAd == null) {
-            this.initBanner();
-        }
+        // if (this.bannerAd == null) {
+        this.initBanner();
+        // }
         if (this.bannerAd == null)
             return;
-        this.bannerAd.show().then(() => {
-        }).catch(res => {
+        this.bannerAd
+            .show()
+            .then(() => {
+        })
+            .catch((res) => {
             this.initBanner();
             this.bannerAd.show();
         });
     }
     hideBanner() {
         if (this.bannerAd) {
+            this.bannerAd.offLoad();
+            this.bannerAd.offError();
+            this.bannerAd.offResize();
             this.bannerAd.hide();
         }
+        this.destroyBanner();
     }
     destroyBanner() {
         if (this.bannerAd) {
             this.bannerAd.destroy();
         }
         this.bannerAd = null;
+        // this.initBanner()
     }
     initVideo() {
         if (GxAdParams_1.AdParams.wx.video == null || GxAdParams_1.AdParams.wx.video.length <= 0)
@@ -241,73 +250,89 @@ class WxAdapter extends BaseAdapter_1.default {
         this.destroyVideo();
         //@ts-ignore
         this.videoAd = wx.createRewardedVideoAd({
-            adUnitId: GxAdParams_1.AdParams.wx.video
+            adUnitId: GxAdParams_1.AdParams.wx.video,
         });
         this.videoAd.load();
-        this.videoAd.onLoad(res => {
+        this.videoAd.onLoad((res) => {
             console.log('激励视频加载', res);
         });
-        this.videoAd.onError(err => {
+        this.videoAd.onError((err) => {
             console.log('激励视频-失败', err);
+            this._videoErrorEvent();
         });
-        this.videoAd.onClose(res => {
+        this.videoAd.onClose((res) => {
             console.log('激励视频关闭');
             this.recorderResume();
+            cc.director.resume();
             if (res && res.isEnded) {
                 console.log('激励视频完成');
                 this.videocallback && this.videocallback(true);
+                this._videoCompleteEvent();
             }
             else {
                 this.videocallback && this.videocallback(false);
+                this._videoCloseEvent();
             }
             this.videoAd.load();
         });
     }
-    showVideo(complete, flag = "") {
+    showVideo(complete, flag = '') {
+        super.showVideo(null, flag);
         if (this.videoAd == null)
             this.initVideo();
         if (this.videoAd == null) {
             complete && complete(false);
+            this._videoErrorEvent();
             return;
         }
         this.videocallback = complete;
-        this.videoAd.show().then(() => {
+        this.videoAd
+            .show()
+            .then(() => {
             this.recorderPause();
-        }).catch(err => {
-            this.videoAd.load().then(res => {
+            cc.director.pause();
+        })
+            .catch((err) => {
+            this.videoAd
+                .load()
+                .then((res) => {
                 return this.videoAd.show();
-            }).then(() => {
+            })
+                .then(() => {
                 this.recorderPause();
-            }).catch(() => {
+                cc.director.pause();
+            })
+                .catch(() => {
+                this._videoErrorEvent();
                 // this.videoAd.load();
                 this.initVideo();
                 //@ts-ignore
                 wx.showToast({
                     title: '暂无广告，请稍后再试',
-                    icon: 'none'
+                    icon: 'none',
                 });
                 this.videocallback && this.videocallback(false);
                 /*    wx.showModal({
-                        title: "暂无广告",
-                        content: "分享游戏获取奖励？",
-                        confirmText: '分享',
-                        success: res => {
-                            if (res.confirm) {
-                                GxGame.shareGame(ret => {
-                                    this.videocallback && this.videocallback(ret);
-                                })
-                            }
-                        },
-                        fail: res => {
-                            //@ts-ignore
+                            title: "暂无广告",
+                            content: "分享游戏获取奖励？",
+                            confirmText: '分享',
+                            success: res => {
+                                if (res.confirm) {
+                                    GxGame.shareGame(ret => {
+                                        this.videocallback && this.videocallback(ret);
+                                    })
+                                }
+                            },
+                            fail: res => {
+                                //@ts-ignore
 
-                            wx.showToast({
-                                title: '暂无广告，请稍后再试',
-                                icon: 'none'
-                            });
-                            this.videocallback && this.videocallback(false);
-                        }
-                    });*/
+                                wx.showToast({
+                                    title: '暂无广告，请稍后再试',
+                                    icon: 'none'
+                                });
+                                this.videocallback && this.videocallback(false);
+                            }
+                        });*/
             });
         });
     }
@@ -322,56 +347,66 @@ class WxAdapter extends BaseAdapter_1.default {
         //@ts-ignore
         // this.normalInterShowed=false;
         this.interAd = wx.createInterstitialAd({
-            adUnitId: GxAdParams_1.AdParams.wx.inter
+            adUnitId: GxAdParams_1.AdParams.wx.inter,
         });
-        this.interAd && this.interAd.onLoad(() => {
-            this.logi("插屏广告加载");
-        });
-        this.interAd && this.interAd.onError(err => {
-            this.logi("show inter err" + JSON.stringify(err));
-            this.destroyNormalInter();
-        });
+        this.interAd &&
+            this.interAd.onLoad(() => {
+                this.logi('插屏广告加载');
+            });
+        this.interAd &&
+            this.interAd.onError((err) => {
+                this.logi('show inter err' + JSON.stringify(err));
+                this.destroyNormalInter();
+            });
         this.interAd && this.interAd.load();
     }
     /**普通插屏 */
     showInterstitial(on_show, on_close) {
         //@ts-ignore
-        if (!wx.createInterstitialAd || GxAdParams_1.AdParams.wx.inter == null || GxAdParams_1.AdParams.wx.inter.length <= 0)
+        if (!wx.createInterstitialAd ||
+            GxAdParams_1.AdParams.wx.inter == null ||
+            GxAdParams_1.AdParams.wx.inter.length <= 0)
             return on_close && on_close();
         console.log(this.interAd);
         if (this.interAd == null) {
-            this.logi("需要重新加载插屏");
+            this.logi('需要重新加载插屏');
             this.initInter();
         }
         else {
-            this.logi("不需要重新加载插屏");
+            this.logi('不需要重新加载插屏');
         }
         if (this.interAd) {
-            this.logi("插屏不空  直接 显示");
-            this.interAd && this.interAd.onClose(() => {
-                this.recorderResume();
-                on_close && on_close();
-                this.destroyNormalInter();
-                this.initInter();
-            });
-            this.interAd.show().then(() => {
+            this.logi('插屏不空  直接 显示');
+            this.interAd &&
+                this.interAd.onClose(() => {
+                    this.recorderResume();
+                    cc.director.resume();
+                    on_close && on_close();
+                    this.destroyNormalInter();
+                    this.initInter();
+                });
+            this.interAd
+                .show()
+                .then(() => {
                 this.recorderPause();
+                cc.director.pause();
                 on_show && on_show();
                 this.hideBanner();
                 this.interShowTime = this.get_time();
-            }).catch(e => {
+            })
+                .catch((e) => {
                 on_close && on_close();
                 this.destroyNormalInter();
                 this.initInter();
             });
         }
         else {
-            this.logi("插屏空 不能展示了");
+            this.logi('插屏空 不能展示了');
             on_close && on_close();
         }
     }
     destroyNormalInter() {
-        this.logi("销毁插屏");
+        this.logi('销毁插屏');
         if (this.interAd) {
             this.interAd.destroy();
         }
@@ -385,7 +420,8 @@ class WxAdapter extends BaseAdapter_1.default {
      * @returns
      */
     showNativeInterstitial(on_show, on_hide, delay_time = 0) {
-        if (this.get_time() - this.interShowTime <= GxGame_1.default.adConfig.interTick * 1000)
+        if (this.get_time() - this.interShowTime <=
+            GxGame_1.default.adConfig.interTick * 1000)
             return;
         this.hideNativeInterstitial();
         if (this.nativeInterTimer == null) {
@@ -400,18 +436,18 @@ class WxAdapter extends BaseAdapter_1.default {
                 this.showCustomInter(on_show, on_hide);
             }
             /*  let native_data = this.getLocalNativeData(ad_native_type.inter1);
-              if (native_data == null || native_data === undefined) {
-                  this.showInterstitial(on_show, on_hide);
-              } else {
-                  let node = cc.instantiate(Utils.getRes('gx/prefab/ad/native_interstitial', cc.Prefab));
-                  this.nativeInter = node.getComponent('gx_native_interstitial');
-                  this.nativeInter && this.nativeInter.show(native_data, () => {
-                      this.interShowTime = this.get_time();
-                      this.hideBanner();
-                      on_show && on_show();
-                  }, on_hide);
-              }*/
-        }, (GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) ? 0 : delay_time * 1000);
+                  if (native_data == null || native_data === undefined) {
+                      this.showInterstitial(on_show, on_hide);
+                  } else {
+                      let node = cc.instantiate(Utils.getRes('gx/prefab/ad/native_interstitial', cc.Prefab));
+                      this.nativeInter = node.getComponent('gx_native_interstitial');
+                      this.nativeInter && this.nativeInter.show(native_data, () => {
+                          this.interShowTime = this.get_time();
+                          this.hideBanner();
+                          on_show && on_show();
+                      }, on_hide);
+                  }*/
+        }, GxGame_1.default.isShenHe ? 0 : delay_time * 1000);
     }
     showOtherNativeInterstitial(on_show, on_hide, delay_time = 0) {
         this.showNativeInterstitial(on_show, on_hide, delay_time);
@@ -429,7 +465,13 @@ class WxAdapter extends BaseAdapter_1.default {
         this.customRightAd.init(GxAdParams_1.AdParams.wx.custom_right, WxCustomAd_1.CustomAdType.TypeRightOne, 30);
     }
     showCustomInter(on_show, on_close) {
-        this.customInterAd && this.customInterAd.show(on_show, on_close);
+        if (this.customInterAd) {
+            this.customInterAd.show(on_show, on_close);
+        }
+        else {
+            console.warn('customInter空 是不是没初始化init Ad');
+            this.initCustomInter();
+        }
     }
     showCustomLeft(on_show, on_close) {
         this.customLeftAd && this.customLeftAd.show(on_show, on_close);
@@ -449,11 +491,11 @@ class WxAdapter extends BaseAdapter_1.default {
     /*    destroyCustomInter() {
 
 
-            if (this.customInterAd) {
-                this.customInterAd.destroy();
-            }
-            this.customInterAd = null;
-        }*/
+              if (this.customInterAd) {
+                  this.customInterAd.destroy();
+              }
+              this.customInterAd = null;
+          }*/
     hideNativeInterstitial() {
         super.hideNativeInterstitial();
         // this.destroyNormalInter();  不销毁普通插屏了  可能预加载的也变空了
@@ -461,74 +503,74 @@ class WxAdapter extends BaseAdapter_1.default {
     initRecorder() {
         /*    if (!wx.getGameRecorderManager) return;
 
-            this.gameRecorder = wx.getGameRecorderManager();
+                this.gameRecorder = wx.getGameRecorderManager();
 
-            // 设置录屏相关监听
-            this.gameRecorder.onStart(res => {
-                console.log('录制开始', JSON.stringify(res));
-                this.gameRecorderState = RECORDER_STATE.START;
-                this.recorderTime = this.get_time();
-                this.videoPath = null;
-            })
+                // 设置录屏相关监听
+                this.gameRecorder.onStart(res => {
+                    console.log('录制开始', JSON.stringify(res));
+                    this.gameRecorderState = RECORDER_STATE.START;
+                    this.recorderTime = this.get_time();
+                    this.videoPath = null;
+                })
 
-            // 监听录屏过程中的错误，需根据错误码处理对应逻辑
-            this.gameRecorder.onError(err => {
-                console.log('录制出错', JSON.stringify(err));
-                this.gameRecorderState = RECORDER_STATE.NO;
-            })
+                // 监听录屏过程中的错误，需根据错误码处理对应逻辑
+                this.gameRecorder.onError(err => {
+                    console.log('录制出错', JSON.stringify(err));
+                    this.gameRecorderState = RECORDER_STATE.NO;
+                })
 
-            // stop 事件的回调函数
-            this.gameRecorder.onStop(res => {
-                this.gameRecorderState = RECORDER_STATE.NO;
-                this.videoPath = null;
-                if (res && res.videoPath) {
-                    if (this.get_time() - this.recorderTime >= 3 * 1000) {
-                        this.videoPath = res.videoPath;
-                        console.log(`录屏停止，录制成功。videoID is ${res.videoPath}`)
+                // stop 事件的回调函数
+                this.gameRecorder.onStop(res => {
+                    this.gameRecorderState = RECORDER_STATE.NO;
+                    this.videoPath = null;
+                    if (res && res.videoPath) {
+                        if (this.get_time() - this.recorderTime >= 3 * 1000) {
+                            this.videoPath = res.videoPath;
+                            console.log(`录屏停止，录制成功。videoID is ${res.videoPath}`)
+                        } else {
+                            console.log(`录屏停止，录制失败。录屏时间<3s`)
+                        }
                     } else {
-                        console.log(`录屏停止，录制失败。录屏时间<3s`)
+                        console.log(`录屏停止，录制失败`)
                     }
-                } else {
-                    console.log(`录屏停止，录制失败`)
-                }
 
-                this.onRecoderStop && this.onRecoderStop(this.videoPath != null);
-            })
+                    this.onRecoderStop && this.onRecoderStop(this.videoPath != null);
+                })
 
-            // pause 事件的回调函数
-            this.gameRecorder.onPause(() => {
-                console.log('暂停录制')
-                this.gameRecorderState = RECORDER_STATE.PAUSE;
-            })
+                // pause 事件的回调函数
+                this.gameRecorder.onPause(() => {
+                    console.log('暂停录制')
+                    this.gameRecorderState = RECORDER_STATE.PAUSE;
+                })
 
-            // resume 事件的回调函数
-            this.gameRecorder.onResume(() => {
-                console.log('继续录制')
-                this.gameRecorderState = RECORDER_STATE.RESUME;
-            })*/
+                // resume 事件的回调函数
+                this.gameRecorder.onResume(() => {
+                    console.log('继续录制')
+                    this.gameRecorderState = RECORDER_STATE.RESUME;
+                })*/
     }
     recorderPause() {
         /*  if (this.gameRecorder && this.gameRecorderState == RECORDER_STATE.START) {
-              this.gameRecorder.pause();
-          }*/
+                  this.gameRecorder.pause();
+              }*/
     }
     recorderResume() {
         /* if (this.gameRecorder && this.gameRecorderState == RECORDER_STATE.PAUSE) {
-             this.gameRecorder.resume();
-         }*/
+                 this.gameRecorder.resume();
+             }*/
     }
     recorderStart() {
         /* if (this.gameRecorder && this.gameRecorderState == RECORDER_STATE.NO) {
-             this.gameRecorder && this.gameRecorder.start({
-                 duration: 300
-             });
-         }*/
+                 this.gameRecorder && this.gameRecorder.start({
+                     duration: 300
+                 });
+             }*/
     }
     recorderStop(on_stop) {
         /* if (this.gameRecorder && this.gameRecorderState != RECORDER_STATE.NO) {
-             this.onRecoderStop = on_stop;
-             this.gameRecorder && this.gameRecorder.stop();
-         }*/
+                 this.onRecoderStop = on_stop;
+                 this.gameRecorder && this.gameRecorder.stop();
+             }*/
     }
     shareRecorder(on_succ, on_fail) {
         if (this.gameRecorder == null || this.videoPath == null) {
@@ -537,23 +579,23 @@ class WxAdapter extends BaseAdapter_1.default {
         }
         // @ts-ignore
         wx.shareAppMessage({
-            channel: "video",
-            query: "",
+            channel: 'video',
+            query: '',
             title: GxGame_1.default.shareWord[0] || '',
             desc: GxGame_1.default.shareWord[2] || GxGame_1.default.shareWord[1] || '',
             extra: {
                 videoPath: this.videoPath,
                 videoTopics: [GxGame_1.default.shareWord[2]],
-                hashtag_list: [GxGame_1.default.shareWord[2]]
+                hashtag_list: [GxGame_1.default.shareWord[2]],
             },
             success: () => {
-                console.log("分享视频成功");
+                console.log('分享视频成功');
                 on_succ && on_succ();
                 this.onRecoderStop = null;
                 this.videoPath = null;
             },
-            fail: res => {
-                console.log("分享视频失败", res);
+            fail: (res) => {
+                console.log('分享视频失败', res);
                 on_fail && on_fail();
                 if (res.errMsg.search(/short/gi) > -1) {
                     this.createToast('分享失败');
@@ -564,32 +606,32 @@ class WxAdapter extends BaseAdapter_1.default {
                 else {
                     this.createToast('分享失败，请重试！');
                 }
-            }
+            },
         });
     }
     showGamePortal() {
     }
     showRecorderLayer(on_succ, on_fail) {
         /*   if (this.shareRcorderLayer == null || this.shareRcorderLayer === undefined || !cc.isValid(this.shareRcorderLayer.node, true)) {
-               let node = cc.instantiate(Utils.getRes('hs_ui/ui_share_rcorder', cc.Prefab));
-               this.shareRcorderLayer = node.getComponent('hs_ui_share_rcorder');
-               this.shareRcorderLayer && this.shareRcorderLayer.show(on_succ, on_fail);
-           }*/
+                   let node = cc.instantiate(Utils.getRes('hs_ui/ui_share_rcorder', cc.Prefab));
+                   this.shareRcorderLayer = node.getComponent('hs_ui_share_rcorder');
+                   this.shareRcorderLayer && this.shareRcorderLayer.show(on_succ, on_fail);
+               }*/
     }
     logi(...data) {
-        super.LOG("[WxAdapter]", ...data);
+        super.LOG('[WxAdapter]', ...data);
     }
     loge(...data) {
-        super.LOGE("[WxAdapter]", ...data);
+        super.LOGE('[WxAdapter]', ...data);
     }
     logw(...data) {
-        super.LOGW("[WxAdapter]", ...data);
+        super.LOGW('[WxAdapter]', ...data);
     }
     /**
      * 定向分享给好友
      */
     shareMessageToFriend(callback) {
-        console.log("微信设置回调");
+        console.log('微信设置回调');
         let boolean = OpenDataUtil_1.default.checkHasOpenData();
         if (boolean) {
             this._shareToFriendCallback = callback;
@@ -600,7 +642,7 @@ class WxAdapter extends BaseAdapter_1.default {
         }
     }
     getSubIds() {
-        if (GxAdParams_1.AdParams.wx["subIds"] && GxAdParams_1.AdParams.wx.subIds.length > 0) {
+        if (GxAdParams_1.AdParams.wx['subIds'] && GxAdParams_1.AdParams.wx.subIds.length > 0) {
             return GxAdParams_1.AdParams.wx.subIds;
         }
         return [];
@@ -614,31 +656,36 @@ class WxAdapter extends BaseAdapter_1.default {
             },
             fail(res) {
                 failCallback && failCallback(res);
-            }
+            },
         });
     }
     initSubmsg() {
+        // @ts-ignore
+        if (wx.uma) {
+            // @ts-ignore
+            wx.uma.setOpenid(this.openId);
+        }
         let subIds = this.getSubIds();
         let self = this;
         for (let i = 0; i < subIds.length; i++) {
             const tmplId = subIds[i];
-            this.requestGet(`${GxConstant_1.default.SubmsgBaseUrl}/${GxConstant_1.default.IS_QQ_GAME ? "qq" : "wx"}/checkSub?appId=${GxAdParams_1.AdParams.wx.appId}&openId=${this.openId}&tmplId=${tmplId}`, (res) => {
+            this.requestGet(`${GxConstant_1.default.SubmsgBaseUrl}/${GxConstant_1.default.IS_QQ_GAME ? 'qq' : 'wx'}/checkSub?appId=${GxAdParams_1.AdParams.wx.appId}&openId=${this.openId}&tmplId=${tmplId}`, (res) => {
                 self.logi(res.data);
                 if (res.data.code == 1) {
                     if (res.data.data.subnum > 0) {
-                        this.logi("已订阅：" + tmplId);
+                        this.logi('已订阅：' + tmplId);
                     }
                     else {
-                        this.logi("未订阅：" + tmplId);
+                        this.logi('未订阅：' + tmplId);
                         this.waitSubIds.push(tmplId);
                     }
                 }
                 else {
-                    self.logw('获取失败！' + res.data["msg"]);
+                    self.logw('获取失败！' + res.data['msg']);
                     this.waitSubIds.push(tmplId);
                 }
             }, (res) => {
-                self.logw('获取失败2！' + res["errMsg"]);
+                self.logw('获取失败2！' + res['errMsg']);
                 self.logw(res);
                 this.waitSubIds.push(tmplId);
             });
@@ -646,18 +693,18 @@ class WxAdapter extends BaseAdapter_1.default {
     }
     submsg(tmplId, callback) {
         let self = this;
-        this.requestGet(`${GxConstant_1.default.SubmsgBaseUrl}/${GxConstant_1.default.IS_QQ_GAME ? "qq" : "wx"}/subMsg?appId=${GxAdParams_1.AdParams.wx.appId}&openId=${this.openId}&tmplId=${tmplId}`, (res) => {
+        this.requestGet(`${GxConstant_1.default.SubmsgBaseUrl}/${GxConstant_1.default.IS_QQ_GAME ? 'qq' : 'wx'}/subMsg?appId=${GxAdParams_1.AdParams.wx.appId}&openId=${this.openId}&tmplId=${tmplId}`, (res) => {
             self.logi(res.data);
             if (res.data.code == 1) {
-                self.logi("订阅成功");
+                self.logi('订阅成功');
                 callback && callback(true);
             }
             else {
-                self.logw('订阅失败！' + res.data["msg"]);
+                self.logw('订阅失败！' + res.data['msg']);
                 callback && callback(false);
             }
         }, (res) => {
-            self.logw('订阅失败2！' + res["errMsg"]);
+            self.logw('订阅失败2！' + res['errMsg']);
             self.logw(res);
             callback && callback(false);
         });

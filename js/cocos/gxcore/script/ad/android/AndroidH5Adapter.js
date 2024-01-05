@@ -128,9 +128,7 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
         if (this.get_time() - this.showVideoTime < 500)
             return;
         this.showVideoTime = this.get_time();
-        if (flag && flag.length > 0) {
-            GxGame_1.default.gameEvent("reward_" + flag);
-        }
+        super.showVideo(null, flag);
         this.callMethod('showVideo', null, ret => {
             if (ret == -1 /* RET_TYPE.ERROR */) {
                 this.createToast('暂无视频，请稍后再试');
@@ -143,14 +141,17 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
             }*/
             if (flag && flag.length > 0) {
                 if (ret == 1 /* RET_TYPE.SUCC */) {
-                    GxGame_1.default.gameEvent("reward_complete_" + flag);
+                    // GxGame.gameEvent("reward_complete_" + flag)
+                    this._videoCompleteEvent();
                 }
                 else {
                     if (ret == -1 /* RET_TYPE.ERROR */) {
-                        GxGame_1.default.gameEvent("reward_error_" + flag);
+                        // GxGame.gameEvent("reward_error_" + flag)
+                        this._videoErrorEvent();
                     }
                     else {
-                        GxGame_1.default.gameEvent("reward_close_" + flag);
+                        // GxGame.gameEvent("reward_close_" + flag)
+                        this._videoCloseEvent();
                     }
                 }
             }

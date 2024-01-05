@@ -49,7 +49,8 @@ exports.AdParams = {
         gameDraw: "",
         bannerOnTop: false,
         labelVersion: "",
-        havebox: false, //结算页是否弹全屏点击广告 true 弹
+        havebox: false,
+        umAppKey: ""
     },
     mi: {
         gameName: "",
@@ -76,7 +77,8 @@ exports.AdParams = {
         gameDraw: "",
         bannerOnTop: false,
         labelVersion: "",
-        havebox: false, //结算页是否弹全屏点击广告 true 弹
+        havebox: false,
+        umAppKey: ""
     },
     vivo: {
         gameName: "",
@@ -101,7 +103,8 @@ exports.AdParams = {
         boxPortal: "",
         bannerOnTop: true,
         labelVersion: "",
-        havebox: false, //结算页是否弹全屏点击广告 true 弹
+        havebox: false,
+        umAppKey: ""
     },
     wx: {
         gameName: "",
@@ -121,7 +124,8 @@ exports.AdParams = {
         custom_left: "adunit-",
         custom_right: "adunit-",
         labelVersion: "",
-        subIds: []
+        subIds: [],
+        shareImgUrl: "https://res.sjzgxwl.com/shareimage/.jpg",
     },
     qq: {
         gameName: "",
@@ -137,13 +141,13 @@ exports.AdParams = {
         box: "ebb2bb84f05dee2c51272897eefb38e6",
         inter: "0f7f1035be90a7f6c93580987da065e7",
         block: "a6bc0b050d01b740e4cd93ba95aefbcc",
-        // banner: "cd788d253e5c0fa605589489348cf14a",
+        block2: "a6bc0b050d01b740e4cd93ba95aefbcc",
         banner: "47f3f7988e5d5f10ec7e1a557749c385",
         bannerOnTop: false,
-        gameEndShowCrazyPoint: true,
-        gameEndShowGameBox: true,
-        shareImgUrl: "",
-        labelVersion: "2",
+        gameEndShowCrazyPoint: false,
+        gameEndShowGameBox: false,
+        shareImgUrl: "https://res.sjzgxwl.com/shareimage/.jpg",
+        labelVersion: "1",
         countdowntime: 5,
         //没用
         sceneidtest: false,
@@ -177,7 +181,9 @@ exports.AdParams = {
         inter: "",
         banner: "",
         video: "",
-        labelVersion: ""
+        labelVersion: "",
+        umAppKey: "",
+        shareTemplateId: ""
     },
     hw: {
         gameName: "",
@@ -207,7 +213,8 @@ exports.AdParams = {
         debug_native_banner: "",
         debug_native1: "testu7m3hc4gvm",
         debug_native2: "",
-        labelVersion: ""
+        labelVersion: "",
+        umAppKey: ""
     },
     uc: {
         gameName: "",
@@ -253,6 +260,20 @@ exports.AdParams = {
         native_banner: "",
         native_icon: "",
         native1: "",
+        labelVersion: ""
+    },
+    zfb: {
+        "gameName": "",
+        labelName: "",
+        age: 12,
+        company: "",
+        softCode: "",
+        ysCompanyName: "石家庄市高兴网络科技有限公司",
+        ysMail: "2361198052@qq.com",
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        inter: "ad_tiny_2021004124680383_202311102200070139",
+        banner: "ad_tiny_2021004124680383_202311102200070028",
+        video: "ad_tiny_2021004124680383_202311102200070140",
         labelVersion: ""
     }
 };

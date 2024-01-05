@@ -121,7 +121,7 @@ let native_interstitial = (() => {
             this.report_click();
         }
         on_click_close() {
-            /*  if (!GxGame.isShenHe && !GxGame.inBlockArea && GxGame.adConfig.closeClickRto >= 0 && Math.random() * 100 <= GxGame.adConfig.closeClickRto && !this.has_easy_click) {
+            /*  if (!GxGame.isShenHe   && GxGame.adConfig.closeClickRto >= 0 && Math.random() * 100 <= GxGame.adConfig.closeClickRto && !this.has_easy_click) {
                   this.easy_click.active = false;
                   this.report_click()
               }*/

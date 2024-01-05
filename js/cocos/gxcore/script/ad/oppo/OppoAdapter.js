@@ -10,7 +10,7 @@ const GxUtils_1 = __importDefault(require("../../util/GxUtils"));
 const BaseAdapter_1 = __importDefault(require("../base/BaseAdapter"));
 const GxEnum_1 = require("../../core/GxEnum");
 const GxAdParams_1 = require("../../GxAdParams");
-const GxLabelUtil_1 = __importDefault(require("../../core/GxLabelUtil"));
+const GxGameUtil_1 = __importDefault(require("../../core/GxGameUtil"));
 const DataStorage_2 = __importDefault(require("../../util/DataStorage"));
 class OppoAdapter extends BaseAdapter_1.default {
     constructor() {
@@ -28,7 +28,6 @@ class OppoAdapter extends BaseAdapter_1.default {
         this.reported = false;
         this.canUpload = true;
         this.pkgName = "";
-        this.initCount = 0;
         this.videoShowing = false;
     }
     static getInstance() {
@@ -44,14 +43,30 @@ class OppoAdapter extends BaseAdapter_1.default {
         // this.getDeviceId();
         GxGame_1.default.adConfig.bannerUpdateTime = 5;
         this.getGameInfo();
-        GxGame_1.default.adConfig.adCdTime = GxGame_1.default.getValue("delay", 60);
-        let label = GxGame_1.default.getLabel("switch");
+        GxGame_1.default.adConfig.adCdTime = GxGame_1.default.gGN("delay", 60);
+        let label = GxGame_1.default.gGB("z1");
         if (label) {
             GxGame_1.default.adConfig.adCdTime = 0;
         }
         this.isGameCd = GxGame_1.default.adConfig.adCdTime > 0;
         this.logi("广告冷却：" + this.isGameCd);
         super.initAd();
+        // @ts-ignore
+        if (qg.getManifestInfo) {
+            // @ts-ignore
+            qg.getManifestInfo({
+                success: (res) => {
+                    console.log(JSON.stringify(res.manifest));
+                    let info = JSON.parse(res.manifest);
+                    this.setManifestInfo(info);
+                    // TDSDK.getInstance().init("DEBB78D26E894F4FB174FAA2A8F4DE24", info.package.replace(/\./g, "_"))
+                },
+                fail: function (err) {
+                },
+                complete: function (res) {
+                },
+            });
+        }
         this._gameCd();
         this.initBanner();
         this.initNormalBanner();
@@ -62,10 +77,40 @@ class OppoAdapter extends BaseAdapter_1.default {
         GxTimer_1.default.loop(() => {
             GxGame_1.default.uploadOcpx('gtime');
         }, 6e4);
-        this.initLLCC();
-        /*2023年8月25日10:06:40    iniitLLVV王硕明  ov需要修改下广告策略，激励违规从到模式页触发违规，改为每隔x时间主动弹出 */
-        this.initLLVV();
+        /*时候4 2023年9月4日11:30:59*/
+        GxGame_1.default.adConfig.interTick = GxGame_1.default.gGN("ae", 10);
+        /*修改3 2023年9月4日11:26:36*/
+        this.ac();
+        /* 修改2 2023年9月4日11:22:57 */
+        this.ab();
         this.initAdMonitor();
+    }
+    ac() {
+        let value = GxGame_1.default.gGN("ac", 20);
+        setTimeout(() => {
+            if (GxGame_1.default.gGB("ac")) {
+                this.privateShowInter(() => {
+                }, () => {
+                    this.ac();
+                });
+            }
+        }, value * 1000);
+    }
+    ab() {
+        let value = GxGame_1.default.gGN("ab", 35);
+        setTimeout(() => {
+            if (GxGame_1.default.gGB("ab")) {
+                this._vv();
+            }
+        }, value * 1000);
+    }
+    _vv() {
+        this.showVideo((res) => {
+            let value = GxGame_1.default.gGN("ab", 35);
+            setTimeout(() => {
+                this._vv();
+            }, value * 1000);
+        }, "GxVV");
     }
     initAdMonitor() {
         this.getAdConfig();
@@ -153,7 +198,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                     //不用加密  服务器加密后去查找
                     url = `https://ocpx.sjzgxwl.com/ocpx/oppo/rpk/action?pkg=${self.pkgName}&action=${actionName}&imeiMD5=${deviceId}`;
                 }
-                GxLabelUtil_1.default.getInstance()._httpGets(url, {}, (res) => {
+                GxGameUtil_1.default.getInstance()._httpGets(url, {}, (res) => {
                     if (res != -1 && res != -2) {
                         self.logi(res);
                         let parse = JSON.parse(res);
@@ -199,7 +244,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                     self.logi(data);
                     self.pkgName = data["package"];
                     //获取配置的   激励次数和时长
-                    GxLabelUtil_1.default.getInstance()._httpGets("https://ocpx.sjzgxwl.com/ocpx/oppo/rpk/getconfig?pkg=" + data["package"], {}, (res) => {
+                    GxGameUtil_1.default.getInstance()._httpGets("https://ocpx.sjzgxwl.com/ocpx/oppo/rpk/getconfig?pkg=" + data["package"], {}, (res) => {
                         if (res != -1 && res != -2) {
                             self.logi(res);
                             let parse = JSON.parse(res);
@@ -306,253 +351,227 @@ class OppoAdapter extends BaseAdapter_1.default {
             this.logi("版本低 不能获取 包名了");
         }
     }
-    md5Str(string) {
-        if ((string + "").length <= 0) {
-            return "";
-        }
-        function md5_RotateLeft(lValue, iShiftBits) {
-            return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
-        }
-        function md5_AddUnsigned(lX, lY) {
-            var lX4, lY4, lX8, lY8, lResult;
-            lX8 = (lX & 0x80000000);
-            lY8 = (lY & 0x80000000);
-            lX4 = (lX & 0x40000000);
-            lY4 = (lY & 0x40000000);
-            lResult = (lX & 0x3FFFFFFF) + (lY & 0x3FFFFFFF);
-            if (lX4 & lY4) {
-                return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
-            }
-            if (lX4 | lY4) {
-                if (lResult & 0x40000000) {
-                    return (lResult ^ 0xC0000000 ^ lX8 ^ lY8);
-                }
-                else {
-                    return (lResult ^ 0x40000000 ^ lX8 ^ lY8);
-                }
-            }
-            else {
-                return (lResult ^ lX8 ^ lY8);
-            }
-        }
-        function md5_F(x, y, z) {
-            return (x & y) | ((~x) & z);
-        }
-        function md5_G(x, y, z) {
-            return (x & z) | (y & (~z));
-        }
-        function md5_H(x, y, z) {
-            return (x ^ y ^ z);
-        }
-        function md5_I(x, y, z) {
-            return (y ^ (x | (~z)));
-        }
-        function md5_FF(a, b, c, d, x, s, ac) {
-            a = md5_AddUnsigned(a, md5_AddUnsigned(md5_AddUnsigned(md5_F(b, c, d), x), ac));
-            return md5_AddUnsigned(md5_RotateLeft(a, s), b);
-        }
-        ;
-        function md5_GG(a, b, c, d, x, s, ac) {
-            a = md5_AddUnsigned(a, md5_AddUnsigned(md5_AddUnsigned(md5_G(b, c, d), x), ac));
-            return md5_AddUnsigned(md5_RotateLeft(a, s), b);
-        }
-        ;
-        function md5_HH(a, b, c, d, x, s, ac) {
-            a = md5_AddUnsigned(a, md5_AddUnsigned(md5_AddUnsigned(md5_H(b, c, d), x), ac));
-            return md5_AddUnsigned(md5_RotateLeft(a, s), b);
-        }
-        ;
-        function md5_II(a, b, c, d, x, s, ac) {
-            a = md5_AddUnsigned(a, md5_AddUnsigned(md5_AddUnsigned(md5_I(b, c, d), x), ac));
-            return md5_AddUnsigned(md5_RotateLeft(a, s), b);
-        }
-        ;
-        function md5_ConvertToWordArray(string) {
-            var lWordCount;
-            var lMessageLength = string.length;
-            var lNumberOfWords_temp1 = lMessageLength + 8;
-            var lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)) / 64;
-            var lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16;
-            var lWordArray = Array(lNumberOfWords - 1);
-            var lBytePosition = 0;
-            var lByteCount = 0;
-            while (lByteCount < lMessageLength) {
-                lWordCount = (lByteCount - (lByteCount % 4)) / 4;
-                lBytePosition = (lByteCount % 4) * 8;
-                lWordArray[lWordCount] = (lWordArray[lWordCount] | (string.charCodeAt(lByteCount) << lBytePosition));
-                lByteCount++;
-            }
-            lWordCount = (lByteCount - (lByteCount % 4)) / 4;
-            lBytePosition = (lByteCount % 4) * 8;
-            lWordArray[lWordCount] = lWordArray[lWordCount] | (0x80 << lBytePosition);
-            lWordArray[lNumberOfWords - 2] = lMessageLength << 3;
-            lWordArray[lNumberOfWords - 1] = lMessageLength >>> 29;
-            return lWordArray;
-        }
-        ;
-        function md5_WordToHex(lValue) {
-            var WordToHexValue = "", WordToHexValue_temp = "", lByte, lCount;
-            for (lCount = 0; lCount <= 3; lCount++) {
-                lByte = (lValue >>> (lCount * 8)) & 255;
-                WordToHexValue_temp = "0" + lByte.toString(16);
-                WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length - 2, 2);
-            }
-            return WordToHexValue;
-        }
-        ;
-        function md5_Utf8Encode(string) {
-            string = string.toString().replace(/\r\n/g, "\n");
-            var utftext = "";
-            for (var n = 0; n < string.length; n++) {
-                var c = string.charCodeAt(n);
-                if (c < 128) {
-                    utftext += String.fromCharCode(c);
-                }
-                else if ((c > 127) && (c < 2048)) {
-                    utftext += String.fromCharCode((c >> 6) | 192);
-                    utftext += String.fromCharCode((c & 63) | 128);
-                }
-                else {
-                    utftext += String.fromCharCode((c >> 12) | 224);
-                    utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-                    utftext += String.fromCharCode((c & 63) | 128);
-                }
-            }
-            return utftext;
-        }
-        ;
-        var x = Array();
-        var k, AA, BB, CC, DD, a, b, c, d;
-        var S11 = 7, S12 = 12, S13 = 17, S14 = 22;
-        var S21 = 5, S22 = 9, S23 = 14, S24 = 20;
-        var S31 = 4, S32 = 11, S33 = 16, S34 = 23;
-        var S41 = 6, S42 = 10, S43 = 15, S44 = 21;
-        string = md5_Utf8Encode(string);
-        x = md5_ConvertToWordArray(string);
-        a = 0x67452301;
-        b = 0xEFCDAB89;
-        c = 0x98BADCFE;
-        d = 0x10325476;
-        for (k = 0; k < x.length; k += 16) {
-            AA = a;
-            BB = b;
-            CC = c;
-            DD = d;
-            a = md5_FF(a, b, c, d, x[k + 0], S11, 0xD76AA478);
-            d = md5_FF(d, a, b, c, x[k + 1], S12, 0xE8C7B756);
-            c = md5_FF(c, d, a, b, x[k + 2], S13, 0x242070DB);
-            b = md5_FF(b, c, d, a, x[k + 3], S14, 0xC1BDCEEE);
-            a = md5_FF(a, b, c, d, x[k + 4], S11, 0xF57C0FAF);
-            d = md5_FF(d, a, b, c, x[k + 5], S12, 0x4787C62A);
-            c = md5_FF(c, d, a, b, x[k + 6], S13, 0xA8304613);
-            b = md5_FF(b, c, d, a, x[k + 7], S14, 0xFD469501);
-            a = md5_FF(a, b, c, d, x[k + 8], S11, 0x698098D8);
-            d = md5_FF(d, a, b, c, x[k + 9], S12, 0x8B44F7AF);
-            c = md5_FF(c, d, a, b, x[k + 10], S13, 0xFFFF5BB1);
-            b = md5_FF(b, c, d, a, x[k + 11], S14, 0x895CD7BE);
-            a = md5_FF(a, b, c, d, x[k + 12], S11, 0x6B901122);
-            d = md5_FF(d, a, b, c, x[k + 13], S12, 0xFD987193);
-            c = md5_FF(c, d, a, b, x[k + 14], S13, 0xA679438E);
-            b = md5_FF(b, c, d, a, x[k + 15], S14, 0x49B40821);
-            a = md5_GG(a, b, c, d, x[k + 1], S21, 0xF61E2562);
-            d = md5_GG(d, a, b, c, x[k + 6], S22, 0xC040B340);
-            c = md5_GG(c, d, a, b, x[k + 11], S23, 0x265E5A51);
-            b = md5_GG(b, c, d, a, x[k + 0], S24, 0xE9B6C7AA);
-            a = md5_GG(a, b, c, d, x[k + 5], S21, 0xD62F105D);
-            d = md5_GG(d, a, b, c, x[k + 10], S22, 0x2441453);
-            c = md5_GG(c, d, a, b, x[k + 15], S23, 0xD8A1E681);
-            b = md5_GG(b, c, d, a, x[k + 4], S24, 0xE7D3FBC8);
-            a = md5_GG(a, b, c, d, x[k + 9], S21, 0x21E1CDE6);
-            d = md5_GG(d, a, b, c, x[k + 14], S22, 0xC33707D6);
-            c = md5_GG(c, d, a, b, x[k + 3], S23, 0xF4D50D87);
-            b = md5_GG(b, c, d, a, x[k + 8], S24, 0x455A14ED);
-            a = md5_GG(a, b, c, d, x[k + 13], S21, 0xA9E3E905);
-            d = md5_GG(d, a, b, c, x[k + 2], S22, 0xFCEFA3F8);
-            c = md5_GG(c, d, a, b, x[k + 7], S23, 0x676F02D9);
-            b = md5_GG(b, c, d, a, x[k + 12], S24, 0x8D2A4C8A);
-            a = md5_HH(a, b, c, d, x[k + 5], S31, 0xFFFA3942);
-            d = md5_HH(d, a, b, c, x[k + 8], S32, 0x8771F681);
-            c = md5_HH(c, d, a, b, x[k + 11], S33, 0x6D9D6122);
-            b = md5_HH(b, c, d, a, x[k + 14], S34, 0xFDE5380C);
-            a = md5_HH(a, b, c, d, x[k + 1], S31, 0xA4BEEA44);
-            d = md5_HH(d, a, b, c, x[k + 4], S32, 0x4BDECFA9);
-            c = md5_HH(c, d, a, b, x[k + 7], S33, 0xF6BB4B60);
-            b = md5_HH(b, c, d, a, x[k + 10], S34, 0xBEBFBC70);
-            a = md5_HH(a, b, c, d, x[k + 13], S31, 0x289B7EC6);
-            d = md5_HH(d, a, b, c, x[k + 0], S32, 0xEAA127FA);
-            c = md5_HH(c, d, a, b, x[k + 3], S33, 0xD4EF3085);
-            b = md5_HH(b, c, d, a, x[k + 6], S34, 0x4881D05);
-            a = md5_HH(a, b, c, d, x[k + 9], S31, 0xD9D4D039);
-            d = md5_HH(d, a, b, c, x[k + 12], S32, 0xE6DB99E5);
-            c = md5_HH(c, d, a, b, x[k + 15], S33, 0x1FA27CF8);
-            b = md5_HH(b, c, d, a, x[k + 2], S34, 0xC4AC5665);
-            a = md5_II(a, b, c, d, x[k + 0], S41, 0xF4292244);
-            d = md5_II(d, a, b, c, x[k + 7], S42, 0x432AFF97);
-            c = md5_II(c, d, a, b, x[k + 14], S43, 0xAB9423A7);
-            b = md5_II(b, c, d, a, x[k + 5], S44, 0xFC93A039);
-            a = md5_II(a, b, c, d, x[k + 12], S41, 0x655B59C3);
-            d = md5_II(d, a, b, c, x[k + 3], S42, 0x8F0CCC92);
-            c = md5_II(c, d, a, b, x[k + 10], S43, 0xFFEFF47D);
-            b = md5_II(b, c, d, a, x[k + 1], S44, 0x85845DD1);
-            a = md5_II(a, b, c, d, x[k + 8], S41, 0x6FA87E4F);
-            d = md5_II(d, a, b, c, x[k + 15], S42, 0xFE2CE6E0);
-            c = md5_II(c, d, a, b, x[k + 6], S43, 0xA3014314);
-            b = md5_II(b, c, d, a, x[k + 13], S44, 0x4E0811A1);
-            a = md5_II(a, b, c, d, x[k + 4], S41, 0xF7537E82);
-            d = md5_II(d, a, b, c, x[k + 11], S42, 0xBD3AF235);
-            c = md5_II(c, d, a, b, x[k + 2], S43, 0x2AD7D2BB);
-            b = md5_II(b, c, d, a, x[k + 9], S44, 0xEB86D391);
-            a = md5_AddUnsigned(a, AA);
-            b = md5_AddUnsigned(b, BB);
-            c = md5_AddUnsigned(c, CC);
-            d = md5_AddUnsigned(d, DD);
-        }
-        return (md5_WordToHex(a) + md5_WordToHex(b) + md5_WordToHex(c) + md5_WordToHex(d)).toLowerCase();
-    }
-    initLLCC() {
-        let value = GxLabelUtil_1.default.getInstance().getValue("lc", 30);
-        setTimeout(() => {
-            if (GxLabelUtil_1.default.getInstance().getLabel("lc")) {
-                this.privateShowInter(() => {
-                }, () => {
-                    this.initLLCC();
-                });
-            }
-        }, value * 1000);
-    }
-    initLLVV() {
-        this.initCount++;
-        setTimeout(() => {
-            if (GxLabelUtil_1.default.getInstance().getLabel("vc")) {
-                this._vv();
-                /*let value = GxLabelUtil.getInstance().getValue("vc", 30);
-                setTimeout(() => {
+    /*  md5Str(string) {
+          if ((string + "").length <= 0) {
+              return ""
+          }
 
-                    if (GxLabelUtil.getInstance().getLabel("vc")) {
-                        this.privateShowInter(() => {
+          function md5_RotateLeft(lValue, iShiftBits) {
+              return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
+          }
 
-                        }, () => {
-                            this.initLLCC()
+          function md5_AddUnsigned(lX, lY) {
+              var lX4, lY4, lX8, lY8, lResult;
+              lX8 = (lX & 0x80000000);
+              lY8 = (lY & 0x80000000);
+              lX4 = (lX & 0x40000000);
+              lY4 = (lY & 0x40000000);
+              lResult = (lX & 0x3FFFFFFF) + (lY & 0x3FFFFFFF);
+              if (lX4 & lY4) {
+                  return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
+              }
+              if (lX4 | lY4) {
+                  if (lResult & 0x40000000) {
+                      return (lResult ^ 0xC0000000 ^ lX8 ^ lY8);
+                  } else {
+                      return (lResult ^ 0x40000000 ^ lX8 ^ lY8);
+                  }
+              } else {
+                  return (lResult ^ lX8 ^ lY8);
+              }
+          }
 
-                        })
-                    }
-                }, value * 1000)*/
-            }
-            else {
-                if (this.initCount < 2) {
-                    this.initLLVV();
-                }
-            }
-        }, 3000);
-    }
-    _vv() {
-        this.showVideo((res) => {
-            let value = GxLabelUtil_1.default.getInstance().getValue("vc", 30);
-            setTimeout(() => {
-                this._vv();
-            }, value * 1000);
-        });
-    }
+          function md5_F(x, y, z) {
+              return (x & y) | ((~x) & z);
+          }
+
+          function md5_G(x, y, z) {
+              return (x & z) | (y & (~z));
+          }
+
+          function md5_H(x, y, z) {
+              return (x ^ y ^ z);
+          }
+
+          function md5_I(x, y, z) {
+              return (y ^ (x | (~z)));
+          }
+
+          function md5_FF(a, b, c, d, x, s, ac) {
+              a = md5_AddUnsigned(a, md5_AddUnsigned(md5_AddUnsigned(md5_F(b, c, d), x), ac));
+              return md5_AddUnsigned(md5_RotateLeft(a, s), b);
+          };
+
+          function md5_GG(a, b, c, d, x, s, ac) {
+              a = md5_AddUnsigned(a, md5_AddUnsigned(md5_AddUnsigned(md5_G(b, c, d), x), ac));
+              return md5_AddUnsigned(md5_RotateLeft(a, s), b);
+          };
+
+          function md5_HH(a, b, c, d, x, s, ac) {
+              a = md5_AddUnsigned(a, md5_AddUnsigned(md5_AddUnsigned(md5_H(b, c, d), x), ac));
+              return md5_AddUnsigned(md5_RotateLeft(a, s), b);
+          };
+
+          function md5_II(a, b, c, d, x, s, ac) {
+              a = md5_AddUnsigned(a, md5_AddUnsigned(md5_AddUnsigned(md5_I(b, c, d), x), ac));
+              return md5_AddUnsigned(md5_RotateLeft(a, s), b);
+          };
+
+          function md5_ConvertToWordArray(string) {
+              var lWordCount;
+              var lMessageLength = string.length;
+              var lNumberOfWords_temp1 = lMessageLength + 8;
+              var lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)) / 64;
+              var lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16;
+              var lWordArray = Array(lNumberOfWords - 1);
+              var lBytePosition = 0;
+              var lByteCount = 0;
+              while (lByteCount < lMessageLength) {
+                  lWordCount = (lByteCount - (lByteCount % 4)) / 4;
+                  lBytePosition = (lByteCount % 4) * 8;
+                  lWordArray[lWordCount] = (lWordArray[lWordCount] | (string.charCodeAt(lByteCount) << lBytePosition));
+                  lByteCount++;
+              }
+              lWordCount = (lByteCount - (lByteCount % 4)) / 4;
+              lBytePosition = (lByteCount % 4) * 8;
+              lWordArray[lWordCount] = lWordArray[lWordCount] | (0x80 << lBytePosition);
+              lWordArray[lNumberOfWords - 2] = lMessageLength << 3;
+              lWordArray[lNumberOfWords - 1] = lMessageLength >>> 29;
+              return lWordArray;
+          };
+
+          function md5_WordToHex(lValue) {
+              var WordToHexValue = "",
+                  WordToHexValue_temp = "",
+                  lByte, lCount;
+              for (lCount = 0; lCount <= 3; lCount++) {
+                  lByte = (lValue >>> (lCount * 8)) & 255;
+                  WordToHexValue_temp = "0" + lByte.toString(16);
+                  WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length - 2, 2);
+              }
+              return WordToHexValue;
+          };
+
+          function md5_Utf8Encode(string) {
+              string = string.toString().replace(/\r\n/g, "\n");
+              var utftext = "";
+              for (var n = 0; n < string.length; n++) {
+                  var c = string.charCodeAt(n);
+                  if (c < 128) {
+                      utftext += String.fromCharCode(c);
+                  } else if ((c > 127) && (c < 2048)) {
+                      utftext += String.fromCharCode((c >> 6) | 192);
+                      utftext += String.fromCharCode((c & 63) | 128);
+                  } else {
+                      utftext += String.fromCharCode((c >> 12) | 224);
+                      utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+                      utftext += String.fromCharCode((c & 63) | 128);
+                  }
+              }
+              return utftext;
+          };
+          var x = Array();
+          var k, AA, BB, CC, DD, a, b, c, d;
+          var S11 = 7,
+              S12 = 12,
+              S13 = 17,
+              S14 = 22;
+          var S21 = 5,
+              S22 = 9,
+              S23 = 14,
+              S24 = 20;
+          var S31 = 4,
+              S32 = 11,
+              S33 = 16,
+              S34 = 23;
+          var S41 = 6,
+              S42 = 10,
+              S43 = 15,
+              S44 = 21;
+          string = md5_Utf8Encode(string);
+          x = md5_ConvertToWordArray(string);
+          a = 0x67452301;
+          b = 0xEFCDAB89;
+          c = 0x98BADCFE;
+          d = 0x10325476;
+          for (k = 0; k < x.length; k += 16) {
+              AA = a;
+              BB = b;
+              CC = c;
+              DD = d;
+              a = md5_FF(a, b, c, d, x[k + 0], S11, 0xD76AA478);
+              d = md5_FF(d, a, b, c, x[k + 1], S12, 0xE8C7B756);
+              c = md5_FF(c, d, a, b, x[k + 2], S13, 0x242070DB);
+              b = md5_FF(b, c, d, a, x[k + 3], S14, 0xC1BDCEEE);
+              a = md5_FF(a, b, c, d, x[k + 4], S11, 0xF57C0FAF);
+              d = md5_FF(d, a, b, c, x[k + 5], S12, 0x4787C62A);
+              c = md5_FF(c, d, a, b, x[k + 6], S13, 0xA8304613);
+              b = md5_FF(b, c, d, a, x[k + 7], S14, 0xFD469501);
+              a = md5_FF(a, b, c, d, x[k + 8], S11, 0x698098D8);
+              d = md5_FF(d, a, b, c, x[k + 9], S12, 0x8B44F7AF);
+              c = md5_FF(c, d, a, b, x[k + 10], S13, 0xFFFF5BB1);
+              b = md5_FF(b, c, d, a, x[k + 11], S14, 0x895CD7BE);
+              a = md5_FF(a, b, c, d, x[k + 12], S11, 0x6B901122);
+              d = md5_FF(d, a, b, c, x[k + 13], S12, 0xFD987193);
+              c = md5_FF(c, d, a, b, x[k + 14], S13, 0xA679438E);
+              b = md5_FF(b, c, d, a, x[k + 15], S14, 0x49B40821);
+              a = md5_GG(a, b, c, d, x[k + 1], S21, 0xF61E2562);
+              d = md5_GG(d, a, b, c, x[k + 6], S22, 0xC040B340);
+              c = md5_GG(c, d, a, b, x[k + 11], S23, 0x265E5A51);
+              b = md5_GG(b, c, d, a, x[k + 0], S24, 0xE9B6C7AA);
+              a = md5_GG(a, b, c, d, x[k + 5], S21, 0xD62F105D);
+              d = md5_GG(d, a, b, c, x[k + 10], S22, 0x2441453);
+              c = md5_GG(c, d, a, b, x[k + 15], S23, 0xD8A1E681);
+              b = md5_GG(b, c, d, a, x[k + 4], S24, 0xE7D3FBC8);
+              a = md5_GG(a, b, c, d, x[k + 9], S21, 0x21E1CDE6);
+              d = md5_GG(d, a, b, c, x[k + 14], S22, 0xC33707D6);
+              c = md5_GG(c, d, a, b, x[k + 3], S23, 0xF4D50D87);
+              b = md5_GG(b, c, d, a, x[k + 8], S24, 0x455A14ED);
+              a = md5_GG(a, b, c, d, x[k + 13], S21, 0xA9E3E905);
+              d = md5_GG(d, a, b, c, x[k + 2], S22, 0xFCEFA3F8);
+              c = md5_GG(c, d, a, b, x[k + 7], S23, 0x676F02D9);
+              b = md5_GG(b, c, d, a, x[k + 12], S24, 0x8D2A4C8A);
+              a = md5_HH(a, b, c, d, x[k + 5], S31, 0xFFFA3942);
+              d = md5_HH(d, a, b, c, x[k + 8], S32, 0x8771F681);
+              c = md5_HH(c, d, a, b, x[k + 11], S33, 0x6D9D6122);
+              b = md5_HH(b, c, d, a, x[k + 14], S34, 0xFDE5380C);
+              a = md5_HH(a, b, c, d, x[k + 1], S31, 0xA4BEEA44);
+              d = md5_HH(d, a, b, c, x[k + 4], S32, 0x4BDECFA9);
+              c = md5_HH(c, d, a, b, x[k + 7], S33, 0xF6BB4B60);
+              b = md5_HH(b, c, d, a, x[k + 10], S34, 0xBEBFBC70);
+              a = md5_HH(a, b, c, d, x[k + 13], S31, 0x289B7EC6);
+              d = md5_HH(d, a, b, c, x[k + 0], S32, 0xEAA127FA);
+              c = md5_HH(c, d, a, b, x[k + 3], S33, 0xD4EF3085);
+              b = md5_HH(b, c, d, a, x[k + 6], S34, 0x4881D05);
+              a = md5_HH(a, b, c, d, x[k + 9], S31, 0xD9D4D039);
+              d = md5_HH(d, a, b, c, x[k + 12], S32, 0xE6DB99E5);
+              c = md5_HH(c, d, a, b, x[k + 15], S33, 0x1FA27CF8);
+              b = md5_HH(b, c, d, a, x[k + 2], S34, 0xC4AC5665);
+              a = md5_II(a, b, c, d, x[k + 0], S41, 0xF4292244);
+              d = md5_II(d, a, b, c, x[k + 7], S42, 0x432AFF97);
+              c = md5_II(c, d, a, b, x[k + 14], S43, 0xAB9423A7);
+              b = md5_II(b, c, d, a, x[k + 5], S44, 0xFC93A039);
+              a = md5_II(a, b, c, d, x[k + 12], S41, 0x655B59C3);
+              d = md5_II(d, a, b, c, x[k + 3], S42, 0x8F0CCC92);
+              c = md5_II(c, d, a, b, x[k + 10], S43, 0xFFEFF47D);
+              b = md5_II(b, c, d, a, x[k + 1], S44, 0x85845DD1);
+              a = md5_II(a, b, c, d, x[k + 8], S41, 0x6FA87E4F);
+              d = md5_II(d, a, b, c, x[k + 15], S42, 0xFE2CE6E0);
+              c = md5_II(c, d, a, b, x[k + 6], S43, 0xA3014314);
+              b = md5_II(b, c, d, a, x[k + 13], S44, 0x4E0811A1);
+              a = md5_II(a, b, c, d, x[k + 4], S41, 0xF7537E82);
+              d = md5_II(d, a, b, c, x[k + 11], S42, 0xBD3AF235);
+              c = md5_II(c, d, a, b, x[k + 2], S43, 0x2AD7D2BB);
+              b = md5_II(b, c, d, a, x[k + 9], S44, 0xEB86D391);
+              a = md5_AddUnsigned(a, AA);
+              b = md5_AddUnsigned(b, BB);
+              c = md5_AddUnsigned(c, CC);
+              d = md5_AddUnsigned(d, DD);
+          }
+          return (md5_WordToHex(a) + md5_WordToHex(b) + md5_WordToHex(c) + md5_WordToHex(d)).toLowerCase();
+      }
+
+   */
     // @ts-ignore
     getDeviceId(callback) {
         //最低1096
@@ -770,14 +789,17 @@ class OppoAdapter extends BaseAdapter_1.default {
         });
         this.videoAd.onError((err) => {
             this.logi("video error: " + JSON.stringify(err), "color: red");
+            this._videoErrorEvent();
         });
         this.videoAd.onClose(res => {
             if (res && res.isEnded) {
                 this.videoReward++;
                 this.checkAdTarget();
                 this.videocallback && this.videocallback(true);
+                this._videoCompleteEvent();
             }
             else {
+                this._videoCloseEvent();
                 this.videocallback && this.videocallback(false);
                 /*   let node = cc.instantiate(Utils.getRes('hs_ui/ui_watch_video', cc.Prefab));
                    let ui_watch_video = node.getComponent('hs_ui_watch_video');
@@ -795,6 +817,7 @@ class OppoAdapter extends BaseAdapter_1.default {
             complete && complete(false);
             return;
         }
+        super.showVideo(null, flag);
         this.videoShowing = true;
         if (this.videoAd == null) {
             this.initVideo();
@@ -802,12 +825,14 @@ class OppoAdapter extends BaseAdapter_1.default {
         if (this.videoAd == null) {
             this.createToast('暂无视频，请稍后再试');
             this.videoShowing = false;
+            this._videoErrorEvent();
             complete && complete(false);
             return;
         }
         this.videocallback = complete;
         this.videoAd.show().then(() => {
         }).catch(() => {
+            this._videoErrorEvent();
             this.createToast('暂无视频，请稍后再试');
             complete && complete(false);
             this.videoShowing = false;
@@ -1052,15 +1077,15 @@ class OppoAdapter extends BaseAdapter_1.default {
             this.logi("showNativeInterstitial 广告CD中");
             return;
         }
-        if (this.get_time() - this.interShowTime <= GxGame_1.default.adConfig.interTick * 1000 || GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) {
+        setTimeout(() => {
+            this.privateShowInter(on_show, on_hide);
+        }, (GxGame_1.default.isShenHe) ? 0 : delay_time * 1000);
+    }
+    privateShowInter(on_show, on_hide) {
+        if (this.get_time() - this.interShowTime <= GxGame_1.default.adConfig.interTick * 1000 || GxGame_1.default.isShenHe) {
             this.logi("限制了2");
             return on_hide && on_hide();
         }
-        setTimeout(() => {
-            this.privateShowInter(on_show, on_hide);
-        }, (GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) ? 0 : delay_time * 1000);
-    }
-    privateShowInter(on_show, on_hide) {
         this.hideNativeInterstitial();
         // this.hideBanner();
         let native_data = null;
@@ -1136,6 +1161,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                 native_data
                     .show()
                     .then(() => {
+                    this.interShowTime = this.get_time();
                     // console.log("显示block")
                     if (window["cc"]) {
                         let childByName = cc.director.getScene().getChildByName("BLOCK");
@@ -1150,6 +1176,14 @@ class OppoAdapter extends BaseAdapter_1.default {
                             let winSize = cc.winSize;
                             node.x = winSize.width / 2;
                             node.y = winSize.height / 2;
+                            let t = 0;
+                            node.on(cc.Node.EventType.TOUCH_START, () => {
+                                t++;
+                                console.log("触摸了");
+                                if (t == 4) {
+                                    node.destroy();
+                                }
+                            });
                         }
                     }
                     this.customInter = native_data;
@@ -1159,12 +1193,19 @@ class OppoAdapter extends BaseAdapter_1.default {
                     .catch((error) => {
                     this.logi("show custom inter fail with:" + error.errCode + "," + error.errMsg);
                     on_hide && on_hide();
+                    if (window["cc"]) {
+                        let childByName = cc.director.getScene().getChildByName("BLOCK");
+                        if (childByName) {
+                            childByName.destroy();
+                        }
+                    }
                 });
             }
         }
     }
     showOtherNativeInterstitial(on_show, on_hide, delay_time = 0) {
-        let label = GxGame_1.default.getLabel("switch");
+        /*修改5 2023年9月4日11:44:48*/
+        let label = GxGame_1.default.gGB("af");
         if (!label) {
             this.logi("限制了1");
             on_hide && on_hide();
@@ -1176,45 +1217,40 @@ class OppoAdapter extends BaseAdapter_1.default {
             return;
         }
         let canShow = false;
-        /*  let icLabel = GxGame.getLabel("ic");
+        /*  let icLabel = GxGame.gGB("ic");
           if (icLabel) {
   */
-        let value = GxGame_1.default.getValue("ic", 0);
+        /*去掉了  let value = GxGame.gGN("ic", 0);
         if (value > 0) {
             if (this.icNum == -1) {
                 this.icNum = value;
                 setInterval(() => {
-                    console.log("重置icNum");
+                    console.log("重置icNum")
                     this.icNum = value;
-                }, 90 * 1000);
+                }, 90 * 1000)
             }
             if (this.icNum > 0) {
                 this.icNum--;
-                canShow = true;
+                canShow = true
+            } else {
+                console.log("icNum <0")
             }
-            else {
-                console.log("icNum <0");
-            }
-        }
-        else {
-            console.log("ic <0");
-        }
+        } else {
+            console.log("ic <0")
+        }*/
         /*
                 } else {
                     console.log("ic false")
                 }*/
+        canShow = true;
         if (!canShow) {
             on_hide && on_hide();
             this.logi("canShow ==false");
             return;
         }
-        if (this.get_time() - this.interShowTime <= GxGame_1.default.adConfig.interTick * 1000 || GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) {
-            this.logi("限制了2");
-            return on_hide && on_hide();
-        }
         GxTimer_1.default.once(() => {
             this.privateShowInter(on_show, on_hide);
-        }, (GxGame_1.default.isShenHe || GxGame_1.default.inBlockArea) ? 0 : delay_time * 1000);
+        }, (GxGame_1.default.isShenHe) ? 0 : delay_time * 1000);
     }
     /**
      * 原生ICON
@@ -1450,7 +1486,7 @@ class OppoAdapter extends BaseAdapter_1.default {
      * @returns
      */
     openGameAd() {
-        if (!GxGame_1.default.isShenHe && !GxGame_1.default.inBlockArea && GxGame_1.default.adConfig.showBanner > 0) {
+        if (!GxGame_1.default.isShenHe && GxGame_1.default.adConfig.showBanner > 0) {
             GxTimer_1.default.once(() => {
                 this.clickNative();
             }, GxGame_1.default.adConfig.showBanner * 1000);
@@ -1464,6 +1500,10 @@ class OppoAdapter extends BaseAdapter_1.default {
     }
     logw(...data) {
         super.LOGW('[OppoAdapter]', ...data);
+    }
+    showGameOverAD() {
+        this.showVideo((res) => {
+        }, "GxGameOverAd");
     }
 }
 exports.default = OppoAdapter;
