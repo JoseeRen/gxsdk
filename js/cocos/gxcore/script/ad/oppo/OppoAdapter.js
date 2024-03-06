@@ -64,7 +64,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                 fail: function (err) {
                 },
                 complete: function (res) {
-                },
+                }
             });
         }
         this._gameCd();
@@ -75,7 +75,7 @@ class OppoAdapter extends BaseAdapter_1.default {
         this.initGamePortal();
         // ocpx 上传
         GxTimer_1.default.loop(() => {
-            GxGame_1.default.uploadOcpx('gtime');
+            GxGame_1.default.uploadOcpx("gtime");
         }, 6e4);
         /*时候4 2023年9月4日11:30:59*/
         GxGame_1.default.adConfig.interTick = GxGame_1.default.gGN("ae", 10);
@@ -139,10 +139,10 @@ class OppoAdapter extends BaseAdapter_1.default {
             }
             this.reported = true;
             let da = new Date();
-            var year = da.getFullYear() + '年';
-            var month = da.getMonth() + 1 + '月';
-            var date = da.getDate() + '日';
-            let data = [year, month, date].join('-');
+            var year = da.getFullYear() + "年";
+            var month = da.getMonth() + 1 + "月";
+            var date = da.getDate() + "日";
+            let data = [year, month, date].join("-");
             /*     let item = DataStorage.getItem("__oppo_lastTime__");
                  if (!item || item == "" || item == null) {
                      DataStorage.setItem("__oppo_lastTime__", data)
@@ -203,7 +203,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                         self.logi(res);
                         let parse = JSON.parse(res);
                         if (!!parse && parse.code == 1) {
-                            self.logi('上报成功：');
+                            self.logi("上报成功：");
                             callback && callback(true);
                         }
                         else {
@@ -213,7 +213,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                                 callback && callback(false);
                             }
                             else {
-                                self.logw('上报失败2！' + res['msg']);
+                                self.logw("上报失败2！" + res["msg"]);
                                 callback && callback(false);
                                 /*
                                                                 setInterval(() => {
@@ -223,7 +223,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                         }
                     }
                     else {
-                        self.logw('上报失败！' + res['msg']);
+                        self.logw("上报失败！" + res["msg"]);
                         callback && callback(false);
                     }
                 });
@@ -249,13 +249,13 @@ class OppoAdapter extends BaseAdapter_1.default {
                             self.logi(res);
                             let parse = JSON.parse(res);
                             if (!!parse && parse.code == 1) {
-                                self.logi('获取ecpm配置成功：');
+                                self.logi("获取ecpm配置成功：");
                                 self.ecpmObj = parse.data;
                                 self.uploadAction("active", (res) => {
                                     if (res) {
                                         let item1 = DataStorage_2.default.getItem(saveKey);
                                         if (!item1) {
-                                            DataStorage_2.default.setItem(saveKey, new Date().valueOf() + '');
+                                            DataStorage_2.default.setItem(saveKey, new Date().valueOf() + "");
                                         }
                                     }
                                     else {
@@ -275,21 +275,21 @@ class OppoAdapter extends BaseAdapter_1.default {
                                 let number1 = Math.floor(number / 24 / 60 / 60 / 1000);
                                 if (number1 >= 1 && number1 <= 7) {
                                     let arr = [
-                                        'day2',
-                                        'day3',
-                                        'day4',
-                                        'day5',
-                                        'day6',
-                                        'day7',
-                                        'day8',
+                                        "day2",
+                                        "day3",
+                                        "day4",
+                                        "day5",
+                                        "day6",
+                                        "day7",
+                                        "day8"
                                     ];
                                     let eventName = arr[number1 - 1];
-                                    let item = DataStorage_2.default.getItem('tt_event_' + eventName);
-                                    item = 'nosuccess';
+                                    let item = DataStorage_2.default.getItem("tt_event_" + eventName);
+                                    item = "nosuccess";
                                     //每次达成都上报    服务器控制多次上报
-                                    if (item != 'success') {
+                                    if (item != "success") {
                                         //保存激活状态
-                                        console.log('上报事件：' + eventName);
+                                        console.log("上报事件：" + eventName);
                                         /* tt.sendtoTAQ({
                                                      event_type: eventName, //event_type 需替换为真实投放的事件英文名称，参考上面链接
                                                      extra: {
@@ -300,30 +300,30 @@ class OppoAdapter extends BaseAdapter_1.default {
                                                  })*/
                                         self.uploadAction(eventName, (res) => {
                                             if (res) {
-                                                console.log('上报事件：' + eventName + ':成功');
-                                                DataStorage_2.default.setItem('oppo_event_' + eventName, 'success');
+                                                console.log("上报事件：" + eventName + ":成功");
+                                                DataStorage_2.default.setItem("oppo_event_" + eventName, "success");
                                             }
                                             else {
-                                                console.log('上报事件：' + eventName + ':失败');
+                                                console.log("上报事件：" + eventName + ":失败");
                                             }
                                         });
                                     }
                                     else {
-                                        console.log(eventName + '已经上报过了');
+                                        console.log(eventName + "已经上报过了");
                                     }
                                 }
                                 else {
-                                    console.log('传的number不能用：' + number1);
+                                    console.log("传的number不能用：" + number1);
                                 }
                             }
                             else {
                                 if (parse.code == -2) {
                                     //配置不存在
                                     self.canUpload = false;
-                                    self.logw('配置不存在 ！');
+                                    self.logw("配置不存在 ！");
                                 }
                                 else {
-                                    self.logw('获取ecpm配置失败2！' + res['msg']);
+                                    self.logw("获取ecpm配置失败2！" + res["msg"]);
                                     setTimeout(() => {
                                         self.getAdConfig();
                                     }, 5000);
@@ -331,7 +331,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                             }
                         }
                         else {
-                            self.logw('获取ecpm配置失败！' + res['msg']);
+                            self.logw("获取ecpm配置失败！" + res["msg"]);
                             setTimeout(() => {
                                 self.getAdConfig();
                             }, 5000);
@@ -344,7 +344,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                     }, 5000);
                 },
                 complete: function (res) {
-                },
+                }
             });
         }
         else {
@@ -588,7 +588,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                 fail: (data, code) => {
                     this.loge(`deviceId  get fail, code = ${code}`);
                     callback && callback(null);
-                },
+                }
             });
         }
         else {
@@ -656,7 +656,7 @@ class OppoAdapter extends BaseAdapter_1.default {
             style: style
         });
         this.bannerAd.onError(err => {
-            this.loge('normal banner error: ', JSON.stringify(err));
+            this.loge("normal banner error: ", JSON.stringify(err));
         });
     }
     /**
@@ -823,7 +823,7 @@ class OppoAdapter extends BaseAdapter_1.default {
             this.initVideo();
         }
         if (this.videoAd == null) {
-            this.createToast('暂无视频，请稍后再试');
+            this.createToast("暂无视频，请稍后再试");
             this.videoShowing = false;
             this._videoErrorEvent();
             complete && complete(false);
@@ -833,7 +833,7 @@ class OppoAdapter extends BaseAdapter_1.default {
         this.videoAd.show().then(() => {
         }).catch(() => {
             this._videoErrorEvent();
-            this.createToast('暂无视频，请稍后再试');
+            this.createToast("暂无视频，请稍后再试");
             complete && complete(false);
             this.videoShowing = false;
         });
@@ -858,8 +858,8 @@ class OppoAdapter extends BaseAdapter_1.default {
             else if (ad_type == GxEnum_1.ad_native_type.inter2) {
                 posId = GxAdParams_1.AdParams.oppo.native2;
             }
-            this.logi(ad_type, 'posId = ', posId);
-            if (posId == '' || posId === undefined || posId == null || this.is_limit_native_length(ad_type) || this.platformVersion() < 1051)
+            this.logi(ad_type, "posId = ", posId);
+            if (posId == "" || posId === undefined || posId == null || this.is_limit_native_length(ad_type) || this.platformVersion() < 1051)
                 return resolve(null);
             let nativeAd = window["qg"].createNativeAd({
                 adUnitId: posId
@@ -926,8 +926,8 @@ class OppoAdapter extends BaseAdapter_1.default {
             style["top"] = top;
             // console.log(JSON.stringify(style))
         }
-        this.logi(ad_type, 'posId = ', posId);
-        if (posId == '' || posId === undefined || posId == null || this.platformVersion() < 1094)
+        this.logi(ad_type, "posId = ", posId);
+        if (posId == "" || posId === undefined || posId == null || this.platformVersion() < 1094)
             return null;
         let nativeAd = window["qg"].createCustomAd({
             adUnitId: posId,
@@ -966,8 +966,8 @@ class OppoAdapter extends BaseAdapter_1.default {
                 style["top"] = top;
                 // console.log(JSON.stringify(style))
             }
-            this.logi(ad_type, 'posId = ', posId);
-            if (posId == '' || posId === undefined || posId == null || this.platformVersion() < 1094)
+            this.logi(ad_type, "posId = ", posId);
+            if (posId == "" || posId === undefined || posId == null || this.platformVersion() < 1094)
                 return resolve(null);
             let nativeAd = window["qg"].createCustomAd({
                 adUnitId: posId,
@@ -1052,8 +1052,8 @@ class OppoAdapter extends BaseAdapter_1.default {
         }
         else {
             this.isNeedShowBanner = false;
-            let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_inner_interstitial', cc.Prefab));
-            this.innerInter = node.getComponent('gx_native_inner_interstitial');
+            let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_inner_interstitial", cc.Prefab));
+            this.innerInter = node.getComponent("gx_native_inner_interstitial");
             this.innerInter && this.innerInter.show(parent, native_data, on_click, () => {
                 // this.hideBanner();
                 on_show && on_show();
@@ -1133,8 +1133,8 @@ class OppoAdapter extends BaseAdapter_1.default {
 
               return on_hide && on_hide()
           }*/
-                let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_interstitial', cc.Prefab));
-                this.nativeInter = node.getComponent('gx_native_interstitial');
+                let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_interstitial", cc.Prefab));
+                this.nativeInter = node.getComponent("gx_native_interstitial");
                 this.nativeInter && this.nativeInter.show(native_data, () => {
                     this.interShowTime = this.get_time();
                     // this.hideBanner();
@@ -1278,8 +1278,8 @@ class OppoAdapter extends BaseAdapter_1.default {
             return this.logi("showNativeIcon 暂无广告数据");
         }
         else {
-            let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_icon', cc.Prefab));
-            this.nativeIcon = node.getComponent('gx_native_icon');
+            let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_icon", cc.Prefab));
+            this.nativeIcon = node.getComponent("gx_native_icon");
             this.nativeIcon && this.nativeIcon.show(parent, native_data);
         }
     }
@@ -1327,24 +1327,24 @@ class OppoAdapter extends BaseAdapter_1.default {
         }
         if (!this.portalAd) {
             on_hide && on_hide();
-            show_toast && this.createToast('努力加载中,请稍后再试~');
+            show_toast && this.createToast("努力加载中,请稍后再试~");
             return;
         }
         this._game_portal_hide = on_hide;
         this.portalAd.load().then(() => {
             this.portalAd.show().then(() => {
-                this.logi('show success');
+                this.logi("show success");
                 this.hideBanner();
                 on_show && on_show();
             }).catch(error => {
-                this.loge('showGamePortal show error:', error);
+                this.loge("showGamePortal show error:", error);
                 on_hide && on_hide();
-                show_toast && this.createToast('努力加载中,请稍后再试~');
+                show_toast && this.createToast("努力加载中,请稍后再试~");
             });
         }).catch(error => {
-            this.loge('showGamePortal load error:', error);
+            this.loge("showGamePortal load error:", error);
             on_hide && on_hide();
-            show_toast && this.createToast('努力加载中,请稍后再试~');
+            show_toast && this.createToast("努力加载中,请稍后再试~");
         });
     }
     destroyGamePortal() {
@@ -1358,13 +1358,13 @@ class OppoAdapter extends BaseAdapter_1.default {
      */
     initGameBanner() {
         let self = this;
-        if (window["qg"].getSystemInfoSync()['platformVersion'] >= 1076 && GxAdParams_1.AdParams.oppo.gameBanner && window["qg"].createGameBannerAd) {
+        if (window["qg"].getSystemInfoSync()["platformVersion"] >= 1076 && GxAdParams_1.AdParams.oppo.gameBanner && window["qg"].createGameBannerAd) {
             this.destroyGameBanner();
             this.gameBannerAd = window["qg"].createGameBannerAd({
                 adUnitId: GxAdParams_1.AdParams.oppo.gameBanner
             });
             this.gameBannerAd.onLoad(function () {
-                self.logi('盒子横幅广告加载成功');
+                self.logi("盒子横幅广告加载成功");
             });
             this.gameBannerAd.onError(function (err) {
                 self.logi(err);
@@ -1381,9 +1381,9 @@ class OppoAdapter extends BaseAdapter_1.default {
         if (!this.gameBannerAd)
             return;
         this.gameBannerAd.show().then(function () {
-            self.logi('show success');
+            self.logi("show success");
         }).catch(function (error) {
-            self.logi('show fail with:' + error.errCode + ',' + error.errMsg);
+            self.logi("show fail with:" + error.errCode + "," + error.errMsg);
         });
     }
     hideGameBanner() {
@@ -1405,8 +1405,8 @@ class OppoAdapter extends BaseAdapter_1.default {
     showAddDesktop(on_close, on_succ) {
         if (this.addIconNode && this.addIconNode !== undefined && cc.isValid(this.addIconNode.node))
             return;
-        let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/add_icon', cc.Prefab));
-        this.addIconNode = node.getComponent('Gx_add_icon');
+        let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/add_icon", cc.Prefab));
+        this.addIconNode = node.getComponent("Gx_add_icon");
         this.addIconNode && this.addIconNode.show(on_close, on_succ);
     }
     /**判断是否支持添加桌面 */
@@ -1415,7 +1415,7 @@ class OppoAdapter extends BaseAdapter_1.default {
             window["qg"].hasShortcutInstalled({
                 success: res => {
                     // 判断图标未存在时，创建图标
-                    this.logi(" hasShortcutInstalled " + (res ? 'has add' : 'can add'));
+                    this.logi(" hasShortcutInstalled " + (res ? "has add" : "can add"));
                     if (res == false) {
                         can_add && can_add();
                     }
@@ -1454,7 +1454,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                     if (showToast) {
                         window["qg"].showToast({
                             title: "请稍后再试",
-                            icon: "none",
+                            icon: "none"
                         });
                     }
                 }
@@ -1479,7 +1479,7 @@ class OppoAdapter extends BaseAdapter_1.default {
     reportAdClick(native_data) {
         super.reportAdClick(native_data);
         // ocpx 上传
-        GxGame_1.default.uploadOcpx('gads');
+        GxGame_1.default.uploadOcpx("gads");
     }
     /**
      * 开局自动跳转原生
@@ -1499,11 +1499,67 @@ class OppoAdapter extends BaseAdapter_1.default {
         super.LOGE("[OppoAdapter]", ...data);
     }
     logw(...data) {
-        super.LOGW('[OppoAdapter]', ...data);
+        super.LOGW("[OppoAdapter]", ...data);
     }
     showGameOverAD() {
         this.showVideo((res) => {
         }, "GxGameOverAd");
+    }
+    userFrom(callback) {
+        //现在还没找到他用什么方法
+        //@ts-ignore
+        if (window["testDataToServer"] && testDataToServer.isAdUser) {
+            return callback && callback(true);
+        }
+        callback && callback(false);
+        /*    try {
+                let clickId = DataStorage.getItem("__clickid__");
+
+                if (!!clickId) {
+                    return callback && callback(true);
+
+                }
+
+                let launchOptionsSync = wx.getLaunchOptionsSync();
+                let query = launchOptionsSync.query;
+                clickId = query["gdt_vid"];
+
+                if (!!clickId) {
+                    DataStorage.setItem("__clickid__", clickId);
+                    return callback && callback(true);
+                }
+                let queryElement = query["weixinadinfo"];
+                if (queryElement) {
+                    // aid.traceid.scene_type.0
+                    let aid = queryElement.weixinadinfo.split(".")[0];
+
+                    if (!!aid) {
+                        return callback && callback(true);
+
+
+                    }
+
+
+                }
+
+
+                /!*    if (this.gxEngine == null) {
+                        return callback && callback(false);
+
+                    }
+
+                    let clickId1 = this.gxEngine.getClickId();
+                    if (!!clickId1) {
+                        return callback && callback(true);
+
+                    }*!/
+                return callback && callback(false);
+
+
+            } catch (e) {
+                callback && callback(false);
+
+            }*/
     }
 }
 exports.default = OppoAdapter;

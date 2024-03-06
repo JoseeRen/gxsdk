@@ -88,6 +88,7 @@ exports.AdParams = {
     vivo: {
         "gameName": "",
         labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        adLabelName: "",
         age: 12,
         company: "",
         softCode: "",
@@ -109,7 +110,7 @@ exports.AdParams = {
         bannerOnTop: true,
         labelVersion: "",
         havebox: false,
-        heJiConfig: "",
+        heJiConfig: ""
     },
     wx: {
         "gameName": "",
@@ -122,15 +123,16 @@ exports.AdParams = {
         ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
         appId: "wx4c32596749743cf9",
         //其他参数待定吧  有点复杂~~
-        video: 'adunit-d07b4473f0e01c0f',
-        banner: 'adunit-a8da4c3fda27eba1',
-        inter: 'adunit-d92be1b1d8ab6324',
-        inter_custom: 'adunit-e6d377baf12c177c',
+        video: "adunit-d07b4473f0e01c0f",
+        banner: "adunit-a8da4c3fda27eba1",
+        inter: "adunit-d92be1b1d8ab6324",
+        inter_custom: "adunit-e6d377baf12c177c",
         custom_left: "adunit-",
         custom_right: "adunit-",
         labelVersion: "",
         subIds: [],
         heJiConfig: "",
+        shareImgUrl: "", //https://res.sjzgxwl.com/shareimage/.jpg
     },
     qq: {
         "gameName": "",
@@ -158,10 +160,11 @@ exports.AdParams = {
         //没用
         sceneidtest: false,
         subIds: [],
-        heJiConfig: "",
+        heJiConfig: ""
     },
     ks: {
-        "gameName": "",
+        gameName: "",
+        appId: "",
         labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
         age: 12,
         company: "",
@@ -171,14 +174,14 @@ exports.AdParams = {
         ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
         inter: "",
         banner: "",
-        video: "",
+        video: "2300005032_01",
         labelVersion: "",
-        heJiConfig: "",
+        heJiConfig: ""
     },
     tt: {
         "gameName": "",
         appId: "",
-        ecpmConfigName: "tt7c3e0a83e3026c4a02_hcr",
+        ecpmConfigName: "",
         labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
         age: 12,
         company: "",
@@ -188,11 +191,11 @@ exports.AdParams = {
         ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
         inter: "",
         banner: "",
-        video: "",
+        video: "4r2q3gc5f2f1pg9mbm",
         labelVersion: "",
         umAppKey: "",
         shareTemplateId: "",
-        heJiConfig: "",
+        heJiConfig: ""
     },
     hw: {
         "gameName": "",
@@ -224,7 +227,7 @@ exports.AdParams = {
         debug_native2: "",
         labelVersion: "",
         umAppKey: "",
-        heJiConfig: "",
+        heJiConfig: ""
     },
     uc: {
         "gameName": "",

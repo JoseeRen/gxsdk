@@ -1313,5 +1313,13 @@ class OppoAdapter extends BaseAdapter_1.default {
         this.showVideo((res) => {
         }, "GxGameOverAd");
     }
+    userFrom(callback) {
+        //现在还没找到他用什么方法
+        // @ts-ignore
+        if (window["testDataToServer"] && testDataToServer.isAdUser) {
+            return callback && callback(true);
+        }
+        callback && callback(false);
+    }
 }
 exports.default = OppoAdapter;

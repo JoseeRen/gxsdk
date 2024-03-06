@@ -29,6 +29,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const GxGame_1 = __importDefault(require("../../GxGame"));
 const BaseAdapter_1 = __importStar(require("../base/BaseAdapter"));
 const GxAdParams_1 = require("../../GxAdParams");
+const GxEngine_1 = __importDefault(require("../../sdk/GxEngine"));
+const DataStorage_1 = __importDefault(require("../../util/DataStorage"));
+const GxConstant_1 = __importDefault(require("../../core/GxConstant"));
 class KsAdapter extends BaseAdapter_1.default {
     constructor() {
         super(...arguments);
@@ -37,6 +40,10 @@ class KsAdapter extends BaseAdapter_1.default {
         this.isHaiWai = false;
         this.systemInfo = null;
         this.kwaiOpenId = '';
+        this.gxEngine = null;
+        this.openId = "";
+        this.union_id = "";
+        this.getOpenidTry = 0;
     }
     static getInstance() {
         if (this.instance == null) {
@@ -46,7 +53,9 @@ class KsAdapter extends BaseAdapter_1.default {
     }
     initAd() {
         // @ts-ignore
-        let env = ks.getSystemInfoSync().host.env;
+        let systemInfoSync = ks.getSystemInfoSync();
+        let env = systemInfoSync.host.env;
+        this.systemInfo = systemInfoSync;
         if (env == 'kwaipro' || env == 'snackvideo' || env == 'kwaime') {
             console.log('海外版本：' + env);
             this.isHaiWai = true;
@@ -58,7 +67,26 @@ class KsAdapter extends BaseAdapter_1.default {
         else {
             this.isHaiWai = false;
             console.log('正常版本：' + env);
-            this.interTimeLimit = 5;
+            this.interTimeLimit = 60;
+            setTimeout(() => {
+                this.canShowInter = true;
+            }, this.interTimeLimit * 1000);
+            GxAdParams_1.AdParams.ks["appId"] = systemInfoSync.host.appId;
+            this.gxEngine = new GxEngine_1.default();
+            this.getOpenId((openId, anonymousId) => {
+                // @ts-ignore
+                if (ks.uma) {
+                    // @ts-ignore
+                    ks.uma.setOpenid(openId);
+                }
+                //window["ge"]
+                this.gxEngine.init({ openId: openId, appToken: GxAdParams_1.AdParams.ks.appId, appId: GxAdParams_1.AdParams.ks.appId }).then(e => {
+                    console.log("gxEngine初始化成功");
+                }).catch(e => {
+                    console.log(e);
+                    console.log("gxEngine初始化失败:" + e);
+                });
+            });
         }
         this.initVideo();
         this.initRecorder();
@@ -629,6 +657,165 @@ class KsAdapter extends BaseAdapter_1.default {
         }
         else {
             on_succ && on_succ();
+        }
+    }
+    getOpenId(callback) {
+        let self = this;
+        let item = DataStorage_1.default.getItem("__gx_openId__", null);
+        let union_id = DataStorage_1.default.getItem("__gx_unionId__", null);
+        if (!!item && !!union_id) {
+            console.log("获取到缓存的openid：" + item);
+            console.log("获取到缓存的union_id：" + union_id);
+            self.openId = item;
+            self.union_id = union_id;
+            callback && callback(item, union_id);
+            return;
+        }
+        if (self.getOpenidTry >= 5) {
+            console.warn("获取openId重试最大次数了");
+            return;
+        }
+        window["ks"].login({
+            force: true,
+            success(res) {
+                console.log(`login 调用成功${res.code} `);
+                if (res.code) {
+                    self.requestGet(`${GxConstant_1.default.Code2SessionUrl}?appId=${GxAdParams_1.AdParams.ks.appId}&code=${res.code}`, (res) => {
+                        self.logi(res.data);
+                        if (res.data.code == 1) {
+                            self.openId = res.data.data.openid;
+                            self.union_id = res.data.data.union_id;
+                            self.logi("获取openid成功：" + self.openId);
+                            self.logi("获取union_id成功：" + self.union_id);
+                            DataStorage_1.default.setItem("__gx_openId__", self.openId);
+                            DataStorage_1.default.setItem("__gx_unionId__", self.union_id);
+                            callback && callback(self.openId, self.union_id);
+                        }
+                        else {
+                            self.logw("登录失败！" + res.data["msg"]);
+                            // self.reported = false
+                            setTimeout(() => {
+                                self.getOpenidTry++;
+                                self.getOpenId(callback);
+                            }, 3000);
+                        }
+                    }, (res) => {
+                        self.logw("登录失败！" + res["errMsg"]);
+                        self.logw(res);
+                        // self.reported = false
+                        setTimeout(() => {
+                            self.getOpenidTry++;
+                            self.getOpenId(callback);
+                        }, 3000);
+                    });
+                }
+                else {
+                    console.log("登录没code");
+                    // self.reported = false
+                    setTimeout(() => {
+                        self.getOpenidTry++;
+                        self.getOpenId(callback);
+                    }, 3000);
+                }
+            },
+            fail(res) {
+                console.log(`login 调用失败`);
+                // self.reported = false
+                setTimeout(() => {
+                    self.getOpenidTry++;
+                    self.getOpenId(callback);
+                }, 3000);
+            }
+        });
+    }
+    logi(...data) {
+        super.LOG("[KSAdapter]", ...data);
+    }
+    loge(...data) {
+        super.LOGE("[KSAdapter]", ...data);
+    }
+    logw(...data) {
+        super.LOGW("[KSAdapter]", ...data);
+    }
+    requestGet(url, successCallback, failCallback) {
+        //@ts-ignore
+        ks.request({
+            url: url,
+            success(res) {
+                successCallback && successCallback(res);
+            },
+            fail(res) {
+                failCallback && failCallback(res);
+            }
+        });
+    }
+    requestPost(url, data, successCallback, failCallback) {
+        //@ts-ignore
+        ks.request({
+            url: url,
+            data: data,
+            header: {
+                "content-type": "application/json"
+            },
+            method: "POST",
+            dataType: "JSON",
+            responseType: "text",
+            success(res) {
+                try {
+                    successCallback && successCallback({
+                        statusCode: res.statusCode,
+                        header: res.header,
+                        data: JSON.parse(res.data)
+                    });
+                    console.log("转换成功");
+                }
+                catch (e) {
+                    console.log(e);
+                    console.log("转换失败");
+                    successCallback && successCallback(res);
+                }
+            },
+            fail(res) {
+                failCallback && failCallback(res);
+            }
+        });
+    }
+    /*
+  * 判断是不是买量用户进来 的
+  * callback 返回值true 代表是  false不是
+  *
+  * */
+    userFrom(callback) {
+        try {
+            // @ts-ignore
+            if (window["testDataToServer"] && testDataToServer.isAdUser) {
+                return callback && callback(true);
+            }
+            let clickId = DataStorage_1.default.getItem("__clickid__");
+            if (!!clickId) {
+                return callback && callback(true);
+            }
+            // @ts-ignore
+            let launchOptionsSync = ks.getLaunchOptionsSync();
+            let query = launchOptionsSync.query;
+            clickId = query.callback;
+            if (!!clickId) {
+                return callback && callback(true);
+            }
+            /*    if (this.gxEngine == null) {
+                    return callback && callback(false);
+
+                }
+
+                let clickId1 = this.gxEngine.getClickId();
+                if (!!clickId1) {
+                    return callback && callback(true);
+
+                }*/
+            return callback && callback(false);
+        }
+        catch (e) {
+            callback && callback(false);
         }
     }
 }

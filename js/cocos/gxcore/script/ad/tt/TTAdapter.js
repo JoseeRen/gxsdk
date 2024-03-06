@@ -34,16 +34,17 @@ const GxEnum_1 = require("../../core/GxEnum");
 const GxAdParams_1 = require("../../GxAdParams");
 const GxConstant_1 = __importDefault(require("../../core/GxConstant"));
 const DataStorage_1 = __importDefault(require("../../util/DataStorage"));
-const TTAdMonitor_1 = __importDefault(require("./TTAdMonitor"));
+const GxEngine_1 = __importDefault(require("../../sdk/GxEngine"));
 /*获取adid  创建 id   向服务器发请求 获取 配置*/
 class TTAdapter extends BaseAdapter_1.default {
     constructor() {
         super(...arguments);
         this.shareRcorderLayer = null;
+        this.gxEngine = null;
         this.recorderTime = 0;
         this.canReward = false;
-        this.openId = '';
-        this.anonymousId = '';
+        this.openId = "";
+        this.anonymousId = "";
         this.getOpenidTry = 0;
     }
     static getInstance() {
@@ -62,7 +63,8 @@ class TTAdapter extends BaseAdapter_1.default {
             //@ts-ignore
             GxAdParams_1.AdParams.tt.appId = tt.getEnvInfoSync().microapp.appId;
         }
-        console.log('当前appid:' + GxAdParams_1.AdParams.tt.appId);
+        console.log("当前appid:" + GxAdParams_1.AdParams.tt.appId);
+        this.gxEngine = new GxEngine_1.default();
         this.initBanner();
         this.initVideo();
         this.initRecorder();
@@ -75,26 +77,32 @@ class TTAdapter extends BaseAdapter_1.default {
                 // @ts-ignore
                 tt.uma.setOpenid(openId);
             }
-            TTAdMonitor_1.default.getInstance().initAdMonitor(openId);
+            // TTAdMonitor.getInstance().initAdMonitor(openId);
+            //window["ge"]
+            this.gxEngine.init({ openId: openId, appToken: GxAdParams_1.AdParams.tt.appId, appId: GxAdParams_1.AdParams.tt.appId }).then(e => {
+                console.log("gxEngine初始化成功");
+            }).catch(e => {
+                console.log("gxEngine初始化失败");
+            });
             // this.getAdConfig()
             // this.ttReport()
         });
         // @ts-ignore
         tt.onShow((res) => {
-            console.log('启动场景字段：', res.launch_from, ', ', res.location);
-            if (res.launch_from == 'homepage' || res.location == 'sidebar_card') {
-                console.log('是从侧边栏启动的');
+            console.log("启动场景字段：", res.launch_from, ", ", res.location);
+            if (res.launch_from == "homepage" || res.location == "sidebar_card") {
+                console.log("是从侧边栏启动的");
                 this.canReward = true;
             }
         });
     }
     getOpenId(callback) {
         let self = this;
-        let item = DataStorage_1.default.getItem('__gx_openId__', null);
-        let anonymousId = DataStorage_1.default.getItem('__gx_anonymousId__', null);
+        let item = DataStorage_1.default.getItem("__gx_openId__", null);
+        let anonymousId = DataStorage_1.default.getItem("__gx_anonymousId__", null);
         if (!!item && !!anonymousId) {
-            console.log('获取到缓存的openid：' + item);
-            console.log('获取到缓存的anonymousId：' + anonymousId);
+            console.log("获取到缓存的openid：" + item);
+            console.log("获取到缓存的anonymousId：" + anonymousId);
             self.openId = item;
             self.anonymousId = anonymousId;
             callback && callback(item, anonymousId);
@@ -104,7 +112,7 @@ class TTAdapter extends BaseAdapter_1.default {
             console.warn("获取openId重试最大次数了");
             return;
         }
-        window['tt'].login({
+        window["tt"].login({
             force: true,
             success(res) {
                 console.log(`login 调用成功${res.code} ${res.anonymousCode}`);
@@ -114,14 +122,14 @@ class TTAdapter extends BaseAdapter_1.default {
                         if (res.data.code == 1) {
                             self.openId = res.data.data.openid;
                             self.anonymousId = res.data.data.anonymousid;
-                            self.logi('获取openid成功：' + self.openId);
-                            self.logi('获取anonymousId成功：' + self.anonymousId);
-                            DataStorage_1.default.setItem('__gx_openId__', self.openId);
-                            DataStorage_1.default.setItem('__gx_anonymousId__', self.anonymousId);
+                            self.logi("获取openid成功：" + self.openId);
+                            self.logi("获取anonymousId成功：" + self.anonymousId);
+                            DataStorage_1.default.setItem("__gx_openId__", self.openId);
+                            DataStorage_1.default.setItem("__gx_anonymousId__", self.anonymousId);
                             callback && callback(self.openId, self.anonymousId);
                         }
                         else {
-                            self.logw('登录失败！' + res.data['msg']);
+                            self.logw("登录失败！" + res.data["msg"]);
                             // self.reported = false
                             setTimeout(() => {
                                 self.getOpenidTry++;
@@ -129,7 +137,7 @@ class TTAdapter extends BaseAdapter_1.default {
                             }, 3000);
                         }
                     }, (res) => {
-                        self.logw('登录失败！' + res['errMsg']);
+                        self.logw("登录失败！" + res["errMsg"]);
                         self.logw(res);
                         // self.reported = false
                         setTimeout(() => {
@@ -139,7 +147,7 @@ class TTAdapter extends BaseAdapter_1.default {
                     });
                 }
                 else {
-                    console.log('登录没code');
+                    console.log("登录没code");
                     // self.reported = false
                     setTimeout(() => {
                         self.getOpenidTry++;
@@ -154,7 +162,7 @@ class TTAdapter extends BaseAdapter_1.default {
                     self.getOpenidTry++;
                     self.getOpenId(callback);
                 }, 3000);
-            },
+            }
         });
     }
     initBanner() {
@@ -169,14 +177,14 @@ class TTAdapter extends BaseAdapter_1.default {
             style: {
                 left: 0,
                 top: GxGame_1.default.screenHeight,
-                width: GxGame_1.default.screenWidth / 2,
-            },
+                width: GxGame_1.default.screenWidth / 2
+            }
         });
         this.bannerAd.onLoad(() => {
-            console.log(' banner 加载完成');
+            console.log(" banner 加载完成");
         });
         this.bannerAd.onError((err) => {
-            console.log(' banner 广告错误' + JSON.stringify(err));
+            console.log(" banner 广告错误" + JSON.stringify(err));
         });
         this.bannerAd.onResize((res) => {
             this.bannerAd.style.top = GxGame_1.default.screenHeight - res.height;
@@ -211,31 +219,32 @@ class TTAdapter extends BaseAdapter_1.default {
     }
     initVideo() {
         if (GxAdParams_1.AdParams.tt.video == null || GxAdParams_1.AdParams.tt.video.length <= 0) {
-            console.warn('激励视频参数空');
+            console.warn("激励视频参数空");
             return;
         }
         this.destroyVideo();
         // @ts-ignore
         this.videoAd = tt.createRewardedVideoAd({
-            adUnitId: GxAdParams_1.AdParams.tt.video,
+            adUnitId: GxAdParams_1.AdParams.tt.video
         });
         this.videoAd.load();
         this.videoAd.onLoad((res) => {
-            console.log('激励视频加载', res);
+            console.log("激励视频加载", res);
         });
         this.videoAd.onError((err) => {
-            console.log('激励视频-失败', err);
+            console.log("激励视频-失败", err);
             this._videoErrorEvent();
         });
         this.videoAd.onClose((res) => {
-            console.log('激励视频关闭');
+            console.log("激励视频关闭");
             this.recorderResume();
             if (res && res.isEnded) {
-                TTAdMonitor_1.default.getInstance().rewardAdEnd();
+                //  TTAdMonitor.getInstance().rewardAdEnd();
+                this.gxEngine.rewardAdEnd();
                 // this.videoReward++
                 //
                 // this.checkAdTarget()
-                console.log('激励视频完成');
+                console.log("激励视频完成");
                 this.videocallback && this.videocallback(true);
                 this._videoCompleteEvent();
             }
@@ -246,7 +255,7 @@ class TTAdapter extends BaseAdapter_1.default {
             this.videoAd.load();
         });
     }
-    showVideo(complete, flag = '') {
+    showVideo(complete, flag = "") {
         super.showVideo(null, flag);
         if (this.videoAd == null)
             this.initVideo();
@@ -275,9 +284,9 @@ class TTAdapter extends BaseAdapter_1.default {
                 this._videoErrorEvent();
                 // @ts-ignore
                 tt.showModal({
-                    title: '暂无广告',
-                    content: '分享游戏获取奖励？',
-                    confirmText: '分享',
+                    title: "暂无广告",
+                    content: "分享游戏获取奖励？",
+                    confirmText: "分享",
                     success: (res) => {
                         if (res.confirm) {
                             GxGame_1.default.shareGame((ret) => {
@@ -288,11 +297,11 @@ class TTAdapter extends BaseAdapter_1.default {
                     fail: (res) => {
                         // @ts-ignore
                         tt.showToast({
-                            title: '暂无广告，请稍后再试',
-                            icon: 'none',
+                            title: "暂无广告，请稍后再试",
+                            icon: "none"
                         });
                         this.videocallback && this.videocallback(false);
-                    },
+                    }
                 });
             });
         });
@@ -314,16 +323,16 @@ class TTAdapter extends BaseAdapter_1.default {
         this.destroyNormalInter();
         // @ts-ignore
         this.interAd = tt.createInterstitialAd({
-            adUnitId: GxAdParams_1.AdParams.tt.inter,
+            adUnitId: GxAdParams_1.AdParams.tt.inter
         });
         this.interAd &&
             this.interAd.onLoad(() => {
-                console.log('插屏广告加载');
+                console.log("插屏广告加载");
                 on_show && on_show();
             });
         this.interAd &&
             this.interAd.onError((err) => {
-                console.log('show inter err' + JSON.stringify(err));
+                console.log("show inter err" + JSON.stringify(err));
                 this.destroyNormalInter();
             });
         this.interAd &&
@@ -368,8 +377,8 @@ class TTAdapter extends BaseAdapter_1.default {
                 this.showInterstitial(on_show, on_hide);
             }
             else {
-                let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_interstitial', cc.Prefab));
-                this.nativeInter = node.getComponent('gx_native_interstitial');
+                let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_interstitial", cc.Prefab));
+                this.nativeInter = node.getComponent("gx_native_interstitial");
                 this.nativeInter &&
                     this.nativeInter.show(native_data, () => {
                         this.interShowTime = this.get_time();
@@ -391,14 +400,14 @@ class TTAdapter extends BaseAdapter_1.default {
         this.gameRecorder = tt.getGameRecorderManager();
         // 设置录屏相关监听
         this.gameRecorder.onStart((res) => {
-            console.log('录制开始', JSON.stringify(res));
+            console.log("录制开始", JSON.stringify(res));
             this.gameRecorderState = BaseAdapter_1.RECORDER_STATE.START;
             this.recorderTime = this.get_time();
             this.videoPath = null;
         });
         // 监听录屏过程中的错误，需根据错误码处理对应逻辑
         this.gameRecorder.onError((err) => {
-            console.log('录制出错', JSON.stringify(err));
+            console.log("录制出错", JSON.stringify(err));
             this.gameRecorderState = BaseAdapter_1.RECORDER_STATE.NO;
         });
         // stop 事件的回调函数
@@ -421,12 +430,12 @@ class TTAdapter extends BaseAdapter_1.default {
         });
         // pause 事件的回调函数
         this.gameRecorder.onPause(() => {
-            console.log('暂停录制');
+            console.log("暂停录制");
             this.gameRecorderState = BaseAdapter_1.RECORDER_STATE.PAUSE;
         });
         // resume 事件的回调函数
         this.gameRecorder.onResume(() => {
-            console.log('继续录制');
+            console.log("继续录制");
             this.gameRecorderState = BaseAdapter_1.RECORDER_STATE.RESUME;
         });
     }
@@ -444,7 +453,7 @@ class TTAdapter extends BaseAdapter_1.default {
         if (this.gameRecorder && this.gameRecorderState == BaseAdapter_1.RECORDER_STATE.NO) {
             this.gameRecorder &&
                 this.gameRecorder.start({
-                    duration: 300,
+                    duration: 300
                 });
         }
     }
@@ -456,52 +465,52 @@ class TTAdapter extends BaseAdapter_1.default {
     }
     shareRecorder(on_succ, on_fail) {
         if (this.gameRecorder == null || this.videoPath == null) {
-            this.createToast('分享失败');
+            this.createToast("分享失败");
             return on_fail && on_fail();
         }
         // @ts-ignore
         tt.shareAppMessage({
-            channel: 'video',
-            query: '',
+            channel: "video",
+            query: "",
             templateId: GxAdParams_1.AdParams.tt.shareTemplateId,
             title: GxAdParams_1.AdParams.tt.gameName,
             desc: GxAdParams_1.AdParams.tt.gameName,
             extra: {
                 videoPath: this.videoPath,
                 videoTopics: [GxAdParams_1.AdParams.tt.gameName],
-                hashtag_list: [GxAdParams_1.AdParams.tt.gameName],
+                hashtag_list: [GxAdParams_1.AdParams.tt.gameName]
             },
             success: () => {
-                console.log('分享视频成功');
+                console.log("分享视频成功");
                 on_succ && on_succ();
                 this.onRecoderStop = null;
                 this.videoPath = null;
             },
             fail: (res) => {
-                console.log('分享视频失败', res);
+                console.log("分享视频失败", res);
                 on_fail && on_fail();
                 if (res.errMsg.search(/short/gi) > -1) {
-                    this.createToast('分享失败');
+                    this.createToast("分享失败");
                 }
                 else if (res.errMsg.search(/cancel/gi) > -1) {
-                    this.createToast('取消分享');
+                    this.createToast("取消分享");
                 }
                 else {
-                    this.createToast('分享失败，请重试！');
+                    this.createToast("分享失败，请重试！");
                 }
-            },
+            }
         });
     }
     showGamePortal() {
         // @ts-ignore
         const systemInfo = tt.getSystemInfoSync();
-        if (systemInfo.platform !== 'ios') {
+        if (systemInfo.platform !== "ios") {
             let options = [];
             for (let appid of GxGame_1.default.recommedList) {
                 options.push({
                     appId: appid,
-                    query: '',
-                    extraData: {},
+                    query: "",
+                    extraData: {}
                 });
             }
             if (options.length > 0) {
@@ -509,20 +518,20 @@ class TTAdapter extends BaseAdapter_1.default {
                 tt.showMoreGamesModal({
                     appLaunchOptions: options,
                     success(res) {
-                        console.log('success', res.errMsg);
+                        console.log("success", res.errMsg);
                     },
                     fail(res) {
-                        console.log('fail', res.errMsg);
-                    },
+                        console.log("fail", res.errMsg);
+                    }
                 });
             }
             else {
-                this.createToast('暂无广告！');
+                this.createToast("暂无广告！");
             }
         }
     }
     showRecorderLayer(on_succ, on_fail) {
-        console.warn('//TODO   show recorderLayer');
+        console.warn("//TODO   show recorderLayer");
         if (this.shareRcorderLayer == null ||
             this.shareRcorderLayer === undefined ||
             !cc.isValid(this.shareRcorderLayer.node, true)) {
@@ -540,17 +549,48 @@ class TTAdapter extends BaseAdapter_1.default {
             },
             fail(res) {
                 failCallback && failCallback(res);
+            }
+        });
+    }
+    requestPost(url, data, successCallback, failCallback) {
+        //@ts-ignore
+        tt.request({
+            url: url,
+            data: data,
+            header: {
+                "content-type": "application/json"
             },
+            method: "POST",
+            dataType: "JSON",
+            responseType: "text",
+            success(res) {
+                try {
+                    successCallback && successCallback({
+                        statusCode: res.statusCode,
+                        header: res.header,
+                        data: JSON.parse(res.data)
+                    });
+                    console.log("转换成功");
+                }
+                catch (e) {
+                    console.log(e);
+                    console.log("转换失败");
+                    successCallback && successCallback(res);
+                }
+            },
+            fail(res) {
+                failCallback && failCallback(res);
+            }
         });
     }
     logi(...data) {
-        super.LOG('[TTAdapter]', ...data);
+        super.LOG("[TTAdapter]", ...data);
     }
     loge(...data) {
-        super.LOGE('[TTAdapter]', ...data);
+        super.LOGE("[TTAdapter]", ...data);
     }
     logw(...data) {
-        super.LOGW('[TTAdapter]', ...data);
+        super.LOGW("[TTAdapter]", ...data);
     }
     addDesktop(callback) {
         // @ts-ignore
@@ -560,24 +600,62 @@ class TTAdapter extends BaseAdapter_1.default {
                     callback();
             },
             fail(err) {
-                console.log('添加桌面失败', err.errMsg);
-            },
+                console.log("添加桌面失败", err.errMsg);
+            }
         });
     }
     hasAddDesktop(can_add, callback) {
         // @ts-ignore
         tt.checkShortcut({
             success(res) {
-                console.log('检查快捷方式', res.status);
+                console.log("检查快捷方式", res.status);
                 if (res.status.exist) {
-                    console.log('隐藏桌面');
+                    console.log("隐藏桌面");
                     callback && callback();
                 }
             },
             fail(res) {
-                console.log('检查快捷方式失败', res.errMsg);
-            },
+                console.log("检查快捷方式失败", res.errMsg);
+            }
         });
+    }
+    /*
+    * 判断是不是买量用户进来 的
+    * callback 返回值true 代表是  false不是
+    *
+    * */
+    userFrom(callback) {
+        try {
+            // @ts-ignore
+            if (window["testDataToServer"] && testDataToServer.isAdUser) {
+                return callback && callback(true);
+            }
+            let clickId = DataStorage_1.default.getItem("__clickid__");
+            if (!!clickId) {
+                return callback && callback(true);
+            }
+            // @ts-ignore
+            let launchOptionsSync = tt.getLaunchOptionsSync();
+            let query = launchOptionsSync.query;
+            clickId = query.clickid;
+            if (!!clickId) {
+                return callback && callback(true);
+            }
+            /*    if (this.gxEngine == null) {
+                    return callback && callback(false);
+
+                }
+
+                let clickId1 = this.gxEngine.getClickId();
+                if (!!clickId1) {
+                    return callback && callback(true);
+
+                }*/
+            return callback && callback(false);
+        }
+        catch (e) {
+            callback && callback(false);
+        }
     }
 }
 exports.default = TTAdapter;

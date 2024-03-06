@@ -64,11 +64,14 @@ class TTAdMonitor {
             return;
         }
         let self = this;
-        TTAdapter_1.default.getInstance().requestGet(
+        TTAdapter_1.default.getInstance().requestPost(
         /*
                     `https://api.sjzgxwl.com/tt/getConfig?appId=${AdParams.tt.appId}&openId=${self.openId}&name=${AdParams.tt.ecpmConfigName}`,
         */
-        `https://api.sjzgxwl.com/tt/getConfigNew?appId=${GxAdParams_1.AdParams.tt.appId}&openId=${self._openId}&adid=${self.getAdid()}&creativeid=${self.getCreativeid()}`, (res) => {
+        `https://api.sjzgxwl.com/tt/getConfigNew?appId=${GxAdParams_1.AdParams.tt.appId}&openId=${self._openId}`, {
+            // @ts-ignore
+            launchOptions: tt.getLaunchOptionsSync()
+        }, (res) => {
             self.logi(res.data);
             if (res.data.code == 1) {
                 self.logi("获取ecpm配置成功：");
@@ -185,31 +188,6 @@ class TTAdMonitor {
     logw(...data) {
         console.warn("[TTAdMonitor]", ...data);
     }
-    getClickId() {
-        if (!!this.clickId) {
-            return this.clickId;
-        }
-        // @ts-ignore
-        let launchOptionsSync = tt.getLaunchOptionsSync();
-        let query = launchOptionsSync.query;
-        let clickId = query.clickid;
-        if (!!clickId) {
-        }
-        else {
-            // clickId = DataStorage.getItem('__clickid__')
-            let queryElement = query["ad_params"];
-            if (queryElement) {
-                clickId = queryElement["clickid"];
-            }
-            if (!!clickId) {
-            }
-            else {
-                // clickId = "";
-                clickId = DataStorage_1.default.getItem("__clickid__");
-            }
-        }
-        return clickId;
-    }
     checkAdTarget() {
         clearTimeout(this.checkAdTargetTimeout);
         this._checkAdTarget();
@@ -226,7 +204,10 @@ class TTAdMonitor {
         }
         let self = this;
         // self.getOpenId((openId) => {
-        TTAdapter_1.default.getInstance().requestGet(`https://api.sjzgxwl.com/tt/report?appId=${GxAdParams_1.AdParams.tt.appId}&eventType=${event}&openId=${self._openId}&clickId=${clickId}&adid=${self.getAdid()}&creativeid=${self.getCreativeid()}`, (res) => {
+        TTAdapter_1.default.getInstance().requestPost(`https://api.sjzgxwl.com/tt/report?appId=${GxAdParams_1.AdParams.tt.appId}&eventType=${event}&openId=${self._openId}&clickId=${this.getClickId()}`, {
+            // @ts-ignore
+            launchOptions: tt.getLaunchOptionsSync()
+        }, (res) => {
             self.logi(res.data);
             if (res.data.code == 1) {
                 callback(true);
@@ -239,48 +220,136 @@ class TTAdMonitor {
         });
         // })
     }
-    getAdid() {
+    getClickId() {
+        if (!!this.clickId) {
+            return this.clickId;
+        }
         // @ts-ignore
         let launchOptionsSync = tt.getLaunchOptionsSync();
+        /*  try {
+              let task = tt.request({
+                  url: "https://api.sjzgxwl.com/tt/reportTest?openId="+this._openId,
+                  data: launchOptionsSync,
+                  header: {
+                      "content-type": "application/json"
+                  },
+                  method: "POST",
+                  dataType: "JSON", // 指定返回数据的类型为 json
+                  responseType: "text",
+                  success(res) {
+                      console.log("调用成功", res.data);
+                  },
+                  fail(res) {
+                      console.log("调用失败", res.errMsg);
+                  }
+              });
+          } catch (e) {
+
+          }*/
         let query = launchOptionsSync.query;
-        let adid = query.adid;
-        if (!!adid) {
+        let clickId = query.clickid;
+        if (!!clickId) {
         }
         else {
-            // adid = ""
             let queryElement = query["ad_params"];
             if (queryElement) {
-                adid = queryElement["adid"];
+                clickId = queryElement["clickid"];
             }
+            if (!!clickId) {
+            }
+            else {
+                // clickId = "";
+                let launchOptionsSyncElement = launchOptionsSync["ad_params"];
+                if (launchOptionsSyncElement) {
+                    clickId = launchOptionsSyncElement["clickid"];
+                }
+                else {
+                    // adid = "";
+                    clickId = DataStorage_1.default.getItem("__clickid__");
+                }
+            }
+        }
+        return clickId;
+    }
+    /*    private getAdid() {
+            // @ts-ignore
+            let launchOptionsSync = tt.getLaunchOptionsSync();
+            try {
+                let task = tt.request({
+                    url: "https://api.sjzgxwl.com/tt/reportTest?openId="+this._openId,
+                    data: launchOptionsSync,
+                    header: {
+                        "content-type": "application/json"
+                    },
+                    method: "POST",
+                    dataType: "JSON", // 指定返回数据的类型为 json
+                    responseType: "text",
+                    success(res) {
+                        console.log("调用成功", res.data);
+                    },
+                    fail(res) {
+                        console.log("调用失败", res.errMsg);
+                    }
+                });
+            } catch (e) {
+
+            }
+            let query = launchOptionsSync.query;
+            let adid = query["promotionid"];
             if (!!adid) {
+            } else {
+                let queryElement = query["ad_params"];
+                if (queryElement) {
+                    adid = queryElement["adid"];
+                }
+                if (!!adid) {
+
+                } else {
+                    // adid = "";
+
+                    let launchOptionsSyncElement = launchOptionsSync["ad_params"];
+                    if (launchOptionsSyncElement) {
+                        adid = launchOptionsSyncElement["adid"];
+
+
+                    } else {
+                        adid = "";
+                    }
+                }
+
             }
-            else {
-                adid = "";
-            }
-        }
-        return adid;
-    }
-    getCreativeid() {
-        // @ts-ignore
-        let launchOptionsSync = tt.getLaunchOptionsSync();
-        let query = launchOptionsSync.query;
-        let creativeid = query.creativeid;
-        if (!!creativeid) {
-        }
-        else {
-            // creativeid = ""
-            let queryElement = query["ad_params"];
-            if (queryElement) {
-                creativeid = queryElement["creativeid"];
-            }
-            if (!!creativeid) {
-            }
-            else {
-                creativeid = "";
-            }
-        }
-        return creativeid;
-    }
+            return adid;
+        }*/
+    /*   private getCreativeid() {
+           // @ts-ignore
+           let launchOptionsSync = tt.getLaunchOptionsSync();
+
+           let query = launchOptionsSync.query;
+           let creativeid = query.creativeid;
+           if (!!creativeid) {
+           } else {
+               let queryElement = query["ad_params"];
+               if (queryElement) {
+                   creativeid = queryElement["creativeid"];
+               }
+               if (!!creativeid) {
+
+               } else {
+                   // creativeid = "";
+                   let launchOptionsSyncElement = launchOptionsSync["ad_params"];
+                   if (launchOptionsSyncElement) {
+                       creativeid = launchOptionsSyncElement["creativeid"];
+
+
+                   } else {
+                       creativeid = "";
+                   }
+
+
+               }
+           }
+           return creativeid;
+       }*/
     _checkAdTarget() {
         //玩游戏大于等于10分钟
         if ((this.gameTime >= this.ecpmObj.gameTime * 60 &&
@@ -324,7 +393,10 @@ class TTAdMonitor {
                 return;
             }
             // self.getOpenId((openId) => {
-            TTAdapter_1.default.getInstance().requestGet(`https://api.sjzgxwl.com/tt/getEcpm?appId=${GxAdParams_1.AdParams.tt.appId}&openId=${self._openId}`, (res) => {
+            TTAdapter_1.default.getInstance().requestPost(`https://api.sjzgxwl.com/tt/getEcpm?appId=${GxAdParams_1.AdParams.tt.appId}&openId=${self._openId}`, {
+                // @ts-ignore
+                launchOptions: tt.getLaunchOptionsSync()
+            }, (res) => {
                 self.logi(res.data);
                 if (res.data.code == 1) {
                     self.logi("获取ecpm成功：");

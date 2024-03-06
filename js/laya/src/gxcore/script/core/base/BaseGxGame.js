@@ -29,6 +29,7 @@ const uma_min_js_1 = __importDefault(require("../../uma.min.js"));
 const AndroidH5Adapter_1 = __importDefault(require("../../ad/android/AndroidH5Adapter"));
 const ZFBAdapter_1 = __importDefault(require("../../ad/zfb/ZFBAdapter"));
 const GxChecker_1 = __importDefault(require("../../GxChecker"));
+const ui_tt_box_1 = __importDefault(require("../../ui/ui_tt_box"));
 class BaseGxGame {
     static initPlatform(initCallback) {
         if (uma_min_js_1.default) {
@@ -1132,6 +1133,56 @@ class BaseGxGame {
             GxLog_1.default.e("咋会调用这儿！！！");
         }
     }
+    static showTTBoxBtnWithParent(parentNode, reward, coin) {
+        if (!GxGame_1.default.needTTBoxBtn()) {
+            console.log("不需要显示字节宝箱按钮");
+            return;
+        }
+        let self = this;
+        let showCallback = () => {
+            if (GxGame_1.default.btnTTBoxSp) {
+                var last = Laya.LocalStorage.getItem('TTRewardTime');
+                if (last != null && last != '' && last != undefined) {
+                    var lasttime = parseInt(last);
+                    var now = new Date();
+                    var nowtime = parseInt("" + now.getFullYear() + (now.getMonth() + 1) + now.getDate());
+                    if (lasttime == nowtime) {
+                        console.log("抖音侧边栏按钮奖励上一次领取之后还没过一天");
+                        return;
+                    }
+                }
+                const Image = Laya.Image;
+                let node = new Image();
+                node.texture = GxGame_1.default.btnTTBoxSp;
+                parentNode.addChild(node);
+                node.width = 100;
+                node.height = 100;
+                node.on(Laya.Event.CLICK, this, () => {
+                    console.log("点击了");
+                    GxGame_1.default.Ad().hideBanner();
+                    if (!this.ttBoxView || this.ttBoxView.parent == null) {
+                        this.ttBoxView = new ui_tt_box_1.default();
+                        this.ttBoxView.show(reward, coin, () => { node.visible = false; });
+                    }
+                });
+            }
+            else {
+                GxLog_1.default.e("显示字节侧边栏弹窗失败");
+            }
+        };
+        if (GxGame_1.default.btnTTBoxSp) {
+            showCallback();
+        }
+        else {
+            ResUtil_1.default.loadSprite('gx/texture/btn_TTBox' + '.png', (err, spriteFrame) => {
+                if (err) {
+                    GxLog_1.default.e("添加字节奖励按钮显示失败" + err);
+                }
+                GxGame_1.default.btnTTBoxSp = spriteFrame;
+                showCallback();
+            });
+        }
+    }
     static showAddDesktopBtnWithParent(parentNode) {
         GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.showAddDesktopBtn, {});
         if (!GxGame_1.default.needAddDesktopBtn()) {
@@ -1189,9 +1240,7 @@ class BaseGxGame {
     }
     static showMoreGameBtnWithParent(parentNode) {
         GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.showMoreGameBtn, {});
-        if (GxUtils_1.default.getNativePlatform() == GxEnum_1.PLATFORM.OPPO ||
-            GxConstant_2.default.IS_QQ_GAME ||
-            GxConstant_2.default.IS_WEB_DEBUG) {
+        if (GxUtils_1.default.getNativePlatform() == GxEnum_1.PLATFORM.OPPO || GxConstant_2.default.IS_WEB_DEBUG) {
             if (parentNode == null) {
                 GxLog_1.default.e("showMoreGameBtnWithParent parent is null ");
                 this.showMoreGameBtn();
@@ -2606,6 +2655,9 @@ BaseGxGame.screenHeight = 0;
 BaseGxGame.isPhoneX = false;
 BaseGxGame.toggleReward = 0;
 BaseGxGame.toggleTiShi = false;
+BaseGxGame.btnTTBoxSp = null;
+BaseGxGame.havettreward = false;
+BaseGxGame.ttBoxView = null;
 /**用户信息 */
 BaseGxGame.userInfo = {
     uid: "",

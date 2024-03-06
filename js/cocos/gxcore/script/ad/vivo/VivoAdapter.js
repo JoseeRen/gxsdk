@@ -112,7 +112,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             adIntervals: Math.max(GxGame_1.default.adConfig.bannerUpdateTime, 30)
         });
         this.bannerAd.onError(err => {
-            this.loge('normal banner error: ', JSON.stringify(err));
+            this.loge("normal banner error: ", JSON.stringify(err));
             if (err && err.errCode == 30002) {
                 this.logi("销毁banner");
                 this.destroyNormalBanner();
@@ -171,8 +171,8 @@ class VivoAdapter extends BaseAdapter_1.default {
             this.showCustomBanner();
         }
         else {
-            let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_banner', cc.Prefab));
-            this.bannerNode = node.getComponent('gx_native_banner');
+            let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_banner", cc.Prefab));
+            this.bannerNode = node.getComponent("gx_native_banner");
             this.bannerNode.show(native_data, () => {
             }, () => {
                 this.bannerTimer && this.bannerTimer.clear();
@@ -186,7 +186,7 @@ class VivoAdapter extends BaseAdapter_1.default {
         this.destroyCustomBanner();
     }
     initVideo(isShow = false) {
-        if (this.platformVersion() < 1041 || GxAdParams_1.AdParams.vivo.video == null || GxAdParams_1.AdParams.vivo.video == '')
+        if (this.platformVersion() < 1041 || GxAdParams_1.AdParams.vivo.video == null || GxAdParams_1.AdParams.vivo.video == "")
             return;
         this.destroyVideo();
         // @ts-ignore
@@ -202,7 +202,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             self.logi("激励视频onerror");
             self.logi(err);
             if (isShow) {
-                self.createToast('暂无视频，请稍后再试');
+                self.createToast("暂无视频，请稍后再试");
             }
             self._videoErrorEvent();
         });
@@ -234,7 +234,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             this.initVideo(true);
         }
         if (this.videoAd == null) {
-            this.createToast('暂无视频，请稍后再试');
+            this.createToast("暂无视频，请稍后再试");
             this.videoShowing = false;
             this._videoErrorEvent();
             complete && complete(false);
@@ -249,7 +249,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             this.logi("激励视频onerror2");
             this.videocallback && this.videocallback(false);
             this.videocallback = null;
-            this.createToast('暂无视频，请稍后再试');
+            this.createToast("暂无视频，请稍后再试");
             this.videoShowing = false;
             this.videoAd.load();
         });
@@ -295,7 +295,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             // this.hideBanner();
             this.interShowTime = this.get_time();
         }).catch(err => {
-            this.logi('普通插屏展示失败' + JSON.stringify(err));
+            this.logi("普通插屏展示失败" + JSON.stringify(err));
             on_close && on_close();
         });
     }
@@ -318,8 +318,8 @@ class VivoAdapter extends BaseAdapter_1.default {
             else if (ad_type == GxEnum_1.ad_native_type.inter2) {
                 posId = GxAdParams_1.AdParams.vivo.native2;
             }
-            this.logi(ad_type, 'posId = ', posId);
-            if (posId == '' || posId === undefined || posId == null || this.is_limit_native_length(ad_type) || this.platformVersion() < 1053)
+            this.logi(ad_type, "posId = ", posId);
+            if (posId == "" || posId === undefined || posId == null || this.is_limit_native_length(ad_type) || this.platformVersion() < 1053)
                 return resolve(null);
             // @ts-ignore
             let nativeAd = qg.createNativeAd({
@@ -366,8 +366,8 @@ class VivoAdapter extends BaseAdapter_1.default {
             on_hide && on_hide();
         }
         else {
-            let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_inner_interstitial', cc.Prefab));
-            this.innerInter = node.getComponent('gx_native_inner_interstitial');
+            let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_inner_interstitial", cc.Prefab));
+            this.innerInter = node.getComponent("gx_native_inner_interstitial");
             this.innerInter && this.innerInter.show(parent, native_data, on_click, () => {
                 // this.hideBanner();
                 on_show && on_show();
@@ -402,8 +402,8 @@ class VivoAdapter extends BaseAdapter_1.default {
             this.showCustomInter(on_show, on_hide);
         }
         else {
-            let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_interstitial', cc.Prefab));
-            this.nativeInter = node.getComponent('gx_native_interstitial');
+            let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_interstitial", cc.Prefab));
+            this.nativeInter = node.getComponent("gx_native_interstitial");
             this.nativeInter && this.nativeInter.show(native_data, () => {
                 this.interShowTime = this.get_time();
                 // this.hideBanner();
@@ -478,8 +478,8 @@ class VivoAdapter extends BaseAdapter_1.default {
             return;
         }
         else {
-            let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_icon', cc.Prefab));
-            this.nativeIcon = node.getComponent('gx_native_icon');
+            let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_icon", cc.Prefab));
+            this.nativeIcon = node.getComponent("gx_native_icon");
             this.nativeIcon && this.nativeIcon.show(parent, native_data);
         }
     }
@@ -497,7 +497,7 @@ class VivoAdapter extends BaseAdapter_1.default {
     /**
      * 盒子9宫格
      */
-    initGamePortal(on_show, on_hide, show_toast = true, image = '', marginTop = 300) {
+    initGamePortal(on_show, on_hide, show_toast = true, image = "", marginTop = 300) {
         if (!GxAdParams_1.AdParams.vivo.boxPortal) {
             on_hide && on_hide();
             return;
@@ -525,7 +525,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             this.portalAd.show();
         });
     }
-    showGamePortal(on_show, on_hide, show_toast = true, image = '', marginTop = 300) {
+    showGamePortal(on_show, on_hide, show_toast = true, image = "", marginTop = 300) {
         // @ts-ignore
         if (qg.createBoxPortalAd && GxGame_1.default.adConfig.adunit_portal) {
             if (this.portalAd == null) {
@@ -534,7 +534,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             if (this.portalAd != null) {
                 // 广告数据加载成功后展示
                 this.portalAd.show().then(() => {
-                    this.logi('portalAd button show success');
+                    this.logi("portalAd button show success");
                     if (this.portalAdTimer) {
                         this.portalAdTimer.clear();
                     }
@@ -549,17 +549,17 @@ class VivoAdapter extends BaseAdapter_1.default {
                     }
                     else {
                         on_hide && on_hide();
-                        show_toast && this.createToast('努力加载中,请稍后再试~');
+                        show_toast && this.createToast("努力加载中,请稍后再试~");
                     }
                 });
             }
             else {
-                this.logi('portalAd is null');
+                this.logi("portalAd is null");
             }
         }
         else {
             on_hide && on_hide();
-            this.logi('暂不支持互推盒子相关 API');
+            this.logi("暂不支持互推盒子相关 API");
         }
     }
     hideGamePortal() {
@@ -589,8 +589,8 @@ class VivoAdapter extends BaseAdapter_1.default {
     showAddDesktop(on_close, on_succ) {
         if (this.addIconNode && this.addIconNode !== undefined && cc.isValid(this.addIconNode.node, true))
             return;
-        let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/add_icon', cc.Prefab));
-        this.addIconNode = node.getComponent('Gx_add_icon');
+        let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/add_icon", cc.Prefab));
+        this.addIconNode = node.getComponent("Gx_add_icon");
         this.addIconNode && this.addIconNode.show(on_succ);
     }
     /**判断是否支持添加桌面 */
@@ -612,7 +612,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             });
         }
         else {
-            this.logi('不支持添加桌面');
+            this.logi("不支持添加桌面");
             on_fail && on_fail();
         }
     }
@@ -670,7 +670,7 @@ class VivoAdapter extends BaseAdapter_1.default {
         });
         this.customBanner.show().then(() => {
         }).catch(err => {
-            this.loge('custom banner show error: ' + JSON.stringify(err));
+            this.loge("custom banner show error: " + JSON.stringify(err));
             this.destroyCustomBanner();
             this.showNormalBanner();
         });
@@ -770,7 +770,7 @@ class VivoAdapter extends BaseAdapter_1.default {
                     childByName.destroy();
                 }
             }
-            this.loge(' custom inter error: ' + JSON.stringify(err));
+            this.loge(" custom inter error: " + JSON.stringify(err));
             this.customInter.offError(on_error);
             this.destroyCustomInter();
             this.showInterstitial(on_show, on_close);
@@ -864,6 +864,69 @@ class VivoAdapter extends BaseAdapter_1.default {
     showGameOverAD() {
         this.showVideo((res) => {
         }, "GxGameOverAd");
+    }
+    userFrom(callback) {
+        // https://minigame.vivo.com.cn/documents/#/lesson/game/game_promoting?id=%e4%ba%8c%e3%80%81vivo%e5%b9%bf%e5%91%8a%e8%81%94%e7%9b%9f%e4%b9%b0%e9%87%8f%e8%af%b4%e6%98%8e
+        try {
+            //@ts-ignore
+            if (window["testDataToServer"] && testDataToServer.isAdUser) {
+                return callback && callback(true);
+            }
+            let isBuy = false;
+            //@ts-ignore
+            if (qg["getLaunchOptionsSync"]) {
+                //@ts-ignore
+                var e = null, 
+                //@ts-ignore
+                t = qg.getLaunchOptionsSync();
+                console.log(JSON.stringify(t));
+                console.log(t["query"]);
+                if (t["query"]) {
+                    console.log(t["query"]["type"]);
+                }
+                if ("ad" === t.query.type) {
+                    isBuy = true;
+                }
+                try {
+                    var o = t.referrerInfo.extraData;
+                    if (o) {
+                        e = o.ad_id || o.adid || null;
+                    }
+                    else {
+                        var n = t.query.internal;
+                        if ("deeplink" === (n && n.channel ? n.channel : "")) {
+                            var i = n.custom_params;
+                            console.log(i);
+                            var r = JSON.parse(i)
+                                .cus_origin_uri;
+                            let match = r.match(/ad_id=([^&]+)/);
+                            let match1 = r.match(/adid=([^&]+)/);
+                            if (match && match.length >= 2) {
+                                e = match[1];
+                            }
+                            if (match1 && match1.length >= 2) {
+                                e = match1[1];
+                            }
+                        }
+                    }
+                }
+                catch (e) {
+                    console.log("----异常了");
+                    console.log(e);
+                }
+                if (!!e) {
+                    isBuy = true;
+                }
+                console.log("---e" + e);
+            }
+            else {
+                console.log("---低版本");
+            }
+            return callback && callback(isBuy);
+        }
+        catch (e) {
+            callback && callback(false);
+        }
     }
 }
 exports.default = VivoAdapter;

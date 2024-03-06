@@ -71,47 +71,109 @@ let NewClass = (() => {
             this.gotoBtn = __runInitializers(this, _gotoBtn_initializers, null);
             this.stringlabel = __runInitializers(this, _stringlabel_initializers, null);
             this.haverewardtip = __runInitializers(this, _haverewardtip_initializers, null);
-            this.Reward = () => { };
+            this.havettreward = false;
+            this.Reward = () => {
+            };
         }
-        onLoad() { }
-        start() {
-            this.haverewardtip.active = false;
-            if (GxGame_1.default.Ad().canReward) {
-                this.getReward.active = true;
-                this.gotoBtn.active = false;
-                if (GxGame_1.default.havettreward) {
-                    this.getReward.getComponent(cc.Button).interactable = false;
-                    this.haverewardtip.active = true;
+        onLoad() {
+            var last = cc.sys.localStorage.getItem("TTRewardTime");
+            if (last != null && last != "" && last != undefined) {
+                var lasttime = parseInt(last);
+                var now = new Date();
+                var nowtime = parseInt("" + now.getFullYear() + (now.getMonth() + 1) + now.getDate());
+                if (lasttime == nowtime) {
+                    this.havettreward = true;
                 }
             }
+            let width = cc.winSize.width;
+            let height = cc.winSize.height;
+            if (width > height) {
+                //横屏
+                this.curRootNode = this.node.getChildByName("land");
+                this.node.getChildByName("land").active = true;
+                this.node.getChildByName("main").active = false;
+            }
             else {
-                this.getReward.active = false;
-                this.gotoBtn.active = true;
+                this.curRootNode = this.node.getChildByName("main");
+                this.node.getChildByName("land").active = false;
+                this.node.getChildByName("main").active = true;
+            }
+            this.getReward = this.curRootNode.getChildByName("领取奖励");
+            this.gotoBtn = this.curRootNode.getChildByName("去侧边栏");
+            this.stringlabel = this.curRootNode.getChildByName("rewardlabel").getComponent(cc.Label);
+            this.haverewardtip = this.curRootNode.getChildByName("havereward");
+        }
+        start() {
+            this.haverewardtip.active = false;
+            if (this.havettreward) {
+                // if (GxGame.havettreward) {//当天是否已经领取过奖励
+                this.getReward.getComponent(cc.Button).interactable = false;
+                this.getReward.active = true;
+                this.gotoBtn.active = false;
+                this.haverewardtip.active = true;
+            }
+            else {
+                if (GxGame_1.default.Ad().canReward) { //判断是不是从侧边栏启动的
+                    this.getReward.active = true;
+                    this.gotoBtn.active = false;
+                }
+                else {
+                    this.getReward.active = false;
+                    this.gotoBtn.active = true;
+                }
+                // @ts-ignore
+                tt.onShow(this.onShow.bind(this));
             }
         }
         // update (dt) {}
         onClickgotoBtn() {
             // @ts-ignore
             tt.navigateToScene({
-                scene: 'sidebar',
+                scene: "sidebar",
                 success: (res) => {
-                    console.log('navigate to scene success');
+                    console.log("navigate to scene success");
                     // 跳转成功回调逻辑
                 },
                 fail: (res) => {
-                    console.log('navigate to scene fail: ', res);
+                    console.log("navigate to scene fail: ", res);
                     // 跳转失败回调逻辑
-                },
+                }
             });
         }
         onclickgetReward() {
             this.Reward();
-            GxGame_1.default.havettreward = true;
+            this.havettreward = true;
+            var nowdate = new Date();
+            var nowtime = "" + nowdate.getFullYear() + (nowdate.getMonth() + 1) + nowdate.getDate();
+            cc.sys.localStorage.setItem("TTRewardTime", nowtime);
             this.getReward.getComponent(cc.Button).interactable = false;
             this.haverewardtip.active = true;
         }
         close() {
             this.node.destroy();
+        }
+        onShow(res) {
+            console.log("启动场景字段：", res.launch_from, ", ", res.location);
+            if (res.launch_from == "homepage" || res.location == "sidebar_card") {
+                console.log("是从侧边栏启动的");
+                this.getReward.active = true;
+                this.gotoBtn.active = false;
+                /* if (GxGame.havettreward) {
+                     this.getReward.getComponent(cc.Button).interactable = false;
+                     this.haverewardtip.active = true;
+                 }*/
+            }
+        }
+        init(rewardCallback, rewardNum, iconAndName) {
+            this.Reward = rewardCallback;
+            let component = this.curRootNode.getChildByName("icon").getComponent(cc.Sprite);
+            if (component) {
+                component.spriteFrame = iconAndName;
+            }
+        }
+        onDestroy() {
+            // @ts-ignore
+            tt.offShow(this.onShow);
         }
     };
     __setFunctionName(_classThis, "NewClass");

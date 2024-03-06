@@ -75,6 +75,23 @@ class GxGame extends BaseGxGame_1.default {
             return false;
         }
     }
+    static needTTBoxBtn() {
+        if (GxConstant_1.default.IS_TT_GAME) {
+            // @ts-ignore
+            if (tt['checkScene']) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else if (GxConstant_1.default.IS_WEB_GAME) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     static getJkShowTime() {
         if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_VIVO_GAME || GxConstant_1.default.IS_HUAWEI_GAME || GxConstant_1.default.IS_QQ_GAME || GxConstant_1.default.IS_MI_GAME) {
             return 3;

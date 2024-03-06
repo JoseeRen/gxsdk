@@ -857,5 +857,64 @@ class VivoAdapter extends BaseAdapter_1.default {
         this.showVideo((res) => {
         }, "GxGameOverAd");
     }
+    userFrom(callback) {
+        // https://minigame.vivo.com.cn/documents/#/lesson/game/game_promoting?id=%e4%ba%8c%e3%80%81vivo%e5%b9%bf%e5%91%8a%e8%81%94%e7%9b%9f%e4%b9%b0%e9%87%8f%e8%af%b4%e6%98%8e
+        try {
+            // @ts-ignore
+            if (window["testDataToServer"] && testDataToServer.isAdUser) {
+                return callback && callback(true);
+            }
+            let isBuy = false;
+            if (qg["getLaunchOptionsSync"]) {
+                var e = null, t = qg.getLaunchOptionsSync();
+                console.log(JSON.stringify(t));
+                console.log(t["query"]);
+                if (t["query"]) {
+                    console.log(t["query"]["type"]);
+                }
+                if ("ad" === t.query.type) {
+                    isBuy = true;
+                }
+                try {
+                    var o = t.referrerInfo.extraData;
+                    if (o) {
+                        e = o.ad_id || o.adid || null;
+                    }
+                    else {
+                        var n = t.query.internal;
+                        if ("deeplink" === (n && n.channel ? n.channel : "")) {
+                            var i = n.custom_params;
+                            console.log(i);
+                            var r = JSON.parse(i)
+                                .cus_origin_uri;
+                            let match = r.match(/ad_id=([^&]+)/);
+                            let match1 = r.match(/adid=([^&]+)/);
+                            if (match && match.length >= 2) {
+                                e = match[1];
+                            }
+                            if (match1 && match1.length >= 2) {
+                                e = match1[1];
+                            }
+                        }
+                    }
+                }
+                catch (e) {
+                    console.log("----异常了");
+                    console.log(e);
+                }
+                if (!!e) {
+                    isBuy = true;
+                }
+                console.log("---e" + e);
+            }
+            else {
+                console.log("---低版本");
+            }
+            return callback && callback(isBuy);
+        }
+        catch (e) {
+            callback && callback(false);
+        }
+    }
 }
 exports.default = VivoAdapter;

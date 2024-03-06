@@ -143,10 +143,10 @@ let Gx_privacy = (() => {
             this.change_tab(type);
         }
         change_tab(type) {
-            this.tabType = type;
             if (!GxGame_1.default.canShowUser) {
                 type = "privacy";
             }
+            this.tabType = type;
             /*    for (let item of this.toggleContainer.toggleItems) {
                     if (item.name.indexOf(type) >= 0) {
                         item.check();

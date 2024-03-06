@@ -232,6 +232,7 @@ class WxAdapter extends BaseAdapter_1.default {
         this.videoAd = wx.createRewardedVideoAd({
             adUnitId: GxAdParams_1.AdParams.wx.video
         });
+        //这里cocos已经去掉了  要不onload会执行多次
         this.videoAd.load();
         this.videoAd.onLoad((res) => {
             console.log("激励视频加载", res);
@@ -694,6 +695,48 @@ class WxAdapter extends BaseAdapter_1.default {
         console.log("游戏暂停");
         Laya.stage.renderingEnabled = false;
         Laya.timer.scale = 0;
+    }
+    userFrom(callback) {
+        try {
+            // @ts-ignore
+            if (window["testDataToServer"] && testDataToServer.isAdUser) {
+                return callback && callback(true);
+            }
+            let clickId = DataStorage_1.default.getItem("__clickid__");
+            if (!!clickId) {
+                return callback && callback(true);
+            }
+            // @ts-ignore
+            let launchOptionsSync = wx.getLaunchOptionsSync();
+            let query = launchOptionsSync.query;
+            clickId = query["gdt_vid"];
+            if (!!clickId) {
+                DataStorage_1.default.setItem("__clickid__", clickId);
+                return callback && callback(true);
+            }
+            let queryElement = query["weixinadinfo"];
+            if (queryElement) {
+                // aid.traceid.scene_type.0
+                let aid = queryElement.weixinadinfo.split(".")[0];
+                if (!!aid) {
+                    return callback && callback(true);
+                }
+            }
+            /*    if (this.gxEngine == null) {
+                    return callback && callback(false);
+
+                }
+
+                let clickId1 = this.gxEngine.getClickId();
+                if (!!clickId1) {
+                    return callback && callback(true);
+
+                }*/
+            return callback && callback(false);
+        }
+        catch (e) {
+            callback && callback(false);
+        }
     }
 }
 exports.default = WxAdapter;

@@ -35,12 +35,12 @@ const GxEnum_1 = require("../../core/GxEnum");
 const GxAdParams_1 = require("../../GxAdParams");
 const DataStorage_1 = __importDefault(require("../../util/DataStorage"));
 const GxConstant_1 = __importDefault(require("../../core/GxConstant"));
-const TTAdMonitor_1 = __importDefault(require("./TTAdMonitor"));
+const GxEngine_1 = __importDefault(require("../../sdk/GxEngine"));
 class TTAdapter extends BaseAdapter_1.default {
     constructor() {
         super(...arguments);
+        this.gxEngine = null;
         this.recorderTime = 0;
-        this.canReward = false;
         this.openId = "";
         this.anonymousId = "";
         this.getOpenidTry = 0;
@@ -62,6 +62,7 @@ class TTAdapter extends BaseAdapter_1.default {
             GxAdParams_1.AdParams.tt.appId = tt.getEnvInfoSync().microapp.appId;
         }
         console.log("当前appid:" + GxAdParams_1.AdParams.tt.appId);
+        this.gxEngine = new GxEngine_1.default();
         this.initBanner();
         this.initVideo();
         this.initRecorder();
@@ -74,7 +75,12 @@ class TTAdapter extends BaseAdapter_1.default {
                 // @ts-ignore
                 tt.uma.setOpenid(openId);
             }
-            TTAdMonitor_1.default.getInstance().initAdMonitor(openId);
+            // TTAdMonitor.getInstance().initAdMonitor(openId);
+            this.gxEngine.init({ openId: openId, appToken: GxAdParams_1.AdParams.tt.appId, appId: GxAdParams_1.AdParams.tt.appId }).then(e => {
+                console.log("gxEngine初始化成功");
+            }).catch(e => {
+                console.log("gxEngine初始化失败");
+            });
         });
         // @ts-ignore
         tt.onShow((res) => {
@@ -225,7 +231,8 @@ class TTAdapter extends BaseAdapter_1.default {
             console.log("激励视频关闭");
             this.recorderResume();
             if (res && res.isEnded) {
-                TTAdMonitor_1.default.getInstance().rewardAdEnd();
+                //TTAdMonitor.getInstance().rewardAdEnd();
+                this.gxEngine.rewardAdEnd();
                 /*   this.videoReward++
 
                    this.checkAdTarget()*/
@@ -516,6 +523,37 @@ class TTAdapter extends BaseAdapter_1.default {
             }
         });
     }
+    requestPost(url, data, successCallback, failCallback) {
+        //@ts-ignore
+        tt.request({
+            url: url,
+            data: data,
+            header: {
+                "content-type": "application/json"
+            },
+            method: "POST",
+            dataType: "JSON",
+            responseType: "text",
+            success(res) {
+                try {
+                    successCallback && successCallback({
+                        statusCode: res.statusCode,
+                        header: res.header,
+                        data: JSON.parse(res.data)
+                    });
+                    console.log("转换成功");
+                }
+                catch (e) {
+                    console.log(e);
+                    console.log("转换失败");
+                    successCallback && successCallback(res);
+                }
+            },
+            fail(res) {
+                failCallback && failCallback(res);
+            }
+        });
+    }
     logi(...data) {
         super.LOG("[TTAdapter]", ...data);
     }
@@ -551,6 +589,44 @@ class TTAdapter extends BaseAdapter_1.default {
                 console.log("检查快捷方式失败", res.errMsg);
             }
         });
+    }
+    /*
+  * 判断是不是买量用户进来 的
+  * callback 返回值true 代表是  false不是
+  *
+  * */
+    userFrom(callback) {
+        try {
+            // @ts-ignore
+            if (window["testDataToServer"] && testDataToServer.isAdUser) {
+                return callback && callback(true);
+            }
+            let clickId = DataStorage_1.default.getItem("__clickid__");
+            if (!!clickId) {
+                return callback && callback(true);
+            }
+            // @ts-ignore
+            let launchOptionsSync = tt.getLaunchOptionsSync();
+            let query = launchOptionsSync.query;
+            clickId = query.clickid;
+            if (!!clickId) {
+                return callback && callback(true);
+            }
+            /*    if (this.gxEngine == null) {
+                    return callback && callback(false);
+
+                }
+
+                let clickId1 = this.gxEngine.getClickId();
+                if (!!clickId1) {
+                    return callback && callback(true);
+
+                }*/
+            return callback && callback(false);
+        }
+        catch (e) {
+            callback && callback(false);
+        }
     }
 }
 exports.default = TTAdapter;

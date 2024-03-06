@@ -7,6 +7,7 @@ const GxEnum_1 = require("../core/GxEnum");
 const layaMaxUI_1 = require("../../../ui/layaMaxUI");
 const GxAdParams_1 = require("../GxAdParams");
 const GxConstant_1 = __importDefault(require("../core/GxConstant"));
+const GxGame_1 = __importDefault(require("../GxGame"));
 class gx_ui_privacy extends layaMaxUI_1.ui.gxui.gx_ui_privacyUI {
     constructor() {
         super();
@@ -19,6 +20,12 @@ class gx_ui_privacy extends layaMaxUI_1.ui.gxui.gx_ui_privacyUI {
         this.tabType = type;
         if (this.parent)
             return;
+        if (GxGame_1.default.canShowUser) {
+            this.toggleContainer.visible = true;
+        }
+        else {
+            this.toggleContainer.visible = false;
+        }
         Laya.stage.addChild(this);
         this.on_show();
     }
@@ -100,6 +107,9 @@ class gx_ui_privacy extends layaMaxUI_1.ui.gxui.gx_ui_privacyUI {
         }
     }
     change_tab(type) {
+        if (!GxGame_1.default.canShowUser) {
+            type = "privacy";
+        }
         this.tabType = type;
         let tab = this[type].parent;
         for (let i = 0; i < tab.numChildren; i++) {

@@ -685,6 +685,9 @@ class QQAdapter extends BaseAdapter_1.default {
             on_hide && on_hide();
             return;
         }
+        if (this.blockAd) {
+            this.blockAd.destroy();
+        }
         const { screenHeight, screenWidth
         // @ts-ignore
          } = qq.getSystemInfoSync();
@@ -1096,6 +1099,58 @@ class QQAdapter extends BaseAdapter_1.default {
     }
     setOpenDataShareCallback(callback) {
         this._shareToFriendCallback = callback;
+    }
+    userFrom(callback) {
+        try {
+            // @ts-ignore
+            if (window["testDataToServer"] && testDataToServer.isAdUser) {
+                return callback && callback(true);
+            }
+            let clickId = DataStorage_1.default.getItem("__clickid__");
+            if (!!clickId) {
+                return callback && callback(true);
+            }
+            // @ts-ignore
+            let launchOptionsSync = qq.getLaunchOptionsSync();
+            let scene = launchOptionsSync.scene;
+            if (scene == 2054 || scene == "2054") {
+                return callback && callback(true);
+            }
+            let query = launchOptionsSync.query;
+            clickId = query["gdt_vid"];
+            if (!!clickId) {
+                DataStorage_1.default.setItem("__clickid__", clickId);
+                return callback && callback(true);
+            }
+            //https://e.qq.com/ads/helpcenter/detail?cid=3166&pid=9017
+            clickId = query["qz_gdt"];
+            if (!!clickId) {
+                DataStorage_1.default.setItem("__clickid__", clickId);
+                return callback && callback(true);
+            }
+            let queryElement = query["weixinadinfo"];
+            if (queryElement) {
+                // aid.traceid.scene_type.0
+                let aid = queryElement.weixinadinfo.split(".")[0];
+                if (!!aid) {
+                    return callback && callback(true);
+                }
+            }
+            /*    if (this.gxEngine == null) {
+                    return callback && callback(false);
+
+                }
+
+                let clickId1 = this.gxEngine.getClickId();
+                if (!!clickId1) {
+                    return callback && callback(true);
+
+                }*/
+            return callback && callback(false);
+        }
+        catch (e) {
+            callback && callback(false);
+        }
     }
 }
 exports.default = QQAdapter;

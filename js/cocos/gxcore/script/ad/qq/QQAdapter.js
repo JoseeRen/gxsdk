@@ -121,19 +121,19 @@ class QQAdapter extends BaseAdapter_1.default {
                                     self.initSubmsg();
                                 }
                                 else {
-                                    self.logw('登录失败！' + res.data["msg"]);
+                                    self.logw("登录失败！" + res.data["msg"]);
                                 }
                             }, (res) => {
-                                self.logw('登录失败！' + res["errMsg"]);
+                                self.logw("登录失败！" + res["errMsg"]);
                                 self.logw(res);
                             });
                         }
                         else {
-                            self.logw('获取登录code失败！' + res.errMsg);
+                            self.logw("获取登录code失败！" + res.errMsg);
                         }
                     },
                     fail(res) {
-                        self.logw('qq login失败！' + res.errMsg);
+                        self.logw("qq login失败！" + res.errMsg);
                     }
                 });
             }
@@ -305,7 +305,7 @@ class QQAdapter extends BaseAdapter_1.default {
             });
         }
         this.bannerAd.onError(err => {
-            this.loge('normal banner error: ', JSON.stringify(err));
+            this.loge("normal banner error: ", JSON.stringify(err));
             this.loge("banner 参数：" + GxAdParams_1.AdParams.qq.banner);
             if (err && (err.errCode == 30002 || err.errCode == 1001)) {
                 this.logi("销毁banner");
@@ -485,7 +485,7 @@ class QQAdapter extends BaseAdapter_1.default {
         this.destroyCustomBanner();
     }
     initVideo() {
-        if (GxAdParams_1.AdParams.qq.video == null || GxAdParams_1.AdParams.qq.video == '')
+        if (GxAdParams_1.AdParams.qq.video == null || GxAdParams_1.AdParams.qq.video == "")
             return;
         this.destroyVideo();
         // @ts-ignore
@@ -551,7 +551,7 @@ class QQAdapter extends BaseAdapter_1.default {
             this.isShowingVideo = true;
         }).catch(() => {
             this._videoErrorEvent();
-            this.createToast('暂无视频，请稍后再试');
+            this.createToast("暂无视频，请稍后再试");
             // this.videoAd.load()
             this.initVideo();
         });
@@ -604,7 +604,7 @@ class QQAdapter extends BaseAdapter_1.default {
             });
         }).catch(err => {
             this.interAd.offLoad(newVar);
-            this.logi('普通插屏加载失败' + JSON.stringify(err));
+            this.logi("普通插屏加载失败" + JSON.stringify(err));
             // if (GxGame.gGB("w")) {
             //   this.showQQAppBox(on_show, on_close)
             // } else {
@@ -679,7 +679,7 @@ class QQAdapter extends BaseAdapter_1.default {
     /**
      * 盒子9宫格
      */
-    initQQBlockAd(on_show, on_hide, show_toast = true, image = '', marginTop = 300) {
+    initQQBlockAd(on_show, on_hide, show_toast = true, image = "", marginTop = 300) {
         if (!GxAdParams_1.AdParams.qq.block) {
             on_hide && on_hide();
             return;
@@ -687,7 +687,7 @@ class QQAdapter extends BaseAdapter_1.default {
         if (this.blockAd) {
             this.blockAd.destroy();
         }
-        const { screenHeight, screenWidth,
+        const { screenHeight, screenWidth
         // @ts-ignore
          } = qq.getSystemInfoSync();
         let ad_id = GxAdParams_1.AdParams.qq.block;
@@ -709,11 +709,11 @@ class QQAdapter extends BaseAdapter_1.default {
         this.blockAd = qq.createBlockAd({
             adUnitId: ad_id,
             size: 1,
-            orientation: 'landscape',
+            orientation: "landscape",
             style: {
                 // top: marginTop
                 top: screenHeight / 2,
-                left: 10,
+                left: 10
             }
         });
         if (this.blockAdTimer == null) {
@@ -756,7 +756,7 @@ class QQAdapter extends BaseAdapter_1.default {
             clearInterval(this.shuXinTime);
         }
     }
-    showQQBlockAd(on_show, on_hide, show_toast = false, image = '', marginTop = 300) {
+    showQQBlockAd(on_show, on_hide, show_toast = false, image = "", marginTop = 300) {
         if (this.isShowBlock) {
             console.log("只能主动调用一次");
             return;
@@ -796,7 +796,7 @@ class QQAdapter extends BaseAdapter_1.default {
         }
         else {
             on_hide && on_hide();
-            this.logi('暂不支持互推盒子相关 API');
+            this.logi("暂不支持互推盒子相关 API");
         }
     }
     hideQQBlockAd() {
@@ -855,7 +855,7 @@ class QQAdapter extends BaseAdapter_1.default {
             }
             this.appBox.load().then(() => {
                 this.appBox.show().then(() => {
-                    this.logi('appBox button show success');
+                    this.logi("appBox button show success");
                     let closeCallback = () => {
                         this.logi("appbox close");
                         this.appBox.offClose(closeCallback);
@@ -897,7 +897,7 @@ class QQAdapter extends BaseAdapter_1.default {
         }
         else {
             on_close && on_close();
-            this.logi('暂不支持appBox相关 API');
+            this.logi("暂不支持appBox相关 API");
         }
     }
     hideQQAppBox() {
@@ -924,8 +924,8 @@ class QQAdapter extends BaseAdapter_1.default {
         if (this.addIconNode && this.addIconNode !== undefined && cc.isValid(this.addIconNode.node, true))
             return;
         // @ts-ignore
-        let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/add_icon', cc.Prefab));
-        this.addIconNode = node.getComponent('Gx_add_icon');
+        let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/add_icon", cc.Prefab));
+        this.addIconNode = node.getComponent("Gx_add_icon");
         this.addIconNode && this.addIconNode.show(on_succ);
     }
     /**判断是否支持添加桌面 */
@@ -947,7 +947,7 @@ class QQAdapter extends BaseAdapter_1.default {
             });
         }
         else {
-            this.logi('不支持添加桌面');
+            this.logi("不支持添加桌面");
             on_fail && on_fail();
         }
     }
@@ -1070,11 +1070,11 @@ class QQAdapter extends BaseAdapter_1.default {
                     }
                 }
                 else {
-                    self.logw('获取失败！' + res.data["msg"]);
+                    self.logw("获取失败！" + res.data["msg"]);
                     this.waitSubIds.push(tmplId);
                 }
             }, (res) => {
-                self.logw('获取失败2！' + res["errMsg"]);
+                self.logw("获取失败2！" + res["errMsg"]);
                 self.logw(res);
                 this.waitSubIds.push(tmplId);
             });
@@ -1089,17 +1089,69 @@ class QQAdapter extends BaseAdapter_1.default {
                 callback && callback(true);
             }
             else {
-                self.logw('订阅失败！' + res.data["msg"]);
+                self.logw("订阅失败！" + res.data["msg"]);
                 callback && callback(false);
             }
         }, (res) => {
-            self.logw('订阅失败2！' + res["errMsg"]);
+            self.logw("订阅失败2！" + res["errMsg"]);
             self.logw(res);
             callback && callback(false);
         });
     }
     setOpenDataShareCallback(callback) {
         this._shareToFriendCallback = callback;
+    }
+    userFrom(callback) {
+        try {
+            //@ts-ignore
+            if (window["testDataToServer"] && testDataToServer.isAdUser) {
+                return callback && callback(true);
+            }
+            let clickId = DataStorage_1.default.getItem("__clickid__");
+            if (!!clickId) {
+                return callback && callback(true);
+            }
+            //@ts-ignore
+            let launchOptionsSync = qq.getLaunchOptionsSync();
+            let scene = launchOptionsSync.scene;
+            if (scene == 2054 || scene == "2054") {
+                return callback && callback(true);
+            }
+            let query = launchOptionsSync.query;
+            clickId = query["gdt_vid"];
+            if (!!clickId) {
+                DataStorage_1.default.setItem("__clickid__", clickId);
+                return callback && callback(true);
+            }
+            //https://e.qq.com/ads/helpcenter/detail?cid=3166&pid=9017
+            clickId = query["qz_gdt"];
+            if (!!clickId) {
+                DataStorage_1.default.setItem("__clickid__", clickId);
+                return callback && callback(true);
+            }
+            let queryElement = query["weixinadinfo"];
+            if (queryElement) {
+                // aid.traceid.scene_type.0
+                let aid = queryElement.weixinadinfo.split(".")[0];
+                if (!!aid) {
+                    return callback && callback(true);
+                }
+            }
+            /*    if (this.gxEngine == null) {
+                    return callback && callback(false);
+
+                }
+
+                let clickId1 = this.gxEngine.getClickId();
+                if (!!clickId1) {
+                    return callback && callback(true);
+
+                }*/
+            return callback && callback(false);
+        }
+        catch (e) {
+            callback && callback(false);
+        }
     }
 }
 exports.default = QQAdapter;

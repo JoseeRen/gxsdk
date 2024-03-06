@@ -18,7 +18,16 @@ class GxDownloadScene extends layaMaxUI_1.ui.GxDownloadSceneUI {
         this.height = Laya.stage.height;
         Laya.timer.frameLoop(1, this, this.onUpdatePb);
         if (GxConstant_1.default.IS_TT_GAME) {
-            if (Laya.LocalStorage.getItem('versionFirst') != this.AD_TouTiaoVersion) {
+            //@ts-ignore
+            let tfs = tt.getFileSystemManager();
+            let resflag = false;
+            try {
+                tfs.accessSync("ttfile://user/resflag.txt");
+                resflag = true;
+            }
+            catch (e) {
+            }
+            if (Laya.LocalStorage.getItem('versionFirst') != this.AD_TouTiaoVersion || !resflag) {
                 this.ttdownload();
                 return;
             }
@@ -37,7 +46,17 @@ class GxDownloadScene extends layaMaxUI_1.ui.GxDownloadSceneUI {
             });
         }
         else if (GxConstant_1.default.IS_QQ_GAME) {
-            if (Laya.LocalStorage.getItem('versionFirst') != this.AD_QQVersion) {
+            //@ts-ignore
+            let qfs = qq.getFileSystemManager();
+            let resflag = false;
+            try {
+                //@ts-ignore
+                qfs.accessSync(`${qq.env.USER_DATA_PATH}/resflag.txt`);
+                resflag = true;
+            }
+            catch (e) {
+            }
+            if (Laya.LocalStorage.getItem('versionFirst') != this.AD_QQVersion || !resflag) {
                 this.qqdownload();
             }
             else {
@@ -45,7 +64,17 @@ class GxDownloadScene extends layaMaxUI_1.ui.GxDownloadSceneUI {
             }
         }
         else if (GxConstant_1.default.IS_WECHAT_GAME) {
-            if (Laya.LocalStorage.getItem('versionFirst') != this.AD_WXVersion) {
+            //@ts-ignore
+            let wxfs = wx.getFileSystemManager();
+            let resflag = false;
+            try {
+                //@ts-ignore
+                wxfs.accessSync(`${wx.env.USER_DATA_PATH}/resflag.txt`);
+                resflag = true;
+            }
+            catch (e) {
+            }
+            if (Laya.LocalStorage.getItem('versionFirst') != this.AD_WXVersion || !resflag) {
                 this.wxdownload();
             }
             else {
@@ -101,6 +130,15 @@ class GxDownloadScene extends layaMaxUI_1.ui.GxDownloadSceneUI {
                         success: () => {
                             // 解压成功
                             console.log('unzip success');
+                            try {
+                                fileManager.writeFileSync(`ttfile://user/resflag.txt`, this.AD_TouTiaoVersion + "", "utf8");
+                                console.log("调用成功");
+                                //const data = fileManager.readFileSync(filePath);
+                                // console.log("写入的内容为:", data);
+                            }
+                            catch (err) {
+                                console.log("调用失败", err);
+                            }
                             Laya.LocalStorage.setItem('versionFirst', this.AD_TouTiaoVersion);
                             this.StartGame();
                         },
@@ -147,6 +185,15 @@ class GxDownloadScene extends layaMaxUI_1.ui.GxDownloadSceneUI {
                         success: () => {
                             // 解压成功
                             console.log('unzip success');
+                            try {
+                                fileManager.writeFileSync(`${userdatapath}/resflag.txt`, this.AD_QQVersion + "", "utf8");
+                                console.log("调用成功");
+                                //const data = fileManager.readFileSync(filePath);
+                                // console.log("写入的内容为:", data);
+                            }
+                            catch (err) {
+                                console.log("调用失败", err);
+                            }
                             Laya.LocalStorage.setItem('versionFirst', this.AD_QQVersion);
                             // qq.loadSubpackage({
                             //   name:'atlas',
@@ -214,6 +261,15 @@ class GxDownloadScene extends layaMaxUI_1.ui.GxDownloadSceneUI {
                         success: () => {
                             // 解压成功
                             console.log('unzip success');
+                            try {
+                                fileManager.writeFileSync(`${userdatapath}/resflag.txt`, this.AD_WXVersion + "", "utf8");
+                                console.log("调用成功");
+                                //const data = fileManager.readFileSync(filePath);
+                                // console.log("写入的内容为:", data);
+                            }
+                            catch (err) {
+                                console.log("调用失败", err);
+                            }
                             Laya.LocalStorage.setItem('versionFirst', this.AD_WXVersion);
                             self.wxStart();
                         },

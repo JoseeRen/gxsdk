@@ -101,7 +101,7 @@ exports.AdParams = {
         //以下是盒子广告 占位待用
         boxBanner: "",
         boxPortal: "",
-        bannerOnTop: true,
+        bannerOnTop: false,
         labelVersion: "",
         havebox: false,
         umAppKey: ""
@@ -125,7 +125,7 @@ exports.AdParams = {
         custom_right: "adunit-",
         labelVersion: "",
         subIds: [],
-        shareImgUrl: "https://res.sjzgxwl.com/shareimage/.jpg",
+        shareImgUrl: "", //https://res.sjzgxwl.com/shareimage/.jpg
     },
     qq: {
         gameName: "",
@@ -146,7 +146,7 @@ exports.AdParams = {
         bannerOnTop: false,
         gameEndShowCrazyPoint: false,
         gameEndShowGameBox: false,
-        shareImgUrl: "https://res.sjzgxwl.com/shareimage/.jpg",
+        shareImgUrl: "",
         labelVersion: "1",
         countdowntime: 5,
         //没用
@@ -155,13 +155,14 @@ exports.AdParams = {
     },
     ks: {
         gameName: "",
+        appId: "",
         labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
         age: 12,
-        company: "",
-        softCode: "",
-        ysCompanyName: "石家庄市高兴网络科技有限公司",
-        ysMail: "2361198052@qq.com",
-        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        company: "石家庄市神名网络科技有限公司",
+        softCode: "2022SRE012464",
+        ysCompanyName: "",
+        ysMail: "",
+        ysAddress: "",
         inter: "",
         banner: "",
         video: "",

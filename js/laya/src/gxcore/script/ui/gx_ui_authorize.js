@@ -35,6 +35,11 @@ class gx_ui_authorize extends layaMaxUI_1.ui.gxui.gx_ui_authorizeUI {
         this.btnSure.on(Laya.Event.CLICK, this, this.on_agree);
         this.btnCancel.on(Laya.Event.CLICK, this, this.on_refuse);
         this.btnClose.on(Laya.Event.CLICK, this, this.on_close);
+        if (!GxGame_1.default.canShowUser) {
+            this.andText.visible = false;
+            this.user.visible = false;
+            this.privacy.left = this.user.left;
+        }
         if (DataStorage_1.default.getItem(GxConstant_1.default.KEY_PRIVACY_AGREE)) {
             this.btnClose.visible = true;
             this.btnSure.visible = false;

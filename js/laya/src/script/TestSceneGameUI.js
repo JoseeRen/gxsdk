@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const layaMaxUI_1 = require("./../ui/layaMaxUI");
 const GxGame_1 = __importDefault(require("../gxcore/script/GxGame"));
-const GxLabelUtil_1 = __importDefault(require("../gxcore/script/core/GxLabelUtil"));
 /**
  * 本示例采用非脚本的方式实现，而使用继承页面基类，实现页面逻辑。在IDE里面设置场景的Runtime属性即可和场景进行关联
  * 相比脚本方式，继承式页面类，可以直接使用页面定义的属性（通过IDE内var属性定义），比如this.tipLbll，this.scoreLbl，具有代码提示效果
@@ -23,6 +22,9 @@ class TestSceneGameUI extends layaMaxUI_1.ui.TestSceneUI {
         GxGame_1.default.showMoreGameBtnWithParent(this.moregame);
         GxGame_1.default.showSubmsgBtnWithParent(this.sub);
         GxGame_1.default.showQQShareBtnWithParent(this.share);
+        GxGame_1.default.showTTBoxBtnWithParent(this.ttBoxBtn, () => {
+            console.log("发奖励了");
+        }, 1000);
         this.btnkuangdian.on(Laya.Event.CLICK, this, () => {
             GxGame_1.default.Ad().showCrazyPoint(() => {
                 //显示成功回调
@@ -40,11 +42,11 @@ class TestSceneGameUI extends layaMaxUI_1.ui.TestSceneUI {
                 //显示成功回调
                 console.log("激励视频：" + res);
             }, "test");
-            let label1 = GxGame_1.default.getLabel("switch2");
+            let label1 = GxGame_1.default.gGB("switch2");
             console.log("labelll switch2:" + label1);
-            let switchlabel = GxGame_1.default.getLabel("switch");
+            let switchlabel = GxGame_1.default.gGB("z1");
             console.log("labelll switchlabel:" + switchlabel);
-            let value = GxGame_1.default.getValue("switch", 10);
+            let value = GxGame_1.default.gGN("z1", 10);
             console.log("labelll switch value:" + value);
         });
         this.gameoverad.on(Laya.Event.CLICK, this, () => {
@@ -58,16 +60,20 @@ class TestSceneGameUI extends layaMaxUI_1.ui.TestSceneUI {
                 console.log("这是分享的结果 ：" + res);
             });
         });
-        GxLabelUtil_1.default.getInstance().initLabel("yhgxlmwy_yhgxlmwyvivo_1_vivo_xyx_20230314");
-        setTimeout(() => {
-            let label = GxLabelUtil_1.default.getInstance().getLabel("switch2");
-            console.log(label);
-            let switch11 = GxLabelUtil_1.default.getInstance().getLabel("switch");
-            console.log(switch11);
-        }, 4000);
+        this.chapingBtn.on(Laya.Event.CLICK, this, () => {
+            GxGame_1.default.Ad().showNativeInterstitial();
+        });
+        // GxGameUtil.getInstance().initLabel("yhgxlmwy_yhgxlmwyvivo_1_vivo_xyx_20230314")
+        // setTimeout(() => {
+        //     let label = GxGameUtil.getInstance().gGB("switch2");
+        //     console.log(label)
+        //     let switch11 = GxGameUtil.getInstance().gGB("z1");
+        //     console.log(switch11)
+        // }, 4000)
         /*   GxGame.Ad().showVideo((res) => {
                console.log("视频结果：" + res)
            }, "test")*/
+        GxGame_1.default.Ad().showBanner(() => { }, () => { });
     }
     onEnable() {
     }

@@ -177,7 +177,7 @@ class BaseAd {
         this.curVideoFlag = flag;
         GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.ad_video, { flag });
         if (!!flag) {
-            GxGame_1.default.gameEvent("reward_" + flag);
+            GxGame_1.default.gameEvent("reward", { flag: this.curVideoFlag });
         }
         else {
             console.warn("视频点没有加flag");
@@ -185,13 +185,13 @@ class BaseAd {
         complete && complete(true);
     }
     _videoCompleteEvent() {
-        GxGame_1.default.gameEvent("reward_complete_" + this.curVideoFlag);
+        GxGame_1.default.gameEvent("reward_complete", { flag: this.curVideoFlag });
     }
     _videoErrorEvent() {
-        GxGame_1.default.gameEvent("reward_error_" + this.curVideoFlag);
+        GxGame_1.default.gameEvent("reward_error", { flag: this.curVideoFlag });
     }
     _videoCloseEvent() {
-        GxGame_1.default.gameEvent("reward_close_" + this.curVideoFlag);
+        GxGame_1.default.gameEvent("reward_close", { flag: this.curVideoFlag });
     }
     /**
      * 上报原生广告曝光
@@ -758,6 +758,13 @@ class BaseAd {
     ttReport() {
     }
     onClickBtn(type) {
+    }
+    /*判断用户是不是买量进来的*/
+    userFrom(callback) {
+        callback && callback(false);
+    }
+    preShowVideo(callback) {
+        callback && callback(false);
     }
 }
 BaseAd.instance = null;

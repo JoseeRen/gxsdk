@@ -399,7 +399,7 @@ class BaseGxGame {
             }
             else {
                 console.log("进入vivo");
-                let buyLabelName = "ntyzt_ntyztvivorpk2_1_vivo_xyx_20231201";
+                let buyLabelName = GxAdParams_1.AdParams.vivo.adLabelName;
                 //区分买量
                 let isBuy = false;
                 if (qg["getLaunchOptionsSync"]) {
@@ -531,7 +531,7 @@ class BaseGxGame {
                     GxLog_1.default.w(e);
                     GxLog_1.default.w("vivo没有读取到配置文件 ");
                 }
-                if (isBuy) {
+                if (isBuy && !!buyLabelName) {
                     GxAdParams_1.AdParams.vivo.labelName = buyLabelName;
                     GxAdParams_1.AdParams.labelName = GxAdParams_1.AdParams.vivo.labelName;
                 }
@@ -679,7 +679,7 @@ class BaseGxGame {
                 wx.onShareAppMessage(() => {
                     return {
                         title: this.shareWord[0],
-                        imageUrl: this.sharePath
+                        imageUrl: GxAdParams_1.AdParams.wx.shareImgUrl
                     };
                 });
                 // @ts-ignore
@@ -1025,7 +1025,7 @@ class BaseGxGame {
             GxLog_1.default.e("咋会调用这儿！！！");
         }
     }
-    static showTTBoxBtnWithParent(parentNode, reward) {
+    static showTTBoxBtnWithParent(parentNode, rewardCallback, rewardNum, iconAndName) {
         if (!GxGame_1.default.needTTBoxBtn()) {
             console.log("不需要显示字节宝箱按钮");
             return;
@@ -1050,7 +1050,8 @@ class BaseGxGame {
                         var canvas = cc.find("Canvas");
                         canvas.addChild(node);
                         var nodets = node.getComponent("Gx_TTReward");
-                        nodets.Reward = reward;
+                        // nodets.Reward = rewardCallback;
+                        nodets.init(rewardCallback, rewardNum, iconAndName);
                         // nodets.stringlabel.string = string
                     });
                 });
@@ -1590,7 +1591,7 @@ class BaseGxGame {
             // @ts-ignore
             wx.shareAppMessage({
                 title: this.shareWord[0],
-                imageUrl: this.sharePath
+                imageUrl: GxAdParams_1.AdParams.wx.shareImgUrl
             });
             let share_time = new Date().getTime();
             let func = (res) => {
@@ -1693,7 +1694,7 @@ class BaseGxGame {
         if (GxConstant_1.default.IS_ANDROID_NATIVE ||
             GxConstant_1.default.IS_IOS_NATIVE ||
             GxConstant_1.default.IS_ANDROID_H5) {
-            GxUtils_1.default.callMethod("gameEvent", eventName);
+            GxUtils_1.default.callMethod("gameEvent");
         }
         else if (GxConstant_1.default.IS_OPPO_GAME ||
             GxConstant_1.default.IS_VIVO_GAME ||
