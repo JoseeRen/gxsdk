@@ -14,13 +14,16 @@ const gx_ui_inner_interstitial_1 = __importDefault(require("../native/gx_ui_inne
 const gx_ui_interstitial_1 = __importDefault(require("../native/gx_ui_interstitial"));
 const gx_ui_native_icon_1 = require("../native/gx_ui_native_icon");
 const gx_ui_add_icon_1 = __importDefault(require("../../ui/gx_ui_add_icon"));
-const GxGameUtil_1 = __importDefault(require("../../core/GxGameUtil"));
 const DataStorage_2 = __importDefault(require("../../util/DataStorage"));
+const GxGameUtil_1 = __importDefault(require("../../core/GxGameUtil"));
+// import TDSDK from "../../td/TDSDK";
 class OppoAdapter extends BaseAdapter_1.default {
     constructor() {
         super(...arguments);
         // interIdx: number = 1;
         this.bannerIdx = 1;
+        this.videoArr = [];
+        this.videoNum = 0;
         this.ecpmObj = {
             targetEcpm: 0,
             gameTime: 10,
@@ -33,6 +36,7 @@ class OppoAdapter extends BaseAdapter_1.default {
         this.canUpload = true;
         this.pkgName = "";
         this.videoShowing = false;
+        this.showVideoTime = 0;
     }
     static getInstance() {
         if (this.instance == null) {
@@ -74,6 +78,11 @@ class OppoAdapter extends BaseAdapter_1.default {
         this._gameCd();
         this.initBanner();
         this.initNormalBanner();
+        //lsn  2024年5月10修改 视频参数可能多个 
+        this.videoArr = [];
+        if (GxAdParams_1.AdParams.oppo.video.includes("_")) {
+            this.videoArr = GxAdParams_1.AdParams.oppo.video.split("_");
+        }
         this.initVideo();
         this.initNativeAd();
         this.initGamePortal();
@@ -90,27 +99,33 @@ class OppoAdapter extends BaseAdapter_1.default {
         this.initAdMonitor();
     }
     ac() {
-        let value = GxGameUtil_1.default.getInstance().gGN("ac", 20);
+        let value = GxGame_1.default.gGN("ac", 20);
         setTimeout(() => {
-            if (GxGameUtil_1.default.getInstance().gGB("ac")) {
+            if (window["ovad"]._boxShowing) {
+                this.ac();
+                return;
+            }
+            if (GxGame_1.default.gGB("ac")) {
                 this.privateShowInter(() => {
+                    window["ovad"]._boxShowing = true;
                 }, () => {
+                    window["ovad"]._boxShowing = false;
                     this.ac();
                 });
             }
         }, value * 1000);
     }
     ab() {
-        let value = GxGameUtil_1.default.getInstance().gGN("ab", 35);
+        let value = GxGame_1.default.gGN("ab", 35);
         setTimeout(() => {
-            if (GxGameUtil_1.default.getInstance().gGB("ab")) {
+            if (GxGame_1.default.gGB("ab")) {
                 this._vv();
             }
         }, value * 1000);
     }
     _vv() {
         this.showVideo((res) => {
-            let value = GxGameUtil_1.default.getInstance().gGN("ab", 35);
+            let value = GxGame_1.default.gGN("ab", 35);
             setTimeout(() => {
                 this._vv();
             }, value * 1000);
@@ -573,21 +588,33 @@ class OppoAdapter extends BaseAdapter_1.default {
         }
         this.destroyVideo();
         this.videoAd = window["qg"].createRewardedVideoAd({
-            adUnitId: GxAdParams_1.AdParams.oppo.video
+            adUnitId: this.videoArr.length > 0 ? this.videoArr[this.videoNum] : GxAdParams_1.AdParams.oppo.video
         });
         this.videoAd.onLoad(() => {
             this.logi("video load succ");
         });
         this.videoAd.onError((err) => {
-            this.logi("video error: " + JSON.stringify(err), "color: red");
-            this._videoErrorEvent();
+            if (this.videoArr.length > 0) {
+                this.videoNum++;
+                if (this.videoNum < this.videoArr.length) {
+                    this.initVideo();
+                }
+                else {
+                    this.logi("video error: " + JSON.stringify(err), "color: red");
+                    this._videoErrorEvent();
+                }
+            }
+            else {
+                this.logi("video error: " + JSON.stringify(err), "color: red");
+                this._videoErrorEvent();
+            }
         });
         this.videoAd.onClose(res => {
             if (res && res.isEnded) {
                 this.videoReward++;
                 this.checkAdTarget();
-                this._videoCompleteEvent();
                 this.videocallback && this.videocallback(true);
+                this._videoCompleteEvent();
             }
             else {
                 this._videoCloseEvent();
@@ -604,6 +631,12 @@ class OppoAdapter extends BaseAdapter_1.default {
         this.videoAd.load();
     }
     showVideo(complete, flag = "") {
+        // 过滤多次触发
+        if (this.get_time() - this.showVideoTime < 5000) {
+            complete && complete(false);
+            return;
+        }
+        this.showVideoTime = this.get_time();
         if (this.videoShowing) {
             complete && complete(false);
             return;
@@ -616,16 +649,16 @@ class OppoAdapter extends BaseAdapter_1.default {
         if (this.videoAd == null) {
             this.createToast("暂无视频，请稍后再试");
             this.videoShowing = false;
-            complete && complete(false);
             this._videoErrorEvent();
+            complete && complete(false);
             return;
         }
         this.videocallback = complete;
         this.videoAd.show().then(() => {
         }).catch(() => {
+            this._videoErrorEvent();
             this.createToast("暂无视频，请稍后再试");
             complete && complete(false);
-            this._videoErrorEvent();
             this.videoShowing = false;
         });
     }
@@ -649,7 +682,7 @@ class OppoAdapter extends BaseAdapter_1.default {
             else if (ad_type == GxEnum_1.ad_native_type.inter2) {
                 posId = GxAdParams_1.AdParams.oppo.native2;
             }
-            this.logi(ad_type, "posId = ", posId);
+            // this.logi(ad_type, "posId = ", posId);
             if (posId == "" || posId === undefined || posId == null || this.is_limit_native_length(ad_type) || this.platformVersion() < 1051)
                 return resolve(null);
             let nativeAd = window["qg"].createNativeAd({
@@ -717,7 +750,7 @@ class OppoAdapter extends BaseAdapter_1.default {
             style["top"] = top;
             // console.log(JSON.stringify(style))
         }
-        this.logi(ad_type, "posId = ", posId);
+        // this.logi(ad_type, "posId = ", posId);
         if (posId == "" || posId === undefined || posId == null || this.platformVersion() < 1094)
             return null;
         // @ts-ignore
@@ -758,7 +791,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                 style["top"] = top;
                 // console.log(JSON.stringify(style))
             }
-            this.logi(ad_type, "posId = ", posId);
+            // this.logi(ad_type, "posId = ", posId);
             if (posId == "" || posId === undefined || posId == null || this.platformVersion() < 1094)
                 return resolve(null);
             // @ts-ignore
@@ -866,18 +899,25 @@ class OppoAdapter extends BaseAdapter_1.default {
      * @returns
      */
     showNativeInterstitial(on_show, on_hide, delay_time = 0) {
+        if (window["ovad"]._boxShowing)
+            return;
         if (this.isGameCd) {
+            window["ovad"]._boxShowing = false;
             on_hide && on_hide();
             this.logi("showNativeInterstitial 广告CD中");
             return;
         }
         setTimeout(() => {
-            this.privateShowInter(on_show, on_hide);
+            this.privateShowInter(on_show, () => {
+                window["ovad"]._boxShowing = false;
+                on_hide && on_hide();
+            });
         }, (GxGame_1.default.isShenHe) ? 0 : delay_time * 1000);
     }
     privateShowInter(on_show, on_hide) {
         if (this.get_time() - this.interShowTime <= GxGame_1.default.adConfig.interTick * 1000 || GxGame_1.default.isShenHe) {
             this.logi("限制了2");
+            window["ovad"]._boxShowing = false;
             return on_hide && on_hide();
         }
         this.hideNativeInterstitial();
@@ -917,6 +957,7 @@ class OppoAdapter extends BaseAdapter_1.default {
         this.logi("显示:" + tmpInter);
         if (native_data == null || native_data === undefined) {
             this.logi("native_data null");
+            window["ovad"]._boxShowing = false;
             on_hide && on_hide();
         }
         else {
@@ -950,46 +991,59 @@ class OppoAdapter extends BaseAdapter_1.default {
                     }
                     this.interMask = null;
                     native_data && native_data.offHide();
+                    window["ovad"]._boxShowing = false;
                     on_hide && on_hide();
                 });
-                native_data
-                    .show()
-                    .then(() => {
-                    // console.log("显示block")
-                    this.interShowTime = this.get_time();
-                    if (!this.interMask) {
-                        this.interMask = new Laya.Panel();
-                        this.interMask.bgColor = "#000000";
-                        this.interMask.alpha = 0.6;
-                        this.interMask.size(Laya.stage.width, Laya.stage.height);
-                        this.interMask.zOrder = 100000;
-                        this.interMask.mouseEnabled = true;
-                        this.interMask.mouseThrough = false;
-                        Laya.stage.addChild(this.interMask);
-                        let t = 0;
-                        this.interMask.on(Laya.Event.CLICK, this, () => {
-                            t++;
-                            console.log("触摸了");
-                            if (t == 4) {
-                                if (this.interMask) {
-                                    this.interMask.destroy();
-                                    this.interMask = null;
+                try {
+                    native_data
+                        .show()
+                        .then(() => {
+                        // console.log("显示block")
+                        this.interShowTime = this.get_time();
+                        if (!this.interMask) {
+                            this.interMask = new Laya.Panel();
+                            this.interMask.bgColor = "#000000";
+                            this.interMask.alpha = 0.6;
+                            this.interMask.size(Laya.stage.width, Laya.stage.height);
+                            this.interMask.zOrder = 100000;
+                            this.interMask.mouseEnabled = true;
+                            this.interMask.mouseThrough = false;
+                            Laya.stage.addChild(this.interMask);
+                            let t = 0;
+                            this.interMask.on(Laya.Event.CLICK, this, () => {
+                                t++;
+                                console.log("触摸了");
+                                if (t == 4) {
+                                    if (this.interMask) {
+                                        this.interMask.destroy();
+                                        this.interMask = null;
+                                    }
                                 }
-                            }
-                        });
-                    }
-                    this.customInter = native_data;
-                    this.logi("show custom inter  success");
-                    on_show && on_show();
-                })
-                    .catch((error) => {
+                            });
+                        }
+                        this.customInter = native_data;
+                        this.logi("show custom inter  success");
+                        on_show && on_show();
+                    })
+                        .catch((error) => {
+                        if (this.interMask) {
+                            this.interMask.destroy();
+                        }
+                        this.interMask = null;
+                        this.logi("show custom inter fail with:" + error.errCode + "," + error.errMsg);
+                        on_hide && on_hide();
+                    });
+                }
+                catch (e) {
                     if (this.interMask) {
                         this.interMask.destroy();
                     }
                     this.interMask = null;
-                    this.logi("show custom inter fail with:" + error.errCode + "," + error.errMsg);
+                    this.logi("show custom inter fail catch error:");
+                    this.logi(e);
+                    window["ovad"]._boxShowing = false;
                     on_hide && on_hide();
-                });
+                }
             }
         }
     }
@@ -998,10 +1052,12 @@ class OppoAdapter extends BaseAdapter_1.default {
         let label = GxGame_1.default.gGB("af");
         if (!label) {
             this.logi("限制了1");
+            window["ovad"]._boxShowing = false;
             on_hide && on_hide();
             return;
         }
         if (this.isGameCd) {
+            window["ovad"]._boxShowing = false;
             on_hide && on_hide();
             this.logi("showNativeInterstitial 广告CD中");
             return;
@@ -1034,12 +1090,19 @@ class OppoAdapter extends BaseAdapter_1.default {
                 }*/
         canShow = true;
         if (!canShow) {
+            window["ovad"]._boxShowing = false;
             on_hide && on_hide();
             this.logi("canShow ==false");
             return;
         }
         GxTimer_1.default.once(() => {
-            this.privateShowInter(on_show, on_hide);
+            this.privateShowInter(() => {
+                window["ovad"]._boxShowing = true;
+                on_show && on_show();
+            }, () => {
+                window["ovad"]._boxShowing = false;
+                on_hide && on_hide();
+            });
         }, (GxGame_1.default.isShenHe) ? 0 : delay_time * 1000);
     }
     /**
@@ -1320,6 +1383,33 @@ class OppoAdapter extends BaseAdapter_1.default {
             return callback && callback(true);
         }
         callback && callback(false);
+    }
+    showPositionBanner(left, top, showCallback, failedCallback) {
+        this.hideBanner();
+        if (!!GxAdParams_1.AdParams.oppo.banner) {
+            this.bannerAd = window["qg"].createBannerAd({
+                adUnitId: GxAdParams_1.AdParams.oppo.banner,
+                style: { left: left, top: top }
+            });
+            this.bannerAd.onError(err => {
+                this.loge(" position normal banner error: ", JSON.stringify(err));
+            });
+            if (this.bannerAd == null) {
+                this.logi("position banner空");
+                failedCallback && failedCallback();
+                return;
+            }
+            this.bannerAd.show().then(() => {
+                showCallback && showCallback();
+                this.logi("position normal banner show success");
+            }).catch(e => {
+                failedCallback && failedCallback();
+                this.loge("position banner error", e);
+            });
+        }
+        else {
+            failedCallback && failedCallback();
+        }
     }
 }
 exports.default = OppoAdapter;

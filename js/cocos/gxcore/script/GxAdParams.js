@@ -54,7 +54,8 @@ exports.AdParams = {
         labelVersion: "",
         heJiConfig: "",
         havebox: false,
-        umAppKey: ""
+        umAppKey: "",
+        tdAppKey: ""
     },
     mi: {
         gameName: "",
@@ -83,11 +84,12 @@ exports.AdParams = {
         labelVersion: "",
         heJiConfig: "",
         havebox: false,
-        umAppKey: ""
+        umAppKey: "",
+        tdAppKey: ""
     },
     vivo: {
         "gameName": "",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        labelName: "csyx_csyxvivorpk0424_1_vivo_xyx_20240424",
         adLabelName: "",
         age: 12,
         company: "",
@@ -96,13 +98,13 @@ exports.AdParams = {
         ysMail: "2361198052@qq.com",
         ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
         inter: "",
-        banner: "",
-        custom1: "",
-        custom2: "",
+        banner: "7e605ccce5e249b4b5ccf0590e72d6ff",
+        custom1: "6dcc9ec70ee8472e9ca48233dba5ea2f",
+        custom2: "81b6d57253dd4942b1d46a5e413e4477",
         custom_banner: "",
         native1: "",
         native2: "",
-        video: "",
+        video: "050a726b94944e138d7de4ec0faf9be6",
         native_icon: "",
         //以下是盒子广告 占位待用
         boxBanner: "",
@@ -110,7 +112,8 @@ exports.AdParams = {
         bannerOnTop: true,
         labelVersion: "",
         havebox: false,
-        heJiConfig: ""
+        heJiConfig: "",
+        tdAppKey: ""
     },
     wx: {
         "gameName": "",
@@ -127,12 +130,13 @@ exports.AdParams = {
         banner: "adunit-a8da4c3fda27eba1",
         inter: "adunit-d92be1b1d8ab6324",
         inter_custom: "adunit-e6d377baf12c177c",
-        custom_left: "adunit-",
-        custom_right: "adunit-",
+        custom_left: "",
+        custom_right: "",
         labelVersion: "",
         subIds: [],
         heJiConfig: "",
-        shareImgUrl: "", //https://res.sjzgxwl.com/shareimage/.jpg
+        shareImgUrl: "",
+        tdAppKey: ""
     },
     qq: {
         "gameName": "",
@@ -160,7 +164,8 @@ exports.AdParams = {
         //没用
         sceneidtest: false,
         subIds: [],
-        heJiConfig: ""
+        heJiConfig: "",
+        tdAppKey: ""
     },
     ks: {
         gameName: "",
@@ -176,7 +181,8 @@ exports.AdParams = {
         banner: "",
         video: "2300005032_01",
         labelVersion: "",
-        heJiConfig: ""
+        heJiConfig: "",
+        tdAppKey: ""
     },
     tt: {
         "gameName": "",
@@ -195,7 +201,8 @@ exports.AdParams = {
         labelVersion: "",
         umAppKey: "",
         shareTemplateId: "",
-        heJiConfig: ""
+        heJiConfig: "",
+        tdAppKey: ""
     },
     hw: {
         "gameName": "",
@@ -227,7 +234,8 @@ exports.AdParams = {
         debug_native2: "",
         labelVersion: "",
         umAppKey: "",
-        heJiConfig: ""
+        heJiConfig: "",
+        tdAppKey: ""
     },
     uc: {
         "gameName": "",
@@ -241,7 +249,8 @@ exports.AdParams = {
         inter: "",
         banner: "",
         video: "",
-        labelVersion: ""
+        labelVersion: "",
+        tdAppKey: ""
     },
     zfb: {
         "gameName": "",
@@ -255,6 +264,7 @@ exports.AdParams = {
         inter: "ad_tiny_2021004124680383_202311102200070139",
         banner: "ad_tiny_2021004124680383_202311102200070028",
         video: "ad_tiny_2021004124680383_202311102200070140",
-        labelVersion: ""
+        labelVersion: "",
+        tdAppKey: ""
     }
 };

@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const layaMaxUI_1 = require("./../ui/layaMaxUI");
 const GxGame_1 = __importDefault(require("../gxcore/script/GxGame"));
+const gxGameEnd_1 = __importDefault(require("../gxcore/script/ad/ad/gxGameEnd"));
 /**
  * 本示例采用非脚本的方式实现，而使用继承页面基类，实现页面逻辑。在IDE里面设置场景的Runtime属性即可和场景进行关联
  * 相比脚本方式，继承式页面类，可以直接使用页面定义的属性（通过IDE内var属性定义），比如this.tipLbll，this.scoreLbl，具有代码提示效果
@@ -25,7 +26,9 @@ class TestSceneGameUI extends layaMaxUI_1.ui.TestSceneUI {
         GxGame_1.default.showTTBoxBtnWithParent(this.ttBoxBtn, () => {
             console.log("发奖励了");
         }, 1000);
+        this.gameEnd.addComponent(gxGameEnd_1.default).init([this.btnkuangdian, this.gameoverad], this.touchNode, this.dotNode);
         this.btnkuangdian.on(Laya.Event.CLICK, this, () => {
+            console.log("11111");
             GxGame_1.default.Ad().showCrazyPoint(() => {
                 //显示成功回调
                 console.log("狂点显示成功");
@@ -37,6 +40,18 @@ class TestSceneGameUI extends layaMaxUI_1.ui.TestSceneUI {
                 console.log("获取到：" + res);
             }, false);
         });
+        //   let t=  new Laya.Sprite();
+        //   t.width=this.btnkuangdian.displayWidth
+        //   t.height=this.btnkuangdian.displayHeight
+        // //   t.parent=this.btnkuangdian
+        //   this.btnkuangdian.addChild(t)
+        //    t.on(Laya.Event.CLICK, this, (e) => {
+        //         console.log("22222")
+        //         e.stopPropagation()
+        //         setTimeout(()=>{
+        //             this.btnkuangdian.event(Laya.Event.CLICK, e);
+        //         },2000)
+        //     })
         this.videoBtn.on(Laya.Event.CLICK, this, () => {
             GxGame_1.default.Ad().showVideo((res) => {
                 //显示成功回调
@@ -50,6 +65,7 @@ class TestSceneGameUI extends layaMaxUI_1.ui.TestSceneUI {
             console.log("labelll switch value:" + value);
         });
         this.gameoverad.on(Laya.Event.CLICK, this, () => {
+            console.log("gameoveraddd");
             GxGame_1.default.Ad().showGameOverAD();
         });
         this.submsg.on(Laya.Event.CLICK, this, () => {

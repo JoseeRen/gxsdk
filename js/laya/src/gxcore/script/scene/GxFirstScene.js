@@ -10,6 +10,7 @@ const layaMaxUI_1 = require("../../../ui/layaMaxUI");
 var GxFirstSceneUI = layaMaxUI_1.ui.GxFirstSceneUI;
 const ResUtil_1 = __importDefault(require("../util/ResUtil"));
 const GxChecker_1 = __importDefault(require("../GxChecker"));
+const ovad_1 = __importDefault(require("../ad/ad/ovad"));
 class GxFirstScene extends GxFirstSceneUI {
     constructor() {
         super();
@@ -26,6 +27,7 @@ class GxFirstScene extends GxFirstSceneUI {
         this.canJumpToNext = false;
     }
     onAwake() {
+        ovad_1.default.init();
         this.width = Laya.stage.width;
         this.height = Laya.stage.height;
         this.jkCompany.text = "";

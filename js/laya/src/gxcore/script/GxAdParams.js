@@ -50,7 +50,8 @@ exports.AdParams = {
         bannerOnTop: false,
         labelVersion: "",
         havebox: false,
-        umAppKey: ""
+        umAppKey: "",
+        tdAppKey: ""
     },
     mi: {
         gameName: "",
@@ -78,11 +79,13 @@ exports.AdParams = {
         bannerOnTop: false,
         labelVersion: "",
         havebox: false,
-        umAppKey: ""
+        umAppKey: "",
+        tdAppKey: ""
     },
     vivo: {
         gameName: "",
         labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        adLabelName: "",
         age: 12,
         company: "",
         softCode: "",
@@ -104,7 +107,8 @@ exports.AdParams = {
         bannerOnTop: false,
         labelVersion: "",
         havebox: false,
-        umAppKey: ""
+        heJiConfig: "",
+        tdAppKey: ""
     },
     wx: {
         gameName: "",
@@ -121,11 +125,12 @@ exports.AdParams = {
         banner: "adunit-2c64edb1e908271c",
         inter: "adunit-515ac98b2e742fc8",
         inter_custom: "adunit-cd977ce3f9e73507",
-        custom_left: "adunit-",
-        custom_right: "adunit-",
+        custom_left: "",
+        custom_right: "",
         labelVersion: "",
         subIds: [],
-        shareImgUrl: "", //https://res.sjzgxwl.com/shareimage/.jpg
+        shareImgUrl: "",
+        tdAppKey: ""
     },
     qq: {
         gameName: "",
@@ -151,7 +156,8 @@ exports.AdParams = {
         countdowntime: 5,
         //没用
         sceneidtest: false,
-        subIds: []
+        subIds: [],
+        tdAppKey: ""
     },
     ks: {
         gameName: "",
@@ -166,7 +172,8 @@ exports.AdParams = {
         inter: "",
         banner: "",
         video: "",
-        labelVersion: ""
+        labelVersion: "",
+        tdAppKey: ""
     },
     tt: {
         gameName: "",
@@ -184,7 +191,8 @@ exports.AdParams = {
         video: "",
         labelVersion: "",
         umAppKey: "",
-        shareTemplateId: ""
+        shareTemplateId: "",
+        tdAppKey: ""
     },
     hw: {
         gameName: "",
@@ -215,7 +223,8 @@ exports.AdParams = {
         debug_native1: "testu7m3hc4gvm",
         debug_native2: "",
         labelVersion: "",
-        umAppKey: ""
+        umAppKey: "",
+        tdAppKey: ""
     },
     uc: {
         gameName: "",
@@ -275,6 +284,7 @@ exports.AdParams = {
         inter: "ad_tiny_2021004124680383_202311102200070139",
         banner: "ad_tiny_2021004124680383_202311102200070028",
         video: "ad_tiny_2021004124680383_202311102200070140",
-        labelVersion: ""
+        labelVersion: "",
+        tdAppKey: ""
     }
 };

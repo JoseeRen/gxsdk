@@ -34,6 +34,7 @@ const WxCustomAd_1 = __importStar(require("./WxCustomAd"));
 const DataStorage_1 = __importDefault(require("../../util/DataStorage"));
 const OpenDataUtil_1 = __importDefault(require("../../util/OpenDataUtil"));
 const GxConstant_1 = __importDefault(require("../../core/GxConstant"));
+// import TDSDK from "../../td/TDSDK";
 class WxAdapter extends BaseAdapter_1.default {
     constructor() {
         super(...arguments);
@@ -324,6 +325,8 @@ class WxAdapter extends BaseAdapter_1.default {
         this.videoAd = null;
     }
     initInter() {
+        if (GxAdParams_1.AdParams.wx.inter == null || GxAdParams_1.AdParams.wx.inter.length <= 0)
+            return;
         this.destroyNormalInter();
         //@ts-ignore
         // this.normalInterShowed=false;
@@ -432,14 +435,20 @@ class WxAdapter extends BaseAdapter_1.default {
         this.showNativeInterstitial(on_show, on_hide, delay_time);
     }
     initCustomInter() {
+        if (GxAdParams_1.AdParams.wx.inter_custom == null || GxAdParams_1.AdParams.wx.inter_custom.length <= 0)
+            return;
         this.customInterAd = new WxCustomAd_1.default();
         this.customInterAd.init(GxAdParams_1.AdParams.wx.inter_custom, WxCustomAd_1.CustomAdType.Type5x3, 30);
     }
     initCustomLeft() {
+        if (GxAdParams_1.AdParams.wx.custom_left == null || GxAdParams_1.AdParams.wx.custom_left.length <= 0)
+            return;
         this.customLeftAd = new WxCustomAd_1.default();
         this.customLeftAd.init(GxAdParams_1.AdParams.wx.custom_left, WxCustomAd_1.CustomAdType.TypeLeftOne, 30);
     }
     initCustomRight() {
+        if (GxAdParams_1.AdParams.wx.custom_right == null || GxAdParams_1.AdParams.wx.custom_right.length <= 0)
+            return;
         this.customRightAd = new WxCustomAd_1.default();
         this.customRightAd.init(GxAdParams_1.AdParams.wx.custom_right, WxCustomAd_1.CustomAdType.TypeRightOne, 30);
     }
@@ -639,6 +648,16 @@ class WxAdapter extends BaseAdapter_1.default {
             // @ts-ignore
             wx.uma.setOpenid(this.openId);
         }
+        if (window["TDAPP"]) {
+            window["TDAPP"].register({
+                profileId: this.openId,
+                profileType: 1
+            });
+            window["TDAPP"].login({
+                profileId: this.openId,
+                profileType: 1
+            });
+        }
         let subIds = this.getSubIds();
         let self = this;
         for (let i = 0; i < subIds.length; i++) {
@@ -699,9 +718,9 @@ class WxAdapter extends BaseAdapter_1.default {
     userFrom(callback) {
         try {
             // @ts-ignore
-            if (window["testDataToServer"] && testDataToServer.isAdUser) {
-                return callback && callback(true);
-            }
+            /*    if (window["testDataToServer"] && testDataToServer.isAdUser) {
+                    return callback && callback(true);
+                }*/
             let clickId = DataStorage_1.default.getItem("__clickid__");
             if (!!clickId) {
                 return callback && callback(true);

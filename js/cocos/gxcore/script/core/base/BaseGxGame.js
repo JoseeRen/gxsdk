@@ -402,8 +402,11 @@ class BaseGxGame {
                 let buyLabelName = GxAdParams_1.AdParams.vivo.adLabelName;
                 //区分买量
                 let isBuy = false;
+                // @ts-ignore
                 if (qg["getLaunchOptionsSync"]) {
-                    var e = null, t = qg.getLaunchOptionsSync();
+                    var e = null, 
+                    // @ts-ignore
+                    t = qg.getLaunchOptionsSync();
                     console.log(JSON.stringify(t));
                     console.log(t["query"]);
                     if (t["query"]) {
@@ -587,6 +590,14 @@ class BaseGxGame {
         else if (typeof window["ks"] != "undefined") {
             GxConstant_1.default.IS_KS_GAME = true;
             GxAdParams_1.AdParams.labelName = GxAdParams_1.AdParams.ks.labelName;
+            GxAdParams_1.AdParams.labelName = GxAdParams_1.AdParams.ks["labelName"];
+            GxAdParams_1.AdParams.age = GxAdParams_1.AdParams.ks["age"];
+            GxAdParams_1.AdParams.company = GxAdParams_1.AdParams.ks["company"];
+            GxAdParams_1.AdParams.softCode = GxAdParams_1.AdParams.ks["softCode"];
+            GxAdParams_1.AdParams.ysCompanyName = GxAdParams_1.AdParams.ks["ysCompanyName"];
+            GxAdParams_1.AdParams.ysMail = GxAdParams_1.AdParams.ks["ysMail"];
+            GxAdParams_1.AdParams.ysAddress = GxAdParams_1.AdParams.ks["ysAddress"];
+            GxAdParams_1.AdParams.heJiConfig = GxAdParams_1.AdParams.ks["heJiConfig"];
         }
         else if (typeof window["wx"] != "undefined") {
             GxConstant_1.default.IS_WECHAT_GAME = true;
@@ -1470,6 +1481,9 @@ class BaseGxGame {
                 (GxAdParams_1.AdParams.oppo.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.oppo.labelVersion;
             }
+            if (window["testDataToServer"] && window["testDataToServer"].isAdUser) {
+                key += "ad";
+            }
         }
         else if (GxConstant_1.default.IS_MI_GAME) {
             if (GxAdParams_1.AdParams.mi.labelVersion &&
@@ -1481,6 +1495,9 @@ class BaseGxGame {
             if (GxAdParams_1.AdParams.vivo.labelVersion &&
                 (GxAdParams_1.AdParams.vivo.labelVersion + "").length > 0) {
                 key += GxAdParams_1.AdParams.vivo.labelVersion;
+            }
+            if (window["testDataToServer"] && window["testDataToServer"].isAdUser) {
+                key += "ad";
             }
         }
         else if (GxConstant_1.default.IS_HUAWEI_GAME) {
@@ -1687,14 +1704,14 @@ class BaseGxGame {
     static gameEvent(eventName, params = null) {
         GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.event, { eventName, params });
         console.log("[gx_game] gameEvent:" + eventName);
-        let patt = /^\w{1,100}$/;
-        if (!patt.test(eventName)) {
-            console.warn("事件名不符合要求：" + eventName);
-        }
+        /*   let patt = /^\w{1,100}$/;
+           if (!patt.test(eventName)) {
+               console.warn("事件名不符合要求：" + eventName);
+           }*/
         if (GxConstant_1.default.IS_ANDROID_NATIVE ||
             GxConstant_1.default.IS_IOS_NATIVE ||
             GxConstant_1.default.IS_ANDROID_H5) {
-            GxUtils_1.default.callMethod("gameEvent");
+            GxUtils_1.default.callMethod("gameEvent", eventName);
         }
         else if (GxConstant_1.default.IS_OPPO_GAME ||
             GxConstant_1.default.IS_VIVO_GAME ||
@@ -1711,9 +1728,16 @@ class BaseGxGame {
             //@ts-ignore
             wx.uma && wx.uma.trackEvent(eventName, params);
         }
+        else if (GxConstant_1.default.IS_KS_GAME) {
+            //@ts-ignore
+            wx.uma && wx.uma.trackEvent(eventName, params);
+        }
         else if (GxConstant_1.default.IS_QQ_GAME) {
             //@ts-ignore
             qq.uma && qq.uma.trackEvent(eventName, params);
+        }
+        if (window["TDAPP"]) {
+            window["TDAPP"] && window["TDAPP"].onEvent(eventName, "", params);
         }
         if (eventName == GxEnum_1.EventName.modeLvChoice) {
             if (GxConstant_1.default.IS_VIVO_GAME || GxConstant_1.default.IS_OPPO_GAME) {
@@ -1766,10 +1790,10 @@ class BaseGxGame {
     static gameEventLevelStart(lvName, params = null) {
         GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.lvStart, { stage: lvName, params });
         lvName = lvName ? lvName.toString() : "";
-        let patt = /^\w{0,1000000}$/;
-        if (!patt.test(lvName)) {
-            console.warn("关卡名不符合要求：" + lvName);
-        }
+        /*       let patt = /^\w{0,1000000}$/;
+               if (!patt.test(lvName)) {
+                   console.warn("关卡名不符合要求：" + lvName);
+               }*/
         console.log("[gx_game] gameEventLevelStart:" + lvName);
         if (GxConstant_1.default.IS_ANDROID_NATIVE ||
             GxConstant_1.default.IS_IOS_NATIVE ||
@@ -1778,11 +1802,10 @@ class BaseGxGame {
         }
         else if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_VIVO_GAME) {
             //@ts-ignore
-            qg.uma &&
-                qg.uma.stage.onStart({
-                    stageId: String(lvName),
-                    stageName: `第${lvName}关`
-                });
+            qg.uma && qg.uma.stage.onStart({
+                stageId: String(lvName),
+                stageName: `第${lvName}关`
+            });
             /*   let label = GxGame.gGB("z1");
                      if (label) {
                          var gailv = GxGame.gGN("gailv")
@@ -1793,44 +1816,50 @@ class BaseGxGame {
         }
         else if (GxConstant_1.default.IS_HUAWEI_GAME || GxConstant_1.default.IS_MI_GAME) {
             //@ts-ignore
-            qg.uma &&
-                qg.uma.stage.onStart({
-                    stageId: String(lvName),
-                    stageName: `第${lvName}关`
-                });
+            qg.uma && qg.uma.stage.onStart({
+                stageId: String(lvName),
+                stageName: `第${lvName}关`
+            });
         }
         else if (GxConstant_1.default.IS_TT_GAME) {
             //@ts-ignore
-            tt.uma &&
-                tt.uma.stage.onStart({
-                    stageId: String(lvName),
-                    stageName: `第${lvName}关`
-                });
+            tt.uma && tt.uma.stage.onStart({
+                stageId: String(lvName),
+                stageName: `第${lvName}关`
+            });
         }
         else if (GxConstant_1.default.IS_WECHAT_GAME) {
             //@ts-ignore
-            wx.uma &&
-                wx.uma.stage.onStart({
-                    stageId: String(lvName),
-                    stageName: `第${lvName}关`
-                });
+            wx.uma && wx.uma.stage.onStart({
+                stageId: String(lvName),
+                stageName: `第${lvName}关`
+            });
+        }
+        else if (GxConstant_1.default.IS_KS_GAME) {
+            //@ts-ignore
+            wx.uma && wx.uma.stage.onStart({
+                stageId: String(lvName),
+                stageName: `第${lvName}关`
+            });
         }
         else if (GxConstant_1.default.IS_QQ_GAME) {
             //@ts-ignore
-            qq.uma &&
-                qq.uma.stage.onStart({
-                    stageId: String(lvName),
-                    stageName: `第${lvName}关`
-                });
+            qq.uma && qq.uma.stage.onStart({
+                stageId: String(lvName),
+                stageName: `第${lvName}关`
+            });
+        }
+        if (window["TDAPP"]) {
+            window["TDAPP"] && window["TDAPP"].onEvent("关卡开始_TD", "", { lvName: lvName });
         }
     }
     static gameEventLevelEnd(lvName, isVictory = false) {
         GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.lvEnd, { stage: lvName, isVictory });
         lvName = lvName ? lvName.toString() : "";
-        let patt = /^\w{0,1000000}$/;
-        if (!patt.test(lvName)) {
-            console.warn("关卡名不符合要求：" + lvName);
-        }
+        /*     let patt = /^\w{0,1000000}$/;
+             if (!patt.test(lvName)) {
+                 console.warn("关卡名不符合要求：" + lvName);
+             }*/
         console.log("[gx_game] 关卡结束:" +
             lvName +
             " isVictory:" +
@@ -1842,12 +1871,11 @@ class BaseGxGame {
         }
         else if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_VIVO_GAME) {
             //@ts-ignore
-            qg.uma &&
-                qg.uma.stage.onEnd({
-                    stageId: String(lvName),
-                    stageName: `第${lvName}关`,
-                    event: isVictory ? "complete" : "fail"
-                });
+            qg.uma && qg.uma.stage.onEnd({
+                stageId: String(lvName),
+                stageName: `第${lvName}关`,
+                event: isVictory ? "complete" : "fail"
+            });
             /*   let label = GxGame.gGB("z1");
                      if (label) {
                          var gailv = GxGame.gGN("gailv")
@@ -1858,39 +1886,51 @@ class BaseGxGame {
         }
         else if (GxConstant_1.default.IS_HUAWEI_GAME || GxConstant_1.default.IS_MI_GAME) {
             //@ts-ignore
-            qg.uma &&
-                qg.uma.stage.onEnd({
-                    stageId: String(lvName),
-                    stageName: `第${lvName}关`,
-                    event: isVictory ? "complete" : "fail"
-                });
+            qg.uma && qg.uma.stage.onEnd({
+                stageId: String(lvName),
+                stageName: `第${lvName}关`,
+                event: isVictory ? "complete" : "fail"
+            });
         }
         else if (GxConstant_1.default.IS_TT_GAME) {
             //@ts-ignore
-            tt.uma &&
-                tt.uma.stage.onEnd({
-                    stageId: String(lvName),
-                    stageName: `第${lvName}关`,
-                    event: isVictory ? "complete" : "fail"
-                });
+            tt.uma && tt.uma.stage.onEnd({
+                stageId: String(lvName),
+                stageName: `第${lvName}关`,
+                event: isVictory ? "complete" : "fail"
+            });
         }
         else if (GxConstant_1.default.IS_WECHAT_GAME) {
             //@ts-ignore
-            wx.uma &&
-                wx.uma.stage.onEnd({
-                    stageId: String(lvName),
-                    stageName: `第${lvName}关`,
-                    event: isVictory ? "complete" : "fail"
-                });
+            wx.uma && wx.uma.stage.onEnd({
+                stageId: String(lvName),
+                stageName: `第${lvName}关`,
+                event: isVictory ? "complete" : "fail"
+            });
+        }
+        else if (GxConstant_1.default.IS_KS_GAME) {
+            //@ts-ignore
+            wx.uma && wx.uma.stage.onEnd({
+                stageId: String(lvName),
+                stageName: `第${lvName}关`,
+                event: isVictory ? "complete" : "fail"
+            });
         }
         else if (GxConstant_1.default.IS_QQ_GAME) {
             //@ts-ignore
-            qq.uma &&
-                qq.uma.stage.onEnd({
-                    stageId: String(lvName),
-                    stageName: `第${lvName}关`,
-                    event: isVictory ? "complete" : "fail"
-                });
+            qq.uma && qq.uma.stage.onEnd({
+                stageId: String(lvName),
+                stageName: `第${lvName}关`,
+                event: isVictory ? "complete" : "fail"
+            });
+        }
+        if (window["TDAPP"]) {
+            if (isVictory) {
+                window["TDAPP"].onEvent("关卡胜利_TD", "", { lvName: lvName });
+            }
+            else {
+                window["TDAPP"].onEvent("关卡失败_TD", "", { lvName: lvName });
+            }
         }
         // //qq的策略
         //

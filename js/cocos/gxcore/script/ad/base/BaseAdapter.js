@@ -17,7 +17,7 @@ const GxConstant_1 = __importDefault(require("../../core/GxConstant"));
 const GxUtils_1 = __importDefault(require("../../util/GxUtils"));
 const GxGame_1 = __importDefault(require("../../GxGame"));
 const GxLog_1 = __importDefault(require("../../util/GxLog"));
-const TDSDK_1 = __importDefault(require("../../td/TDSDK"));
+// import TDSDK from "../../td/TDSDK";
 const GxChecker_1 = __importDefault(require("../../GxChecker"));
 var RECORDER_STATE;
 (function (RECORDER_STATE) {
@@ -79,7 +79,12 @@ class BaseAd {
     }
     setManifestInfo(info) {
         this.manifestInfo = info;
-        TDSDK_1.default.getInstance().initApp(info.package, info.name, info.versionName, info.versionCode);
+        /*  TDSDK.getInstance().initApp(
+              info.package,
+              info.name,
+              info.versionName,
+              info.versionCode
+          );*/
         console.log("[gx_game]设置info");
     }
     showAuthorize(on_agree, on_refuse) {
@@ -765,6 +770,8 @@ class BaseAd {
     }
     preShowVideo(callback) {
         callback && callback(false);
+    }
+    showPositionBanner(left, top, showCallback, failedCallback) {
     }
 }
 BaseAd.instance = null;

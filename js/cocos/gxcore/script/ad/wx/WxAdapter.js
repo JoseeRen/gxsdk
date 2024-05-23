@@ -355,6 +355,8 @@ class WxAdapter extends BaseAdapter_1.default {
         this.videoAd = null;
     }
     initInter() {
+        if (GxAdParams_1.AdParams.wx.inter == null || GxAdParams_1.AdParams.wx.inter.length <= 0)
+            return;
         this.destroyNormalInter();
         //@ts-ignore
         // this.normalInterShowed=false;
@@ -465,14 +467,20 @@ class WxAdapter extends BaseAdapter_1.default {
         this.showNativeInterstitial(on_show, on_hide, delay_time);
     }
     initCustomInter() {
+        if (GxAdParams_1.AdParams.wx.inter_custom == null || GxAdParams_1.AdParams.wx.inter_custom.length <= 0)
+            return;
         this.customInterAd = new WxCustomAd_1.default();
         this.customInterAd.init(GxAdParams_1.AdParams.wx.inter_custom, WxCustomAd_1.CustomAdType.Type5x3, 30);
     }
     initCustomLeft() {
+        if (GxAdParams_1.AdParams.wx.custom_left == null || GxAdParams_1.AdParams.wx.custom_left.length <= 0)
+            return;
         this.customLeftAd = new WxCustomAd_1.default();
         this.customLeftAd.init(GxAdParams_1.AdParams.wx.custom_left, WxCustomAd_1.CustomAdType.TypeLeftOne, 30);
     }
     initCustomRight() {
+        if (GxAdParams_1.AdParams.wx.custom_right == null || GxAdParams_1.AdParams.wx.custom_right.length <= 0)
+            return;
         this.customRightAd = new WxCustomAd_1.default();
         this.customRightAd.init(GxAdParams_1.AdParams.wx.custom_right, WxCustomAd_1.CustomAdType.TypeRightOne, 30);
     }
@@ -677,6 +685,16 @@ class WxAdapter extends BaseAdapter_1.default {
             // @ts-ignore
             wx.uma.setOpenid(this.openId);
         }
+        if (window["TDAPP"]) {
+            window["TDAPP"].register({
+                profileId: this.openId,
+                profileType: 1
+            });
+            window["TDAPP"].login({
+                profileId: this.openId,
+                profileType: 1
+            });
+        }
         let subIds = this.getSubIds();
         let self = this;
         for (let i = 0; i < subIds.length; i++) {
@@ -727,15 +745,28 @@ class WxAdapter extends BaseAdapter_1.default {
     userFrom(callback) {
         try {
             //@ts-ignore
-            if (window["testDataToServer"] && testDataToServer.isAdUser) {
-                return callback && callback(true);
-            }
+            /*  if (window["testDataToServer"] && testDataToServer.isAdUser) {
+                  return callback && callback(true);
+              }*/
             let clickId = DataStorage_1.default.getItem("__clickid__");
             if (!!clickId) {
                 return callback && callback(true);
             }
             //@ts-ignore
             let launchOptionsSync = wx.getLaunchOptionsSync();
+            /*     let demoT = {
+                     "getLaunchOptionsSync": {
+                         "scene": 1095,
+                         "query": {
+                             "weixinadinfo": "12864698926.wx0vravolutzjzle00.1038.1",
+                             "wx_aid": "12864698926",
+                             "weixinadkey": "df2e74a83185620edceb3d296dfaac0bf797daec0f614e9a399f14e398575dfb906f6487493f749fd32c0cbc8937f358",
+                             "wx_traceid": "wx0vravolutzjzle00",
+                             "gdt_vid": "wx0vravolutzjzle00"
+                         },
+                         "referrerInfo": {"appId": "wxf8c664173edb07c3", "extraData": {}}
+                     }, "channel": "wx"
+                 };*/
             let query = launchOptionsSync.query;
             clickId = query["gdt_vid"];
             if (!!clickId) {

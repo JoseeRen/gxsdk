@@ -83,7 +83,7 @@ class GxGame extends BaseGxGame_1.default {
     static needTTBoxBtn() {
         if (GxConstant_1.default.IS_TT_GAME) {
             // @ts-ignore
-            if (tt['checkScene']) {
+            if (tt["checkScene"]) {
                 return true;
             }
             else
@@ -94,6 +94,17 @@ class GxGame extends BaseGxGame_1.default {
         }
     }
     static getJkShowTime() {
+        if (GxConstant_1.default.IS_KS_GAME) {
+            // @ts-ignore
+            let systemInfoSync = ks.getSystemInfoSync();
+            let env = systemInfoSync.host.env;
+            if (env == "kwaipro" || env == "snackvideo" || env == "kwaime") {
+                return 0.001;
+            }
+            else {
+                return 3;
+            }
+        }
         if (GxConstant_1.default.IS_OPPO_GAME ||
             GxConstant_1.default.IS_VIVO_GAME ||
             GxConstant_1.default.IS_HUAWEI_GAME ||
@@ -117,7 +128,7 @@ class GxGame extends BaseGxGame_1.default {
             return -1;
         }
         if (GxConstant_1.default.IS_ANDROID_NATIVE) {
-            return parseInt(GxUtils_1.default.callMethod('getGameAge'));
+            return parseInt(GxUtils_1.default.callMethod("getGameAge"));
         }
         if (GxConstant_1.default.IS_ANDROID_H5) {
             return parseInt(this.Ad().getGameAge());
@@ -129,49 +140,49 @@ class GxGame extends BaseGxGame_1.default {
             let subIds = GxGame.Ad().getSubIds();
             if (subIds && subIds.length > 0) {
                 if (GxGame.Ad().waitSubIds.length > 0) {
-                    ResUtil_1.default.loadPrefab('gx/prefab/submsg', (err, prefab) => {
+                    ResUtil_1.default.loadPrefab("gx/prefab/submsg", (err, prefab) => {
                         if (err) {
-                            GxLog_1.default.e('加载订阅预制体失败 无法显示订阅');
+                            GxLog_1.default.e("加载订阅预制体失败 无法显示订阅");
                             return;
                         }
                         let node = cc.instantiate(prefab);
                         if (!!GxGame.uiGroup) {
                             node.group = GxGame.uiGroup;
                         }
-                        let submsgView = node.getComponent('Gx_submsg');
+                        let submsgView = node.getComponent("Gx_submsg");
                         submsgView.show();
                     });
                 }
                 else {
-                    GxLog_1.default.w('未订阅id为空 已经全部订阅 不显示订阅');
+                    GxLog_1.default.w("未订阅id为空 已经全部订阅 不显示订阅");
                 }
             }
             else {
-                GxLog_1.default.w('订阅id为空或者没有配置 不显示订阅');
+                GxLog_1.default.w("订阅id为空或者没有配置 不显示订阅");
             }
         }
         else {
-            GxLog_1.default.w('非qq 微信不显示订阅');
+            GxLog_1.default.w("非qq 微信不显示订阅");
         }
     }
     static showShareFriend(callback) {
         if (GxConstant_1.default.IS_WECHAT_GAME || GxConstant_1.default.IS_QQ_GAME) {
-            ResUtil_1.default.loadPrefab('gx/prefab/shareFriend', (err, prefab) => {
+            ResUtil_1.default.loadPrefab("gx/prefab/shareFriend", (err, prefab) => {
                 if (err) {
-                    GxLog_1.default.e('加载分享预制体失败 无法显示分享');
+                    GxLog_1.default.e("加载分享预制体失败 无法显示分享");
                     return;
                 }
                 let node = cc.instantiate(prefab);
                 if (!!GxGame.uiGroup) {
                     node.group = GxGame.uiGroup;
                 }
-                let shareView = node.getComponent('Gx_shareFriend');
+                let shareView = node.getComponent("Gx_shareFriend");
                 shareView.show();
                 shareView.setShareCallback(callback);
             });
         }
         else {
-            GxLog_1.default.w('非qq 微信不显示分享');
+            GxLog_1.default.w("非qq 微信不显示分享");
         }
     }
     static clickBtn(clickId, callback) {

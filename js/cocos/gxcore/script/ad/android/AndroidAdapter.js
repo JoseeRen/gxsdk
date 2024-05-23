@@ -125,7 +125,7 @@ class AndroidAdapter extends BaseAdapter_1.default {
     }
     showVideo(complete, flag = "") {
         // 过滤多次触发
-        if (this.get_time() - this.showVideoTime < 500)
+        if (this.get_time() - this.showVideoTime < 5000)
             return;
         this.showVideoTime = this.get_time();
         super.showVideo(null, flag);
@@ -158,6 +158,7 @@ class AndroidAdapter extends BaseAdapter_1.default {
             setTimeout(() => {
                 //延迟下  防止字体乱
                 complete && complete(ret == 1 /* RET_TYPE.SUCC */);
+                this.showVideoTime = 0;
             }, 500);
         });
     }

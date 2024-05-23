@@ -16,6 +16,8 @@ class VivoAdapter extends BaseAdapter_1.default {
         this.customBanner = null;
         this.customInter = null;
         this.portalAdTimer = null;
+        this.videoArr = [];
+        this.videoNum = 0;
         this.interShowCount = 0;
         this.videoShowing = false;
     }
@@ -41,6 +43,11 @@ class VivoAdapter extends BaseAdapter_1.default {
         }
         this.initBanner();
         this.initNormalBanner();
+        //lsn  2024年5月10修改 视频参数可能多个 
+        this.videoArr = [];
+        if (GxAdParams_1.AdParams.vivo.video.includes("_")) {
+            this.videoArr = GxAdParams_1.AdParams.vivo.video.split("_");
+        }
         this.initVideo();
         this.initNativeAd();
         this.initGamePortal();
@@ -54,7 +61,12 @@ class VivoAdapter extends BaseAdapter_1.default {
     ac() {
         let value = GxGame_1.default.gGN("ac", 20);
         setTimeout(() => {
+            if (window["ovad"]._boxShowing) {
+                this.ac();
+                return;
+            }
             if (GxGame_1.default.gGB("ac")) {
+                window["ovad"]._boxShowing = true;
                 this.privateShowInter(() => {
                 }, () => {
                     this.ac();
@@ -190,8 +202,8 @@ class VivoAdapter extends BaseAdapter_1.default {
             return;
         this.destroyVideo();
         // @ts-ignore
-        this.videoAd = qg.createRewardedVideoAd({
-            posId: GxAdParams_1.AdParams.vivo.video
+        this.videoAd = window["qg"].createRewardedVideoAd({
+            posId: this.videoArr.length > 0 ? this.videoArr[this.videoNum] : GxAdParams_1.AdParams.vivo.video
         });
         let self = this;
         this.videoAd.onLoad(function () {
@@ -199,12 +211,29 @@ class VivoAdapter extends BaseAdapter_1.default {
         });
         this.videoAd.onError(function (err) {
             // Utils.emit(EVENT_TYPE.AD_ERROR, 0);
-            self.logi("激励视频onerror");
-            self.logi(err);
-            if (isShow) {
-                self.createToast("暂无视频，请稍后再试");
+            if (this.videoArr.length > 0) {
+                this.videoNum++;
+                if (this.videoNum < this.videoArr.length) {
+                    this.initVideo();
+                }
+                else {
+                    this.videoNum = 0;
+                    self.logi("激励视频onerror");
+                    self.logi(err);
+                    if (isShow) {
+                        self.createToast("暂无视频，请稍后再试");
+                    }
+                    self._videoErrorEvent();
+                }
             }
-            self._videoErrorEvent();
+            else {
+                self.logi("激励视频onerror");
+                self.logi(err);
+                if (isShow) {
+                    self.createToast("暂无视频，请稍后再试");
+                }
+                self._videoErrorEvent();
+            }
         });
         this.videoAd.onClose(res => {
             GxAudioUtil_1.default.setMusicVolume(1);
@@ -318,7 +347,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             else if (ad_type == GxEnum_1.ad_native_type.inter2) {
                 posId = GxAdParams_1.AdParams.vivo.native2;
             }
-            this.logi(ad_type, "posId = ", posId);
+            // this.logi(ad_type, "posId = ", posId);
             if (posId == "" || posId === undefined || posId == null || this.is_limit_native_length(ad_type) || this.platformVersion() < 1053)
                 return resolve(null);
             // @ts-ignore
@@ -387,19 +416,27 @@ class VivoAdapter extends BaseAdapter_1.default {
      * @returns
      */
     showNativeInterstitial(on_show, on_hide, delay_time = 0) {
+        if (window["ovad"]._boxShowing)
+            return;
+        window["ovad"]._boxShowing = true;
         setTimeout(() => {
             this.privateShowInter(on_show, on_hide);
         }, (GxGame_1.default.isShenHe) ? 0 : delay_time * 1000);
     }
     privateShowInter(on_show, on_hide) {
-        if (this.get_time() - this.interShowTime <= GxGame_1.default.adConfig.interTick * 1000)
+        if (this.get_time() - this.interShowTime <= GxGame_1.default.adConfig.interTick * 1000) {
+            window["ovad"]._boxShowing = false;
             return on_hide && on_hide();
+        }
         this.hideNativeInterstitial();
         // this.hideBanner();
         let native_data = this.getLocalNativeData(GxEnum_1.ad_native_type.inter2);
         if (native_data == null || native_data === undefined) {
             // this.showInterstitial(on_show, on_hide);
-            this.showCustomInter(on_show, on_hide);
+            this.showCustomInter(on_show, () => {
+                window["ovad"]._boxShowing = false;
+                on_hide && on_hide();
+            });
         }
         else {
             let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_interstitial", cc.Prefab));
@@ -408,7 +445,10 @@ class VivoAdapter extends BaseAdapter_1.default {
                 this.interShowTime = this.get_time();
                 // this.hideBanner();
                 on_show && on_show();
-            }, on_hide);
+            }, () => {
+                window["ovad"]._boxShowing = false;
+                on_hide && on_hide();
+            });
         }
     }
     showOtherNativeInterstitial(on_show, on_hide, delay_time = 0) {
@@ -450,6 +490,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             return;
         }
         setTimeout(() => {
+            window["ovad"]._boxShowing = true;
             this.privateShowInter(on_show, on_hide);
         }, (GxGame_1.default.isShenHe) ? 0 : delay_time * 1000);
     }
@@ -887,6 +928,126 @@ class VivoAdapter extends BaseAdapter_1.default {
                 if ("ad" === t.query.type) {
                     isBuy = true;
                 }
+                /*            let demoD = {
+                                "channel": "qg",
+                                "systemInfo": {
+                                    "system": "Android 11",
+                                    "brand": "vivo",
+                                    "manufacturer": "vivo",
+                                    "model": "V2068A",
+                                    "product": "PD2068",
+                                    "osType": "android",
+                                    "osVersionName": "11",
+                                    "osVersionCode": 30,
+                                    "platformVersionName": "1.10",
+                                    "platformVersionCode": 1105,
+                                    "language": "zh",
+                                    "region": "CN",
+                                    "screenWidth": 1600,
+                                    "screenHeight": 720,
+                                    "windowHeight": 720,
+                                    "windowWidth": 1600,
+                                    "pixelRatio": 2,
+                                    "statusBarHeight": 46,
+                                    "isHole": false,
+                                    "isNotch": true,
+                                    "hole_x": 0,
+                                    "hole_y": 0,
+                                    "hole_radius": 0,
+                                    "safeArea": {
+                                        "right": 1600,
+                                        "bottom": 720,
+                                        "left": 46,
+                                        "top": 0,
+                                        "width": 1554,
+                                        "height": 720
+                                    },
+                                    "miniGame": {
+                                        "package": "com.bjly.mhyhpk.vivominigame",
+                                        "version": 20240202,
+                                        "buildType": "release"
+                                    },
+                                    "battery": 0.8100000023841858,
+                                    "wifiSignal": 4
+                                },
+                                "getNavigateOptionsSync": {},
+                                "getEnterOptionsSync": {
+                                    "query": {
+                                        "packageName": "com.cbest.xszd.vivoad.vivo",
+                                        "type": "ad",
+                                        "channelInfo": "",
+                                        "path": "/%5Bpath%5D%5B?key=value%5D&origin=fiAvlfP9Cl-qevLFZIh_PuAurJwf_QHnWaFJPKMkt7m6ZXxNOm76wYqGOuqXlEcd5RJZoDjbyyYE-lafWFng7LwWW1--Ud5nTPB9V6ujODZEJgiTQloU2lcnah-Wpg3vpyb0xPV3ltSWYYhYvJcYiIoc6AztXwLPIuleh5zNxWpfPLEDsvvEU2Nv5s39jLpQS-l_OXc4IO0Hfscspv4vFlf7o_oUZh0wNsNMEVyG8NyYlwz6zRzPZ_6NLHtMQZICYjFcQuhpi7To9F3-0HC8MA&__t__=eyJzb3VyY2VJZCI6IjEwMDExIiwidmVyaWZ5Q29kZSI6IjE3MDg2ODI0MDIwNzhfYmRiYTQyZDFlM2FhNDAzOThmOTU3NjkwNWMzNzk4ZmZfNjU0OTk2MTciLCJzaWduIjoiMTYyZjc4MjA0N2E4OTYxMmQ5MjhmNjM5MGZjZjBiZTk5OTEyMzYzZDYzYjQ5ZjAyOWJmYTNiZTg2M2FlZTNkMSIsInZlcnNpb24iOiIxLjAiLCJ0aW1lc3RhbXAiOiIxNzA4NjgyNDAyMzUxIn0%3D&btn_name=__BTN_NAME__&backurl=__BACKURL__%26ad_id%3Da688262addc145309cddefb8319247d2%26enter_from%3D42528%26ad_token%3D1708682402078_bdba42d1e3aa40398f9576905c3798ff%26ad_position%3D3db9809828ed44b3860f4c918a08e061",
+                                        "freedomGameLaunch": false,
+                                        "extra": {
+                                            "quick_app_st_channel": "VIVO_UNKNOWN_CHANNEL",
+                                            "topRunningAct": "com.unity3d.player.GameActivity",
+                                            "third_st_param": "{\"ad_a\":\"a688262addc145309cddefb8319247d2\",\"ad_p\":\"3db9809828ed44b3860f4c918a08e061\",\"ad_r\":\"1708682402078_bdba42d1e3aa40398f9576905c3798ff\",\"dspid\":\"1\",\"pkg\":\"com.bjly.mhyhpk.vivominigame\"}",
+                                            "topRunningPkg": "com.cbest.xszd.vivoad.vivo",
+                                            "define_pkg": "com.vivo.ad"
+                                        },
+                                        "internal": {
+                                            "custom_params": "{\"cus_origin_uri\":\"hap:\\/\\/app\\/com.bjly.mhyhpk.vivominigame\\/[path][?key=value]&__SRC__={extra:{third_st_param:{\\\"ad_a\\\":\\\"a688262addc145309cddefb8319247d2\\\",\\\"ad_p\\\":\\\"3db9809828ed44b3860f4c918a08e061\\\",\\\"ad_r\\\":\\\"1708682402078_bdba42d1e3aa40398f9576905c3798ff\\\",\\\"dspid\\\":\\\"1\\\",\\\"pkg\\\":\\\"com.bjly.mhyhpk.vivominigame\\\"}},packageName:com.vivo.ad,type:ad}&origin=fiAvlfP9Cl-qevLFZIh_PuAurJwf_QHnWaFJPKMkt7m6ZXxNOm76wYqGOuqXlEcd5RJZoDjbyyYE-lafWFng7LwWW1--Ud5nTPB9V6ujODZEJgiTQloU2lcnah-Wpg3vpyb0xPV3ltSWYYhYvJcYiIoc6AztXwLPIuleh5zNxWpfPLEDsvvEU2Nv5s39jLpQS-l_OXc4IO0Hfscspv4vFlf7o_oUZh0wNsNMEVyG8NyYlwz6zRzPZ_6NLHtMQZICYjFcQuhpi7To9F3-0HC8MA&__t__=eyJzb3VyY2VJZCI6IjEwMDExIiwidmVyaWZ5Q29kZSI6IjE3MDg2ODI0MDIwNzhfYmRiYTQyZDFlM2FhNDAzOThmOTU3NjkwNWMzNzk4ZmZfNjU0OTk2MTciLCJzaWduIjoiMTYyZjc4MjA0N2E4OTYxMmQ5MjhmNjM5MGZjZjBiZTk5OTEyMzYzZDYzYjQ5ZjAyOWJmYTNiZTg2M2FlZTNkMSIsInZlcnNpb24iOiIxLjAiLCJ0aW1lc3RhbXAiOiIxNzA4NjgyNDAyMzUxIn0%3D&btn_name=__BTN_NAME__&backurl=__BACKURL__%26ad_id%3Da688262addc145309cddefb8319247d2%26enter_from%3D42528%26ad_token%3D1708682402078_bdba42d1e3aa40398f9576905c3798ff%26ad_position%3D3db9809828ed44b3860f4c918a08e061\"}",
+                                            "channel": "deeplink"
+                                        }
+                                    },
+                                    "referrerInfo": {
+                                        "package": "com.cbest.xszd.vivoad.vivo",
+                                        "type": "ad",
+                                        "extraData": {
+                                            "key": "value]",
+                                            "__SRC__": "{extra:{third_st_param:{\"ad_a\":\"a688262addc145309cddefb8319247d2\",\"ad_p\":\"3db9809828ed44b3860f4c918a08e061\",\"ad_r\":\"1708682402078_bdba42d1e3aa40398f9576905c3798ff\",\"dspid\":\"1\",\"pkg\":\"com.bjly.mhyhpk.vivominigame\"}},packageName:com.vivo.ad,type:ad}",
+                                            "origin": "fiAvlfP9Cl-qevLFZIh_PuAurJwf_QHnWaFJPKMkt7m6ZXxNOm76wYqGOuqXlEcd5RJZoDjbyyYE-lafWFng7LwWW1--Ud5nTPB9V6ujODZEJgiTQloU2lcnah-Wpg3vpyb0xPV3ltSWYYhYvJcYiIoc6AztXwLPIuleh5zNxWpfPLEDsvvEU2Nv5s39jLpQS-l_OXc4IO0Hfscspv4vFlf7o_oUZh0wNsNMEVyG8NyYlwz6zRzPZ_6NLHtMQZICYjFcQuhpi7To9F3-0HC8MA",
+                                            "__t__": "eyJzb3VyY2VJZCI6IjEwMDExIiwidmVyaWZ5Q29kZSI6IjE3MDg2ODI0MDIwNzhfYmRiYTQyZDFlM2FhNDAzOThmOTU3NjkwNWMzNzk4ZmZfNjU0OTk2MTciLCJzaWduIjoiMTYyZjc4MjA0N2E4OTYxMmQ5MjhmNjM5MGZjZjBiZTk5OTEyMzYzZDYzYjQ5ZjAyOWJmYTNiZTg2M2FlZTNkMSIsInZlcnNpb24iOiIxLjAiLCJ0aW1lc3RhbXAiOiIxNzA4NjgyNDAyMzUxIn0=",
+                                            "btn_name": "__BTN_NAME__",
+                                            "backurl": "__BACKURL__",
+                                            "ad_id": "a688262addc145309cddefb8319247d2",
+                                            "enter_from": "42528",
+                                            "ad_token": "1708682402078_bdba42d1e3aa40398f9576905c3798ff",
+                                            "ad_position": "3db9809828ed44b3860f4c918a08e061"
+                                        }
+                                    },
+                                    "appId": "com.bjly.mhyhpk.vivominigame",
+                                    "path": "/%5Bpath%5D%5B?key=value%5D&origin=fiAvlfP9Cl-qevLFZIh_PuAurJwf_QHnWaFJPKMkt7m6ZXxNOm76wYqGOuqXlEcd5RJZoDjbyyYE-lafWFng7LwWW1--Ud5nTPB9V6ujODZEJgiTQloU2lcnah-Wpg3vpyb0xPV3ltSWYYhYvJcYiIoc6AztXwLPIuleh5zNxWpfPLEDsvvEU2Nv5s39jLpQS-l_OXc4IO0Hfscspv4vFlf7o_oUZh0wNsNMEVyG8NyYlwz6zRzPZ_6NLHtMQZICYjFcQuhpi7To9F3-0HC8MA&__t__=eyJzb3VyY2VJZCI6IjEwMDExIiwidmVyaWZ5Q29kZSI6IjE3MDg2ODI0MDIwNzhfYmRiYTQyZDFlM2FhNDAzOThmOTU3NjkwNWMzNzk4ZmZfNjU0OTk2MTciLCJzaWduIjoiMTYyZjc4MjA0N2E4OTYxMmQ5MjhmNjM5MGZjZjBiZTk5OTEyMzYzZDYzYjQ5ZjAyOWJmYTNiZTg2M2FlZTNkMSIsInZlcnNpb24iOiIxLjAiLCJ0aW1lc3RhbXAiOiIxNzA4NjgyNDAyMzUxIn0%3D&btn_name=__BTN_NAME__&backurl=__BACKURL__%26ad_id%3Da688262addc145309cddefb8319247d2%26enter_from%3D42528%26ad_token%3D1708682402078_bdba42d1e3aa40398f9576905c3798ff%26ad_position%3D3db9809828ed44b3860f4c918a08e061"
+                                },
+                                "getLaunchOptionsSync": {
+                                    "query": {
+                                        "packageName": "com.cbest.xszd.vivoad.vivo",
+                                        "type": "ad",
+                                        "channelInfo": "",
+                                        "path": "/%5Bpath%5D%5B?key=value%5D&origin=fiAvlfP9Cl-qevLFZIh_PuAurJwf_QHnWaFJPKMkt7m6ZXxNOm76wYqGOuqXlEcd5RJZoDjbyyYE-lafWFng7LwWW1--Ud5nTPB9V6ujODZEJgiTQloU2lcnah-Wpg3vpyb0xPV3ltSWYYhYvJcYiIoc6AztXwLPIuleh5zNxWpfPLEDsvvEU2Nv5s39jLpQS-l_OXc4IO0Hfscspv4vFlf7o_oUZh0wNsNMEVyG8NyYlwz6zRzPZ_6NLHtMQZICYjFcQuhpi7To9F3-0HC8MA&__t__=eyJzb3VyY2VJZCI6IjEwMDExIiwidmVyaWZ5Q29kZSI6IjE3MDg2ODI0MDIwNzhfYmRiYTQyZDFlM2FhNDAzOThmOTU3NjkwNWMzNzk4ZmZfNjU0OTk2MTciLCJzaWduIjoiMTYyZjc4MjA0N2E4OTYxMmQ5MjhmNjM5MGZjZjBiZTk5OTEyMzYzZDYzYjQ5ZjAyOWJmYTNiZTg2M2FlZTNkMSIsInZlcnNpb24iOiIxLjAiLCJ0aW1lc3RhbXAiOiIxNzA4NjgyNDAyMzUxIn0%3D&btn_name=__BTN_NAME__&backurl=__BACKURL__%26ad_id%3Da688262addc145309cddefb8319247d2%26enter_from%3D42528%26ad_token%3D1708682402078_bdba42d1e3aa40398f9576905c3798ff%26ad_position%3D3db9809828ed44b3860f4c918a08e061",
+                                        "freedomGameLaunch": false,
+                                        "extra": {
+                                            "quick_app_st_channel": "VIVO_UNKNOWN_CHANNEL",
+                                            "topRunningAct": "com.unity3d.player.GameActivity",
+                                            "third_st_param": "{\"ad_a\":\"a688262addc145309cddefb8319247d2\",\"ad_p\":\"3db9809828ed44b3860f4c918a08e061\",\"ad_r\":\"1708682402078_bdba42d1e3aa40398f9576905c3798ff\",\"dspid\":\"1\",\"pkg\":\"com.bjly.mhyhpk.vivominigame\"}",
+                                            "topRunningPkg": "com.cbest.xszd.vivoad.vivo",
+                                            "define_pkg": "com.vivo.ad"
+                                        },
+                                        "internal": {
+                                            "custom_params": "{\"cus_origin_uri\":\"hap:\\/\\/app\\/com.bjly.mhyhpk.vivominigame\\/[path][?key=value]&__SRC__={extra:{third_st_param:{\\\"ad_a\\\":\\\"a688262addc145309cddefb8319247d2\\\",\\\"ad_p\\\":\\\"3db9809828ed44b3860f4c918a08e061\\\",\\\"ad_r\\\":\\\"1708682402078_bdba42d1e3aa40398f9576905c3798ff\\\",\\\"dspid\\\":\\\"1\\\",\\\"pkg\\\":\\\"com.bjly.mhyhpk.vivominigame\\\"}},packageName:com.vivo.ad,type:ad}&origin=fiAvlfP9Cl-qevLFZIh_PuAurJwf_QHnWaFJPKMkt7m6ZXxNOm76wYqGOuqXlEcd5RJZoDjbyyYE-lafWFng7LwWW1--Ud5nTPB9V6ujODZEJgiTQloU2lcnah-Wpg3vpyb0xPV3ltSWYYhYvJcYiIoc6AztXwLPIuleh5zNxWpfPLEDsvvEU2Nv5s39jLpQS-l_OXc4IO0Hfscspv4vFlf7o_oUZh0wNsNMEVyG8NyYlwz6zRzPZ_6NLHtMQZICYjFcQuhpi7To9F3-0HC8MA&__t__=eyJzb3VyY2VJZCI6IjEwMDExIiwidmVyaWZ5Q29kZSI6IjE3MDg2ODI0MDIwNzhfYmRiYTQyZDFlM2FhNDAzOThmOTU3NjkwNWMzNzk4ZmZfNjU0OTk2MTciLCJzaWduIjoiMTYyZjc4MjA0N2E4OTYxMmQ5MjhmNjM5MGZjZjBiZTk5OTEyMzYzZDYzYjQ5ZjAyOWJmYTNiZTg2M2FlZTNkMSIsInZlcnNpb24iOiIxLjAiLCJ0aW1lc3RhbXAiOiIxNzA4NjgyNDAyMzUxIn0%3D&btn_name=__BTN_NAME__&backurl=__BACKURL__%26ad_id%3Da688262addc145309cddefb8319247d2%26enter_from%3D42528%26ad_token%3D1708682402078_bdba42d1e3aa40398f9576905c3798ff%26ad_position%3D3db9809828ed44b3860f4c918a08e061\"}",
+                                            "channel": "deeplink"
+                                        }
+                                    },
+                                    "referrerInfo": {
+                                        "package": "com.cbest.xszd.vivoad.vivo",
+                                        "type": "ad",
+                                        "extraData": {
+                                            "key": "value]",
+                                            "__SRC__": "{extra:{third_st_param:{\"ad_a\":\"a688262addc145309cddefb8319247d2\",\"ad_p\":\"3db9809828ed44b3860f4c918a08e061\",\"ad_r\":\"1708682402078_bdba42d1e3aa40398f9576905c3798ff\",\"dspid\":\"1\",\"pkg\":\"com.bjly.mhyhpk.vivominigame\"}},packageName:com.vivo.ad,type:ad}",
+                                            "origin": "fiAvlfP9Cl-qevLFZIh_PuAurJwf_QHnWaFJPKMkt7m6ZXxNOm76wYqGOuqXlEcd5RJZoDjbyyYE-lafWFng7LwWW1--Ud5nTPB9V6ujODZEJgiTQloU2lcnah-Wpg3vpyb0xPV3ltSWYYhYvJcYiIoc6AztXwLPIuleh5zNxWpfPLEDsvvEU2Nv5s39jLpQS-l_OXc4IO0Hfscspv4vFlf7o_oUZh0wNsNMEVyG8NyYlwz6zRzPZ_6NLHtMQZICYjFcQuhpi7To9F3-0HC8MA",
+                                            "__t__": "eyJzb3VyY2VJZCI6IjEwMDExIiwidmVyaWZ5Q29kZSI6IjE3MDg2ODI0MDIwNzhfYmRiYTQyZDFlM2FhNDAzOThmOTU3NjkwNWMzNzk4ZmZfNjU0OTk2MTciLCJzaWduIjoiMTYyZjc4MjA0N2E4OTYxMmQ5MjhmNjM5MGZjZjBiZTk5OTEyMzYzZDYzYjQ5ZjAyOWJmYTNiZTg2M2FlZTNkMSIsInZlcnNpb24iOiIxLjAiLCJ0aW1lc3RhbXAiOiIxNzA4NjgyNDAyMzUxIn0=",
+                                            "btn_name": "__BTN_NAME__",
+                                            "backurl": "__BACKURL__",
+                                            "ad_id": "a688262addc145309cddefb8319247d2",
+                                            "enter_from": "42528",
+                                            "ad_token": "1708682402078_bdba42d1e3aa40398f9576905c3798ff",
+                                            "ad_position": "3db9809828ed44b3860f4c918a08e061"
+                                        }
+                                    },
+                                    "appId": "com.bjly.mhyhpk.vivominigame",
+                                    "path": "/%5Bpath%5D%5B?key=value%5D&origin=fiAvlfP9Cl-qevLFZIh_PuAurJwf_QHnWaFJPKMkt7m6ZXxNOm76wYqGOuqXlEcd5RJZoDjbyyYE-lafWFng7LwWW1--Ud5nTPB9V6ujODZEJgiTQloU2lcnah-Wpg3vpyb0xPV3ltSWYYhYvJcYiIoc6AztXwLPIuleh5zNxWpfPLEDsvvEU2Nv5s39jLpQS-l_OXc4IO0Hfscspv4vFlf7o_oUZh0wNsNMEVyG8NyYlwz6zRzPZ_6NLHtMQZICYjFcQuhpi7To9F3-0HC8MA&__t__=eyJzb3VyY2VJZCI6IjEwMDExIiwidmVyaWZ5Q29kZSI6IjE3MDg2ODI0MDIwNzhfYmRiYTQyZDFlM2FhNDAzOThmOTU3NjkwNWMzNzk4ZmZfNjU0OTk2MTciLCJzaWduIjoiMTYyZjc4MjA0N2E4OTYxMmQ5MjhmNjM5MGZjZjBiZTk5OTEyMzYzZDYzYjQ5ZjAyOWJmYTNiZTg2M2FlZTNkMSIsInZlcnNpb24iOiIxLjAiLCJ0aW1lc3RhbXAiOiIxNzA4NjgyNDAyMzUxIn0%3D&btn_name=__BTN_NAME__&backurl=__BACKURL__%26ad_id%3Da688262addc145309cddefb8319247d2%26enter_from%3D42528%26ad_token%3D1708682402078_bdba42d1e3aa40398f9576905c3798ff%26ad_position%3D3db9809828ed44b3860f4c918a08e061"
+                                }
+                            };*/
                 try {
                     var o = t.referrerInfo.extraData;
                     if (o) {
@@ -926,6 +1087,34 @@ class VivoAdapter extends BaseAdapter_1.default {
         }
         catch (e) {
             callback && callback(false);
+        }
+    }
+    showPositionBanner(left, top, showCallback, failedCallback) {
+        this.hideBanner();
+        if (!!GxAdParams_1.AdParams.vivo.banner) {
+            this.bannerAd = window["qg"].createBannerAd({
+                adUnitId: GxAdParams_1.AdParams.vivo.banner,
+                style: { left: left, top: top },
+                adIntervals: Math.max(GxGame_1.default.adConfig.bannerUpdateTime, 30)
+            });
+            this.bannerAd.onError(err => {
+                this.loge(" position normal banner error: ", JSON.stringify(err));
+            });
+            if (this.bannerAd == null) {
+                this.logi("position banner空");
+                failedCallback && failedCallback();
+                return;
+            }
+            this.bannerAd.show().then(() => {
+                showCallback && showCallback();
+                this.logi("position normal banner show success");
+            }).catch(e => {
+                failedCallback && failedCallback();
+                this.loge("position banner error", e);
+            });
+        }
+        else {
+            failedCallback && failedCallback();
         }
     }
 }

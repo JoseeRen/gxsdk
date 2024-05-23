@@ -1054,6 +1054,16 @@ class QQAdapter extends BaseAdapter_1.default {
             // @ts-ignore
             qq.uma.setOpenid(this.openId);
         }
+        if (window["TDAPP"]) {
+            window["TDAPP"].register({
+                profileId: this.openId,
+                profileType: 1
+            });
+            window["TDAPP"].login({
+                profileId: this.openId,
+                profileType: 1
+            });
+        }
         let subIds = this.getSubIds();
         let self = this;
         for (let i = 0; i < subIds.length; i++) {

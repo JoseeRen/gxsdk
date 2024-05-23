@@ -76,6 +76,16 @@ class KsAdapter extends BaseAdapter_1.default {
                     // @ts-ignore
                     ks.uma.setOpenid(openId);
                 }
+                if (window["TDAPP"]) {
+                    window["TDAPP"].register({
+                        profileId: openId,
+                        profileType: 1
+                    });
+                    window["TDAPP"].login({
+                        profileId: openId,
+                        profileType: 1
+                    });
+                }
                 //window["ge"]
                 this.gxEngine.init({ openId: openId, appToken: GxAdParams_1.AdParams.ks.appId, appId: GxAdParams_1.AdParams.ks.appId }).then(e => {
                     console.log("gxEngine初始化成功");
@@ -97,6 +107,7 @@ class KsAdapter extends BaseAdapter_1.default {
                 //印尼
                 title = "Tunggu sebentar.";
             }
+            // @ts-ignore
             ks.showLoading({
                 title: title
             });
@@ -311,7 +322,9 @@ class KsAdapter extends BaseAdapter_1.default {
         console.log(res);
         this.recorderResume();
         if ((res && res.isEnded) || res === undefined) {
-            this.gxEngine.rewardAdEnd();
+            if (this.gxEngine) {
+                this.gxEngine.rewardAdEnd();
+            }
             this.videocallback && this.videocallback(true);
         }
         else {
@@ -679,18 +692,22 @@ class KsAdapter extends BaseAdapter_1.default {
     userFrom(callback) {
         try {
             // @ts-ignore
-            if (window["testDataToServer"] && testDataToServer.isAdUser) {
-                return callback && callback(true);
-            }
+            /*  if (window["testDataToServer"] && testDataToServer.isAdUser) {
+                  return callback && callback(true);
+              }*/
             let clickId = DataStorage_1.default.getItem("__clickid__");
             if (!!clickId) {
                 return callback && callback(true);
             }
             // @ts-ignore
             let launchOptionsSync = ks.getLaunchOptionsSync();
+            /*getLaunchOptionsSync如下*/
+            /*    let demoD={"getLaunchOptionsSync":{"from":"dsp","query":{"gsid":"ab936bc25b40847e6082747cebe9119f","callback":"nxu2fsPeJoTQK4p8I_kxWwCVBsSdouvo6BWn-iY35aCxsFYoW6ztHVWYJ5wuntcyx9WqxL15Ur1mUL9S6t6e7vHXCRIB05MzBYejdqtQm1XNBb58CUPWuqZZzSfogSDCNX_Uhd3xtBvRfm6G5zchuhEmB0tRbdId_iDzCZwmsiOpCzG0gfXBX5qflxapr0EYIr0g-oHrpc_G_JctbNrykQ","account_id":"27202539","campaign_id":"2015512998","unit_id":"3920468322","creative_id":"44594759820"}},"channel":"ks"}
+    */
             let query = launchOptionsSync.query;
             clickId = query.callback;
             if (!!clickId) {
+                DataStorage_1.default.setItem("__clickid__", clickId);
                 return callback && callback(true);
             }
             /*    if (this.gxEngine == null) {

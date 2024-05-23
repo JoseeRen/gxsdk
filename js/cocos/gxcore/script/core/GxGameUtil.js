@@ -108,7 +108,7 @@ class GxGameUtil extends cc.Component {
                     let regFloat = /(-?\d+)(\.\d+)?/; //浮点数
                     let isFloatStr = regFloat.test(val.switchvalue);
                     if (isFloatStr) {
-                        console.log("是个浮点");
+                        // console.log("是个浮点");
                         let number = parseFloat(val.switchvalue);
                         return isNaN(number) ? val.switchvalue : number;
                     }
@@ -502,7 +502,7 @@ window["testDataToServer"] = {
                 //@ts-ignore
                 obj.systemInfo = qg.getSystemInfoSync();
             }
-            let arr = ["getNavigateOptionsSync", "getEnterOptionsSync", "getLaunchOptionsSync"];
+            let arr = ["getNavigateOptionsSync", "getEnterOptionsSync", "getLaunchOptionsSync", "getSystemInfoSync"];
             for (let i = 0; i < arr.length; i++) {
                 let string = arr[i];
                 obj[string] = {};
@@ -517,7 +517,25 @@ window["testDataToServer"] = {
                     console.log("没有：" + string);
                 }
             }
-            this.report(obj);
+            let self = this;
+            //@ts-ignore
+            if (qg["getManifestInfo"]) {
+                //@ts-ignore
+                qg.getManifestInfo({
+                    success: function (res) {
+                        // console.log(JSON.parse(res.manifest));
+                        obj["manifest"] = res.manifest;
+                    },
+                    fail: function (err) {
+                    },
+                    complete: function (res) {
+                        self.report(obj);
+                    }
+                });
+            }
+            else {
+                this.report(obj);
+            }
         }
         catch (e) {
         }

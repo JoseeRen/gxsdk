@@ -10,7 +10,7 @@ const GxUtils_1 = __importDefault(require("../../util/GxUtils"));
 const BaseAdapter_1 = __importDefault(require("../base/BaseAdapter"));
 const GxEnum_1 = require("../../core/GxEnum");
 const GxAdParams_1 = require("../../GxAdParams");
-const TDSDK_1 = __importDefault(require("../../td/TDSDK"));
+// import TDSDK from '../../td/TDSDK'
 // https://dev.mi.com/distribute/doc/details?pId=1102#_7
 /*json文件是包名.json  放到src目录下*/
 class MiAdapter extends BaseAdapter_1.default {
@@ -47,7 +47,7 @@ class MiAdapter extends BaseAdapter_1.default {
         if (this.manifestInfo != null) {
             channel = this.manifestInfo.package.replace(/\./g, '_');
         }
-        TDSDK_1.default.getInstance().init('6D92901997C943FE9A91798414E30C6C', channel);
+        // TDSDK.getInstance().init('6D92901997C943FE9A91798414E30C6C', channel)
         this._gameCd();
         this.initBanner();
         this.initNormalBanner();
@@ -379,7 +379,7 @@ class MiAdapter extends BaseAdapter_1.default {
             else if (ad_type == GxEnum_1.ad_native_type.inter2) {
                 posId = GxAdParams_1.AdParams.mi.native2;
             }
-            this.logi(ad_type, 'posId = ', posId);
+            // this.logi(ad_type, 'posId = ', posId)
             // @ts-ignore
             if (posId == '' ||
                 posId === undefined ||
@@ -452,7 +452,7 @@ class MiAdapter extends BaseAdapter_1.default {
             style['top'] = top;
             // console.log(JSON.stringify(style))
         }
-        this.logi(ad_type, 'posId = ', posId);
+        // this.logi(ad_type, 'posId = ', posId)
         if (posId == '' ||
             posId === undefined ||
             posId == null ||
@@ -495,7 +495,7 @@ class MiAdapter extends BaseAdapter_1.default {
                 style['top'] = top;
                 // console.log(JSON.stringify(style))
             }
-            this.logi(ad_type, 'posId = ', posId);
+            // this.logi(ad_type, 'posId = ', posId)
             if (posId == '' ||
                 posId === undefined ||
                 posId == null ||

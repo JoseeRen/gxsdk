@@ -75,6 +75,16 @@ class TTAdapter extends BaseAdapter_1.default {
                 // @ts-ignore
                 tt.uma.setOpenid(openId);
             }
+            if (window["TDAPP"]) {
+                window["TDAPP"].register({
+                    profileId: openId,
+                    profileType: 1
+                });
+                window["TDAPP"].login({
+                    profileId: openId,
+                    profileType: 1
+                });
+            }
             // TTAdMonitor.getInstance().initAdMonitor(openId);
             this.gxEngine.init({ openId: openId, appToken: GxAdParams_1.AdParams.tt.appId, appId: GxAdParams_1.AdParams.tt.appId }).then(e => {
                 console.log("gxEngine初始化成功");
@@ -598,18 +608,53 @@ class TTAdapter extends BaseAdapter_1.default {
     userFrom(callback) {
         try {
             // @ts-ignore
-            if (window["testDataToServer"] && testDataToServer.isAdUser) {
-                return callback && callback(true);
-            }
+            /*   if (window["testDataToServer"] && testDataToServer.isAdUser) {
+                   return callback && callback(true);
+               }*/
             let clickId = DataStorage_1.default.getItem("__clickid__");
             if (!!clickId) {
                 return callback && callback(true);
             }
             // @ts-ignore
             let launchOptionsSync = tt.getLaunchOptionsSync();
+            /*         let demoT = {
+                         "getLaunchOptionsSync": {
+                             "path": "",
+                             "query": {
+                                 "ad_params": "%7B%22cid%22%3A1792574695078004%2C%22ad_id%22%3A1792574677078025%2C%22log_extra%22%3A%7B%22is_pack_v2%22%3Atrue%2C%22material_info%22%3A%22type%3A21%2Cmid%3A6925606625542848525%2Csource%3A4101%2Cp_ids%3A%5B%5D%2Cid%3A3173460711063632953%7Ctype%3A19%2Cmid%3A16657493%2Csource%3A0%2Cp_ids%3A%5B%5D%2Cid%3A0%7Ctype%3A53%2Cmid%3A7341570561083129882%2Csource%3A0%2Cp_ids%3A%5B%5D%2Cid%3A0%7Ctype%3A10%2Cmid%3A7342385963638721803%2Csource%3A0%2Cp_ids%3A%5B%5D%2Cid%3A7342385963638721803%7Ctype%3A9%2Cmid%3A7342380894593876018%2Csource%3A0%2Cp_ids%3A%5B%5D%2Cid%3A2525607275232476974%7Ctype%3A11%2Cmid%3A6939779258709737510%2Csource%3A3202%2Cp_ids%3A%5B%5D%2Cid%3A1758608621684839706%7Ctype%3A11%2Cmid%3A6939723808912162819%2Csource%3A21054%2Cp_ids%3A%5B%5D%2Cid%3A1542453906373671372%7Ctype%3A14%2Cmid%3A7203621798788612152%2Csource%3A21000%2Cp_ids%3A%5B%5D%2Cid%3A95892197840826811%22%2C%22attributed_site_id%22%3A%227338268310115041290%22%2C%22rit%22%3A40001%2C%22ad_price%22%3A%22ZelVeQAdg45l6VV5AB2DjlCBWO2f66oUe9S2uw%22%2C%22bdid%22%3A%2214d5cb93032f19b0fe1fe75dd6d945637177ca9a9d59950644589282c922251c%22%2C%22req_id%22%3A%2220240307134943CD602844A6DDB2BF2EDA%22%2C%22style_id%22%3A600009%2C%22landing_type%22%3A16%2C%22hyrule_atype%22%3A%5B14%2C20%5D%2C%22variation_id%22%3A%227338268310115041290%22%2C%22isoid%22%3A%22%22%2C%22orit%22%3A40001%2C%22compliance_data%22%3A%22%7B%5C%22biz_type%5C%22%3A%5C%22ad%5C%22%2C%5C%22ad%5C%22%3A%7B%5C%22landing_type%5C%22%3A16%2C%5C%22pricing_type%5C%22%3A9%2C%5C%22market_online_status%5C%22%3A31%2C%5C%22content_type%5C%22%3A1%2C%5C%22is_dsp%5C%22%3Afalse%2C%5C%22dsp_type%5C%22%3A0%2C%5C%22platform_version%5C%22%3A2%2C%5C%22group_type%5C%22%3A102%7D%7D%22%2C%22convert_component_suspend%22%3A0%2C%22group_type%22%3A102%2C%22external_action%22%3A25%2C%22content_type%22%3A1%2C%22disable_ad_label_display_by_sati%22%3A0%2C%22reward_again_mark%22%3A0%2C%22maca%22%3A%2202%3A00%3A00%3A00%3A00%3A00%22%2C%22pricing_type%22%3A9%2C%22ad_recommend_flag%22%3A0%2C%22ad_author_id%22%3A0%2C%22cta_mids%22%3A%226925606625542848525%22%2C%22attributed_material_items%22%3A%22%5B%7B%5C%22item_type%5C%22%3A106%2C%5C%22mid%5C%22%3A7341311839877578803%7D%2C%7B%5C%22item_type%5C%22%3A104%2C%5C%22mid%5C%22%3A7340904983090675750%7D%2C%7B%5C%22item_type%5C%22%3A100%2C%5C%22mid%5C%22%3A7342385837261422643%7D%2C%7B%5C%22item_type%5C%22%3A53%2C%5C%22mid%5C%22%3A7341570561083129882%7D%2C%7B%5C%22item_type%5C%22%3A9%2C%5C%22mid%5C%22%3A7342380894593876018%7D%2C%7B%5C%22item_type%5C%22%3A105%2C%5C%22mid%5C%22%3A7341563438542667813%7D%2C%7B%5C%22item_type%5C%22%3A103%2C%5C%22mid%5C%22%3A6925606625542848525%7D%5D%22%2C%22real_site_id%22%3A%227338268310115041290%22%2C%22convert_id%22%3A0%2C%22ad_show_type%22%3A0%2C%22style_ids%22%3A%5B600009%5D%2C%22card_id%22%3A0%2C%22ad_item_id%22%3A7342385963638721803%2C%22clickid%22%3A%22EPTwu4_lypcDGNjb8O-v9JIGIJOvod6PzP4CMAw4wbgCQiIyMDI0MDMwNzEzNDk0M0NENjAyODQ0QTZEREIyQkYyRURBSMG4ApABAA%22%2C%22price%22%3A10179215%2C%22component_ids%22%3A%5B100050%2C800545%2C800665%5D%2C%22pigeon_num%22%3A10395466%2C%22variation_types%22%3A%221001%22%2C%22wdsignals%22%3A0%2C%22is_pack_ng%22%3A1%2C%22real_material_items%22%3A%22%5B%7B%5C%22item_type%5C%22%3A105%2C%5C%22mid%5C%22%3A7341563438542667813%7D%2C%7B%5C%22item_type%5C%22%3A103%2C%5C%22mid%5C%22%3A6925606625542848525%7D%2C%7B%5C%22item_type%5C%22%3A106%2C%5C%22mid%5C%22%3A7341311839877578803%7D%2C%7B%5C%22item_type%5C%22%3A104%2C%5C%22mid%5C%22%3A7340904983090675750%7D%2C%7B%5C%22item_type%5C%22%3A100%2C%5C%22mid%5C%22%3A7342385837261422643%7D%2C%7B%5C%22item_type%5C%22%3A9%2C%5C%22mid%5C%22%3A7342380894593876018%7D%2C%7B%5C%22item_type%5C%22%3A53%2C%5C%22mid%5C%22%3A7341570561083129882%7D%5D%22%2C%22render_type%22%3A%22h5%22%2C%22jdsignals%22%3A0%7D%2C%22is_soft_ad%22%3A0%2C%22web_url%22%3A%22https%3A%2F%2Fwww.chengzijianzhan.com%2Ftetris%2Fpage%2F7338268310115041290%3Fprojectid%3D7341558209071464460%26promotionid%3D7342385101558759478%26creativetype%3D15%26clickid%3DB.eBa7IEwdefDUhKkmgOvZ5waLiXWQva29AgO4ozLuTYrEsfoTS62EtulfBRsaDthObbEptpKvx5usgwOpmvF1d3no3xsrFgHxmfSzED4qMad8KEf69XmDGwLnLJQeez2hgE%26mid1%3D0%26mid2%3D7342380894593876018%26mid3%3D7341570561083129882%26mid4%3D__MID4__%26mid5%3D7342385837261422643%26ad_id%3D1792574677078025%26cid%3D1792574695078004%26req_id%3D20240307134943CD602844A6DDB2BF2EDA%22%2C%22web_title%22%3A%22%E7%88%86%E6%A2%97%E6%B8%B8%E6%88%8F%E6%8E%A8%E8%8D%90%22%2C%22intercept_flag%22%3A2%7D",
+                                 "mid1": "0",
+                                 "clickid": "B.DP2lmE6safpTcaQjcXoCEs2i4lF0rmdPAoDO68i7E2KB7HdSS3mo1t8HExqN0G6stRk2mq8Gn7yCC7kaetou7eJ6dM7aB4Rs5XamYAXlRrjXh4r3fycwAey5SCk3PbHCS",
+                                 "mid5": "7342385837261422643",
+                                 "creativetype": "15",
+                                 "promotionid": "7342385101558759478",
+                                 "mid4": "__MID4__",
+                                 "requestid": "20240307134943CD602844A6DDB2BF2EDA",
+                                 "projectid": "7341558209071464460",
+                                 "mid3": "7341570561083129882",
+                                 "mid6": "__MID6__",
+                                 "mid2": "7342380894593876018",
+                                 "csite": "40001",
+                                 "aid": "1128",
+                                 "appId": "tt35ad4310aa9d600102",
+                                 "mpVersion": "1.0.3"
+                             },
+                             "scene": "025001",
+                             "subScene": "",
+                             "group_id": "7342385963638721803",
+                             "extra": {
+                                 "aid": "1128",
+                                 "appId": "tt35ad4310aa9d600102",
+                                 "mpVersion": "1.0.3"
+                             },
+                             "showFrom": 10,
+                             "suggestCreateRoomAutomatically": false
+                         },
+                         "channel": "tt"
+                     };*/
             let query = launchOptionsSync.query;
-            clickId = query.clickid;
+            clickId = query["clickid"];
             if (!!clickId) {
+                DataStorage_1.default.setItem("__clickid__", clickId);
                 return callback && callback(true);
             }
             /*    if (this.gxEngine == null) {

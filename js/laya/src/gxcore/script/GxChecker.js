@@ -61,7 +61,7 @@ class GxChecker {
             }
         }
         else {
-            console.log("不能添加");
+            // console.log("不能添加")
         }
     }
     check(MsgType, data = {}) {

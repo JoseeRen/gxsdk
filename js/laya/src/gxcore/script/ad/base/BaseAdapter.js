@@ -22,7 +22,7 @@ const gx_ui_gameover_ad_1 = __importDefault(require("../../ui/gx_ui_gameover_ad"
 const gx_ui_toast_1 = __importDefault(require("../../ui/gx_ui_toast"));
 const gx_ui_gamebox_1 = __importDefault(require("../../ui/gx_ui_gamebox"));
 const gx_ui_crazypoint_1 = __importDefault(require("../../ui/gx_ui_crazypoint"));
-const TDSDK_1 = __importDefault(require("../../td/TDSDK"));
+// import TDSDK from "../../td/TDSDK";
 const GxChecker_1 = __importDefault(require("../../GxChecker"));
 var RECORDER_STATE;
 (function (RECORDER_STATE) {
@@ -87,7 +87,7 @@ class BaseAd {
     }
     setManifestInfo(info) {
         this.manifestInfo = info;
-        TDSDK_1.default.getInstance().initApp(info.package, info.name, info.versionName, info.versionCode);
+        // TDSDK.getInstance().initApp(info.package, info.name, info.versionName, info.versionCode);
     }
     showAuthorize(on_agree, on_refuse) {
         if (!this.authorizeView || this.authorizeView.parent == null) {
@@ -763,6 +763,8 @@ class BaseAd {
     }
     preShowVideo(callback) {
         callback && callback(false);
+    }
+    showPositionBanner(left, top, showCallback, failedCallback) {
     }
 }
 BaseAd.instance = null;

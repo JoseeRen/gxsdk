@@ -78,7 +78,7 @@ class GxGame extends BaseGxGame_1.default {
     static needTTBoxBtn() {
         if (GxConstant_1.default.IS_TT_GAME) {
             // @ts-ignore
-            if (tt['checkScene']) {
+            if (tt["checkScene"]) {
                 return true;
             }
             else {
@@ -93,6 +93,17 @@ class GxGame extends BaseGxGame_1.default {
         }
     }
     static getJkShowTime() {
+        if (GxConstant_1.default.IS_KS_GAME) {
+            // @ts-ignore
+            let systemInfoSync = ks.getSystemInfoSync();
+            let env = systemInfoSync.host.env;
+            if (env == "kwaipro" || env == "snackvideo" || env == "kwaime") {
+                return 0.001;
+            }
+            else {
+                return 3;
+            }
+        }
         if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_VIVO_GAME || GxConstant_1.default.IS_HUAWEI_GAME || GxConstant_1.default.IS_QQ_GAME || GxConstant_1.default.IS_MI_GAME) {
             return 3;
         }
@@ -108,7 +119,7 @@ class GxGame extends BaseGxGame_1.default {
             return -1;
         }
         if (GxConstant_1.default.IS_ANDROID_NATIVE) {
-            return parseInt(GxUtils_1.default.callMethod('getGameAge'));
+            return parseInt(GxUtils_1.default.callMethod("getGameAge"));
         }
         if (GxConstant_1.default.IS_ANDROID_H5) {
             return parseInt(this.Ad().getGameAge());

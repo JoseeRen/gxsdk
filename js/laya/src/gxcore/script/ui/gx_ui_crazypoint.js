@@ -11,8 +11,12 @@ class gx_ui_crazypoint extends layaMaxUI_1.ui.gxui.gx_ui_crazypointUI {
         super();
         this.boo = false;
         this.onHide = false;
-        this.time = 0;
-        this.IsClickdaji = false;
+        this.time11 = 0;
+        this.videoShowed = false;
+        this.onGet = null;
+        this.onClose = null;
+        this.num = 0;
+        this.showVideoTime = 0;
     }
     // show(on_agree?: () => void, on_refuse?: () => void) {
     /*
@@ -25,6 +29,8 @@ class gx_ui_crazypoint extends layaMaxUI_1.ui.gxui.gx_ui_crazypointUI {
         if (this.parent)
             return;
         Laya.stage.addChild(this);
+        on_show && on_show();
+        this.onGet = on_get;
         console.log("dddd执行了 ");
         /* this.onAgree = on_agree;
          this.onRefuse = on_refuse;
@@ -42,18 +48,18 @@ class gx_ui_crazypoint extends layaMaxUI_1.ui.gxui.gx_ui_crazypointUI {
             GxGame_1.default.Ad().hideBanner();
         }, 500);
         // AD_QQ.preLoadBanner();
-        Laya.timer.loop(800, this, () => {
-            if (!this.boo) {
-                this.time -= 10;
-                if (this.time < 80) {
-                }
-                if (this.time <= 0) {
-                    this.time = 0;
-                }
-            }
-        });
+        /*      Laya.timer.loop(800, this, () => {
+                  if (!this.boo) {
+                      this.time11 -= 10;
+                      if (this.time11 < 80) {
+                      }
+                      if (this.time11 <= 0) {
+                          this.time11 = 0;
+                      }
+                  }
+              });*/
         this.onHide = false;
-        this.IsClickdaji = false;
+        this.videoShowed = false;
         if (Laya.stage.width <= Laya.stage.height) {
             //竖屏
             // this.bg.centerX= 0
@@ -64,8 +70,12 @@ class gx_ui_crazypoint extends layaMaxUI_1.ui.gxui.gx_ui_crazypointUI {
             console.log("如果狂点按钮不合适改这里 ");
             this.btn.centerX = (Laya.stage.width / 2) - 439 - 30;
         }
+        this.barUpdate();
     }
     onDestroy() {
+        if (this.onClose) {
+            this.onClose();
+        }
         Laya.timer.clearAll(this);
     }
     onAwake() {
@@ -75,16 +85,26 @@ class gx_ui_crazypoint extends layaMaxUI_1.ui.gxui.gx_ui_crazypointUI {
                this.btnSure.on(Laya.Event.CLICK, this, this.on_agree);
                this.btnCancel.on(Laya.Event.CLICK, this, this.on_refuse);*/
         this.boo = false;
-        this.time = 0;
+        this.time11 = 0;
         console.log("初始多长：" + this.progress.width);
         this.btn.on(Laya.Event.MOUSE_DOWN, this, this.touchHanler);
     }
     onUpdate(dt) {
+        // if (!this.boo) {
+        //     if (this.time11 < 10) {
+        //         return
+        //     }
+        //     this.time11 -= 1;
+        //     if (this.time11 <= 0) {
+        //         this.time11 = 0;
+        //     }
+        // }
+        // console.log(" this.time11 onUpdate", this.time11)
         var self = this;
-        this.progress.width = (this.time / 100) * 537 + 0.0001;
-        // console.log("多长：" + (this.time / 100) * 537, "progress:" + this.progress.width)
+        // this.progress.width = (this.time11 / 100) * 537 + 0.0001;
+        // console.log("多长：" + (this.time11 / 100) * 537, "progress:" + this.progress.width)
         // @ts-ignore
-        this.img_xiangPiCa.scale = 0.6 + this.time / 100 * 0.6;
+        // this.img_xiangPiCa.scale = 0.6 + this.time11 / 100 * 0.6;
         if (!self.onHide) {
             if (GxConstant_1.default.IS_QQ_GAME) {
                 // @ts-ignore
@@ -99,23 +119,74 @@ class gx_ui_crazypoint extends layaMaxUI_1.ui.gxui.gx_ui_crazypointUI {
             }
         }
     }
+    get_time() {
+        if (window["cc"]) {
+            return window["cc"].sys.now();
+        }
+        else if (window["Laya"]) {
+            return window["Laya"].timer.currTimer;
+        }
+        else {
+            return new Date().getTime();
+        }
+    }
+    barUpdate() {
+        Laya.timer.loop(100, this, () => {
+            this.time11 -= 1;
+            if (this.time11 <= 0) {
+                this.time11 = 0;
+            }
+            this.progress.width = (this.time11 / 100) * 537 + 0.0001;
+        });
+    }
     touchHanler(e, t) {
+        console.log("crazypoint boo ", this.boo);
         if (this.boo)
             return;
-        this.time += 10;
-        if (this.time >= 100) {
-            console.log("time一百下");
-            this.boo = true;
-            this.time = 100;
-            console.log("关闭狂点");
-            this.destroy();
+        if (this.time11 <= 0) {
+            this.time11 += 50;
         }
-        else if (this.time > 20 && !this.IsClickdaji) {
-            this.IsClickdaji = true;
-            GxGame_1.default.Ad().showVideo((res) => {
-            }, "GxCrazyPoint");
-            // this.showbanner();
+        else {
+            this.time11 += Math.floor(Math.random() * 2) + 8;
+            if (this.time11 >= 100) {
+                this.time11 = 100;
+            }
         }
+        console.log("this.time11", this.time11);
+        if (this.get_time() - this.showVideoTime < 5000) {
+            this.num++;
+            if (this.num == 4 && !this.videoShowed) {
+                this.num = 0;
+                this.videoShowed = true;
+                GxGame_1.default.Ad().showVideo((res) => {
+                    if (this.onGet) {
+                        this.onGet(res);
+                    }
+                    this.destroy();
+                    window["ovad"]._boxShowing = false;
+                }, "GxCrazyPoint");
+            }
+        }
+        else {
+            this.num = 1;
+        }
+        this.showVideoTime = this.get_time();
+        // if (this.time11 >= 100) {
+        //     console.log("time一百下");
+        //     this.boo = true;
+        //     this.time11 = 100;
+        //     console.log("关闭狂点");
+        //     this.destroy();
+        // } else if (this.time11 >= 70 && !this.videoShowed) {
+        //     this.videoShowed = true;
+        //     GxGame.Ad().showVideo((res) => {
+        //         if (this.onGet) {
+        //             this.onGet(res);
+        //         }
+        //         this.destroy();
+        //     }, "GxCrazyPoint");
+        //     // this.showbanner();
+        // }
     }
     on_show() {
     }

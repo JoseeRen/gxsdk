@@ -64,6 +64,10 @@ let Gx_crazypoint = (() => {
     let _btnNode_initializers = [];
     let _boxNode_decorators;
     let _boxNode_initializers = [];
+    let _title_decorators;
+    let _title_initializers = [];
+    let _title2_decorators;
+    let _title2_initializers = [];
     var Gx_crazypoint = _classThis = class extends _classSuper {
         constructor() {
             super(...arguments);
@@ -71,37 +75,44 @@ let Gx_crazypoint = (() => {
             this.img_xiangPiCa = __runInitializers(this, _img_xiangPiCa_initializers, null);
             this.btnNode = __runInitializers(this, _btnNode_initializers, null);
             this.boxNode = __runInitializers(this, _boxNode_initializers, null);
+            this.title = __runInitializers(this, _title_initializers, null);
+            this.title2 = __runInitializers(this, _title2_initializers, null);
             this.time = 0;
+            this.num = 0;
             this.boo = false;
             this.videoShowed = false;
             this.isBanner = false;
             this.listening = false;
+            this.showVideoTime = 0;
             // update (dt) {}
         }
         onLoad() {
             let winSize = cc.winSize;
             if (winSize.width > winSize.height) {
-                this.btnNode.setPosition(cc.v2(403.429, -189));
+                this.btnNode.setPosition(cc.v2(400, 0));
                 this.boxNode.setPosition(cc.v2(-310.119, -52));
+                this.title.setPosition(cc.v2(0, 245));
+                this.title2.setPosition(cc.v2(570, -90));
             }
             this.btnNode.opacity = 255;
             this.boxNode.opacity = 255;
             this.boo = false;
             this.time = 0;
+            this.num = 0;
         }
         start() {
             GxGame_1.default.Ad().hideBanner();
             var self = this;
-            this.schedule(() => {
-                if (!this.boo) {
-                    this.time -= 5;
-                    if (this.time < 80) {
-                    }
-                    if (this.time <= 0) {
-                        this.time = 0;
-                    }
-                }
-            }, 0.4);
+            /*      this.schedule(() => {
+                      if (!this.boo) {
+                          this.time -= 1;
+                          if (this.time < 80) {
+                          }
+                          if (this.time <= 0) {
+                              this.time = 0;
+                          }
+                      }
+                  }, 0.1);*/
         }
         show(on_show, on_close, on_get, is_banner = false) {
             this.onShow = on_show;
@@ -119,7 +130,9 @@ let Gx_crazypoint = (() => {
             cc.director.emit("dest");
         }
         onDest() {
-            this.node.destroy();
+            if (this && this.isValid && this.node && this.node.isValid) {
+                this.node.destroy();
+            }
         }
         onDestroy() {
             cc.director.off("dest", this.onDest, this);
@@ -129,46 +142,111 @@ let Gx_crazypoint = (() => {
             GxGame_1.default.Ad().hideBanner();
         }
         update(dt) {
+            if (!this.boo) {
+                this.time -= 0.3;
+                if (this.time < 80) {
+                }
+                if (this.time <= 0) {
+                    this.time = 0;
+                }
+            }
             this.progressNode.progress = this.time / 100;
-            this.img_xiangPiCa.scale = 0.6 + this.time / 100 * 0.6;
+            // this.img_xiangPiCa.scale = 0.6 + this.time / 100 * 0.6;
             // console.log("这玩意值是多少怎么不触发"+this.time)
+        }
+        get_time() {
+            if (window["cc"]) {
+                return window["cc"].sys.now();
+            }
+            else if (window["Laya"]) {
+                return window["Laya"].timer.currTimer;
+            }
+            else {
+                return new Date().getTime();
+            }
         }
         touchHandler(e, t) {
             if (this.boo)
                 return;
-            this.time += 5;
-            if (this.time >= 100) {
-                console.log("time一百下");
-                this.boo = true;
-                this.time = 100;
-                console.log("关闭狂点");
-                this.node.destroy();
+            if (this.time <= 0) {
+                this.time += 50;
             }
-            else if (this.time >= 25 && !this.videoShowed) {
-                this.videoShowed = true;
-                if (!this.listening) {
-                    this.listening = true;
-                    cc.director.on("dest", this.onDest, this);
-                    cc.game.on(cc.game.EVENT_HIDE, this.gameHide, this);
-                    cc.game.on(cc.game.EVENT_SHOW, this.gameShow, this);
-                }
-                if (this.isBanner) {
-                    GxGame_1.default.Ad().showBanner(() => {
-                        console.log("wudian banner显示成功");
-                    }, () => {
-                        console.log("wudian banner显示失败");
-                    });
-                    setTimeout(() => {
-                        GxGame_1.default.Ad().hideBanner();
-                        this.videoShowed = false;
-                    }, 3 * 1000);
-                }
-                else {
-                    GxGame_1.default.Ad().showVideo((res) => {
-                        this.onGet && this.onGet(res);
-                    }, "GxCrazyPoint");
+            else {
+                this.time += Math.floor(Math.random() * 2) + 8;
+                if (this.time >= 100) {
+                    this.time = 100;
                 }
             }
+            if (this.get_time() - this.showVideoTime < 500) {
+                this.num++;
+                if (this.num == 4 && !this.videoShowed) {
+                    this.num = 0;
+                    this.videoShowed = true;
+                    if (!this.listening) {
+                        this.listening = true;
+                        cc.director.on("dest", this.onDest, this);
+                        cc.game.on(cc.game.EVENT_HIDE, this.gameHide, this);
+                        cc.game.on(cc.game.EVENT_SHOW, this.gameShow, this);
+                    }
+                    if (this.isBanner) {
+                        GxGame_1.default.Ad().showBanner(() => {
+                            console.log("wudian banner显示成功");
+                        }, () => {
+                            console.log("wudian banner显示失败");
+                        });
+                        setTimeout(() => {
+                            GxGame_1.default.Ad().hideBanner();
+                            this.videoShowed = false;
+                        }, 3 * 1000);
+                    }
+                    else {
+                        console.log("调用 视频了");
+                        GxGame_1.default.Ad().showVideo((res) => {
+                            this.onGet && this.onGet(res);
+                            if (this && this.isValid && this.node && this.node.isValid) {
+                                this.node.destroy();
+                            }
+                        }, "GxCrazyPoint");
+                    }
+                }
+            }
+            else {
+                this.num = 1;
+            }
+            console.log(this.num, this.get_time() - this.showVideoTime);
+            this.showVideoTime = this.get_time();
+            // if (this.time >= 100) {
+            //     console.log("time100百下");
+            //     this.boo = true;
+            //     this.time = 100;
+            //     console.log("关闭狂点");
+            //     this.node.destroy();
+            // } else if (this.time >= 70 && !this.videoShowed) {
+            //     this.videoShowed = true;
+            //     if (!this.listening) {
+            //         this.listening = true;
+            //         cc.director.on("dest", this.onDest, this);
+            //         cc.game.on(cc.game.EVENT_HIDE, this.gameHide, this);
+            //         cc.game.on(cc.game.EVENT_SHOW, this.gameShow, this);
+            //     }
+            //     if (this.isBanner) {
+            //         GxGame.Ad().showBanner(() => {
+            //             console.log("wudian banner显示成功");
+            //         }, () => {
+            //             console.log("wudian banner显示失败");
+            //         });
+            //         setTimeout(() => {
+            //             GxGame.Ad().hideBanner();
+            //             this.videoShowed = false;
+            //         }, 3 * 1000);
+            //     } else {
+            //         console.log("调用 视频了");
+            //         GxGame.Ad().showVideo((res) => {
+            //             this.onGet && this.onGet(res);
+            //             this.node.destroy();
+            //         }, "GxCrazyPoint");
+            //     }
+            // }
         }
     };
     __setFunctionName(_classThis, "Gx_crazypoint");
@@ -179,10 +257,14 @@ let Gx_crazypoint = (() => {
         _img_xiangPiCa_decorators = [property(cc.Node)];
         _btnNode_decorators = [property(cc.Node)];
         _boxNode_decorators = [property(cc.Node)];
+        _title_decorators = [property(cc.Node)];
+        _title2_decorators = [property(cc.Node)];
         __esDecorate(null, null, _progressNode_decorators, { kind: "field", name: "progressNode", static: false, private: false, access: { has: obj => "progressNode" in obj, get: obj => obj.progressNode, set: (obj, value) => { obj.progressNode = value; } }, metadata: _metadata }, _progressNode_initializers, _instanceExtraInitializers);
         __esDecorate(null, null, _img_xiangPiCa_decorators, { kind: "field", name: "img_xiangPiCa", static: false, private: false, access: { has: obj => "img_xiangPiCa" in obj, get: obj => obj.img_xiangPiCa, set: (obj, value) => { obj.img_xiangPiCa = value; } }, metadata: _metadata }, _img_xiangPiCa_initializers, _instanceExtraInitializers);
         __esDecorate(null, null, _btnNode_decorators, { kind: "field", name: "btnNode", static: false, private: false, access: { has: obj => "btnNode" in obj, get: obj => obj.btnNode, set: (obj, value) => { obj.btnNode = value; } }, metadata: _metadata }, _btnNode_initializers, _instanceExtraInitializers);
         __esDecorate(null, null, _boxNode_decorators, { kind: "field", name: "boxNode", static: false, private: false, access: { has: obj => "boxNode" in obj, get: obj => obj.boxNode, set: (obj, value) => { obj.boxNode = value; } }, metadata: _metadata }, _boxNode_initializers, _instanceExtraInitializers);
+        __esDecorate(null, null, _title_decorators, { kind: "field", name: "title", static: false, private: false, access: { has: obj => "title" in obj, get: obj => obj.title, set: (obj, value) => { obj.title = value; } }, metadata: _metadata }, _title_initializers, _instanceExtraInitializers);
+        __esDecorate(null, null, _title2_decorators, { kind: "field", name: "title2", static: false, private: false, access: { has: obj => "title2" in obj, get: obj => obj.title2, set: (obj, value) => { obj.title2 = value; } }, metadata: _metadata }, _title2_initializers, _instanceExtraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         Gx_crazypoint = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
