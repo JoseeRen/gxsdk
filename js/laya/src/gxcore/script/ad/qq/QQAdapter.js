@@ -713,7 +713,7 @@ class QQAdapter extends BaseAdapter_1.default {
             orientation: "landscape",
             style: {
                 // top: marginTop
-                top: screenHeight / 2,
+                top: screenHeight / 2, //根据系统约定尺寸计算出广告高度 1440 - (700 / 16 * 9)
                 left: 10
             }
         });

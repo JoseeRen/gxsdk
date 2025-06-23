@@ -49,20 +49,22 @@ let Gx_add_icon = (() => {
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    let _instanceExtraInitializers = [];
     let _btnAddIcon_decorators;
     let _btnAddIcon_initializers = [];
+    let _btnAddIcon_extraInitializers = [];
     let _btnWatchAd_decorators;
     let _btnWatchAd_initializers = [];
+    let _btnWatchAd_extraInitializers = [];
     let _innerNative_decorators;
     let _innerNative_initializers = [];
+    let _innerNative_extraInitializers = [];
     var Gx_add_icon = _classThis = class extends _classSuper {
         constructor() {
             super(...arguments);
-            this.btnAddIcon = (__runInitializers(this, _instanceExtraInitializers), __runInitializers(this, _btnAddIcon_initializers, null));
-            this.btnWatchAd = __runInitializers(this, _btnWatchAd_initializers, null);
-            this.innerNative = __runInitializers(this, _innerNative_initializers, null);
-            this.onSucc = null;
+            this.btnAddIcon = __runInitializers(this, _btnAddIcon_initializers, null);
+            this.btnWatchAd = (__runInitializers(this, _btnAddIcon_extraInitializers), __runInitializers(this, _btnWatchAd_initializers, null));
+            this.innerNative = (__runInitializers(this, _btnWatchAd_extraInitializers), __runInitializers(this, _innerNative_initializers, null));
+            this.onSucc = (__runInitializers(this, _innerNative_extraInitializers), null);
             this.onHide = null;
         }
         onLoad() {
@@ -114,9 +116,9 @@ let Gx_add_icon = (() => {
         _btnAddIcon_decorators = [property(cc.Node)];
         _btnWatchAd_decorators = [property(cc.Node)];
         _innerNative_decorators = [property(cc.Node)];
-        __esDecorate(null, null, _btnAddIcon_decorators, { kind: "field", name: "btnAddIcon", static: false, private: false, access: { has: obj => "btnAddIcon" in obj, get: obj => obj.btnAddIcon, set: (obj, value) => { obj.btnAddIcon = value; } }, metadata: _metadata }, _btnAddIcon_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _btnWatchAd_decorators, { kind: "field", name: "btnWatchAd", static: false, private: false, access: { has: obj => "btnWatchAd" in obj, get: obj => obj.btnWatchAd, set: (obj, value) => { obj.btnWatchAd = value; } }, metadata: _metadata }, _btnWatchAd_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _innerNative_decorators, { kind: "field", name: "innerNative", static: false, private: false, access: { has: obj => "innerNative" in obj, get: obj => obj.innerNative, set: (obj, value) => { obj.innerNative = value; } }, metadata: _metadata }, _innerNative_initializers, _instanceExtraInitializers);
+        __esDecorate(null, null, _btnAddIcon_decorators, { kind: "field", name: "btnAddIcon", static: false, private: false, access: { has: obj => "btnAddIcon" in obj, get: obj => obj.btnAddIcon, set: (obj, value) => { obj.btnAddIcon = value; } }, metadata: _metadata }, _btnAddIcon_initializers, _btnAddIcon_extraInitializers);
+        __esDecorate(null, null, _btnWatchAd_decorators, { kind: "field", name: "btnWatchAd", static: false, private: false, access: { has: obj => "btnWatchAd" in obj, get: obj => obj.btnWatchAd, set: (obj, value) => { obj.btnWatchAd = value; } }, metadata: _metadata }, _btnWatchAd_initializers, _btnWatchAd_extraInitializers);
+        __esDecorate(null, null, _innerNative_decorators, { kind: "field", name: "innerNative", static: false, private: false, access: { has: obj => "innerNative" in obj, get: obj => obj.innerNative, set: (obj, value) => { obj.innerNative = value; } }, metadata: _metadata }, _innerNative_initializers, _innerNative_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         Gx_add_icon = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });

@@ -21,8 +21,8 @@ class OppoAdapter extends BaseAdapter_1.default {
         this.videoArr = [];
         this.videoNum = 0;
         this.ecpmObj = {
-            targetEcpm: 0,
-            gameTime: 10,
+            targetEcpm: 0, //目标ecpm
+            gameTime: 10, //目标游戏时长  分钟
             targetVideo: 3 //目标激励视频次数
         };
         this.checkInterval = 10; //10秒检查一次

@@ -125,8 +125,8 @@ class GxDownloadScene extends layaMaxUI_1.ui.GxDownloadSceneUI {
                         recursive: true,
                     });
                     fileManager.unzip({
-                        zipFilePath: filePath,
-                        targetPath: userdatapath + this.AD_TouTiaoVersion + 'res',
+                        zipFilePath: filePath, // 资源下载后路径
+                        targetPath: userdatapath + this.AD_TouTiaoVersion + 'res', // 解压资源存放路径
                         success: () => {
                             // 解压成功
                             console.log('unzip success');
@@ -180,8 +180,8 @@ class GxDownloadScene extends layaMaxUI_1.ui.GxDownloadSceneUI {
                     console.log('download success tmpPath: ' + filePath);
                     // self.loadTips.string = "资源解压中，请稍后~";
                     fileManager.unzip({
-                        zipFilePath: filePath,
-                        targetPath: userdatapath + this.AD_QQVersion + 'res',
+                        zipFilePath: filePath, // 资源下载后路径
+                        targetPath: userdatapath + this.AD_QQVersion + 'res', // 解压资源存放路径
                         success: () => {
                             // 解压成功
                             console.log('unzip success');
@@ -256,8 +256,8 @@ class GxDownloadScene extends layaMaxUI_1.ui.GxDownloadSceneUI {
                     });
                     //@ts-ignore
                     wx.getFileSystemManager().unzip({
-                        zipFilePath: filePath,
-                        targetPath: userdatapath + this.AD_WXVersion + 'res',
+                        zipFilePath: filePath, // 资源下载后路径
+                        targetPath: userdatapath + this.AD_WXVersion + 'res', // 解压资源存放路径
                         success: () => {
                             // 解压成功
                             console.log('unzip success');

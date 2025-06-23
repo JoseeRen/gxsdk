@@ -17,108 +17,108 @@ exports.AdParams = void 0;
 // qq的倒计时  GxGame.countdown(label,成功方法); qq.countdowntime是倒计时长度   结束后执行成功方法
 // 取消qq本次倒计时 GxGame.quitcount(); 某些游戏结算页 不看广告时隐藏结算页面，需要取消倒计时
 exports.AdParams = {
-    labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+    labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
     age: 12,
-    company: "",
-    softCode: "",
-    ysCompanyName: "石家庄市高兴网络科技有限公司",
-    ysMail: "2361198052@qq.com",
-    ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+    company: "", //健康忠告的公司名
+    softCode: "", //软著号
+    ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+    ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+    ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
     gameName: "",
     oppo: {
         gameName: "",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
-        company: "",
-        softCode: "",
-        ysCompanyName: "石家庄市高兴网络科技有限公司",
-        ysMail: "2361198052@qq.com",
-        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
         banner: "",
-        native1: "",
-        native2: "",
-        native_banner: "",
-        native_icon: "",
+        native1: "", //一般原生大图 自渲染
+        native2: "", //一般原生图文 自渲染
+        native_banner: "", // 自渲染
+        native_icon: "", //原生icon
         video: "",
-        native_custom1: "",
-        native_custom2: "",
-        native_custom_banner: "",
+        native_custom1: "", //模板广告参数
+        native_custom2: "", //模板广告参数
+        native_custom_banner: "", //模板广告参数
         //以下是互推的广告位  占位待用
         gameBanner: "",
         gamePortal: "",
         gameDraw: "",
-        bannerOnTop: false,
+        bannerOnTop: false, //banner显示位置  true 上面  false 下面
         labelVersion: "",
-        havebox: false,
+        havebox: false, //结算页是否弹全屏点击广告 true 弹
         umAppKey: "",
         tdAppKey: ""
     },
     mi: {
         gameName: "",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
-        company: "",
-        softCode: "",
-        ysCompanyName: "石家庄市高兴网络科技有限公司",
-        ysMail: "2361198052@qq.com",
-        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
         inter: "b672387b924750e1052b55925495f80d",
         banner: "f0684d0e4b45a22aa3d14da2d5e25e9f",
-        native1: "f7ce1b63755d33d1477551be3a24bd91",
-        native2: "",
-        native_banner: "",
-        native_icon: "",
+        native1: "f7ce1b63755d33d1477551be3a24bd91", //用这个native1 原生广告参数写这
+        native2: "", // 备用
+        native_banner: "", // 自渲染
+        native_icon: "", //原生icon
         video: "c930fe3dacd17ce9617a4aa7d687f92e",
-        native_custom1: "",
-        native_custom2: "",
-        native_custom_banner: "",
+        native_custom1: "", //模板广告参数
+        native_custom2: "", //模板广告参数
+        native_custom_banner: "", //模板广告参数
         //以下是互推的广告位  占位待用
         gameBanner: "",
         gamePortal: "",
         gameDraw: "",
-        bannerOnTop: false,
+        bannerOnTop: false, //banner显示位置  true 上面  false 下面
         labelVersion: "",
-        havebox: false,
+        havebox: false, //结算页是否弹全屏点击广告 true 弹
         umAppKey: "",
         tdAppKey: ""
     },
     vivo: {
         gameName: "",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
-        adLabelName: "",
+        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
+        adLabelName: "", //标签名
         age: 12,
-        company: "",
-        softCode: "",
-        ysCompanyName: "石家庄市高兴网络科技有限公司",
-        ysMail: "2361198052@qq.com",
-        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
         inter: "",
         banner: "",
-        custom1: "",
-        custom2: "",
-        custom_banner: "",
-        native1: "",
-        native2: "",
+        custom1: "", //原生模板插屏
+        custom2: "", //原生模板插屏
+        custom_banner: "", //原生模板banner
+        native1: "", //原生 自渲染
+        native2: "", ////原生 自渲染
         video: "",
-        native_icon: "",
+        native_icon: "", //占位待用
         //以下是盒子广告 占位待用
         boxBanner: "",
         boxPortal: "",
-        bannerOnTop: false,
+        bannerOnTop: false, //banner显示位置  true 上面  false 下面
         labelVersion: "",
-        havebox: false,
+        havebox: false, //结算页是否弹全屏点击广告 true 弹
         heJiConfig: "",
         tdAppKey: ""
     },
     wx: {
         gameName: "",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
-        company: "",
-        softCode: "",
-        ysCompanyName: "石家庄市高兴网络科技有限公司",
-        ysMail: "2361198052@qq.com",
-        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
         appId: "wxe2ca0cc427b7e86b",
         //其他参数待定吧  有点复杂~~
         video: "adunit-5fa260dc4617e41e",
@@ -129,18 +129,18 @@ exports.AdParams = {
         custom_right: "",
         labelVersion: "",
         subIds: [],
-        shareImgUrl: "",
+        shareImgUrl: "", //https://res.sjzgxwl.com/shareimage/.jpg
         tdAppKey: ""
     },
     qq: {
         gameName: "",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
-        company: "",
-        softCode: "",
-        ysCompanyName: "石家庄市高兴网络科技有限公司",
-        ysMail: "2361198052@qq.com",
-        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
         appId: "1112204543",
         video: "e757e4aafb16730b8b7c290757c12645",
         box: "ebb2bb84f05dee2c51272897eefb38e6",
@@ -149,26 +149,26 @@ exports.AdParams = {
         block2: "a6bc0b050d01b740e4cd93ba95aefbcc",
         banner: "47f3f7988e5d5f10ec7e1a557749c385",
         bannerOnTop: false,
-        gameEndShowCrazyPoint: false,
-        gameEndShowGameBox: false,
-        shareImgUrl: "",
+        gameEndShowCrazyPoint: false, //游戏结束时是否显示砸宝箱
+        gameEndShowGameBox: false, //游戏结束时是否显示九宫格
+        shareImgUrl: "", //https://res.sjzgxwl.com/shareimage/.jpg
         labelVersion: "1",
-        countdowntime: 5,
+        countdowntime: 5, //倒计时的时间  不用倒计时不用管
         //没用
-        sceneidtest: false,
+        sceneidtest: false, //测试哪种策略 true：买量 false：常量（仅测试用不影响上线）    GxGame.Ad().ismailiang可以确定是不是买量用户 true:是 false:不是
         subIds: [],
         tdAppKey: ""
     },
     ks: {
         gameName: "",
         appId: "",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
-        company: "石家庄市神名网络科技有限公司",
-        softCode: "2022SRE012464",
-        ysCompanyName: "",
-        ysMail: "",
-        ysAddress: "",
+        company: "石家庄市神名网络科技有限公司", //健康忠告的公司名
+        softCode: "2022SRE012464", //软著号
+        ysCompanyName: "", //隐私政策中公司名
+        ysMail: "", //隐私政策中联系邮箱
+        ysAddress: "", //隐私政策中公司地址
         inter: "",
         banner: "",
         video: "",
@@ -179,13 +179,13 @@ exports.AdParams = {
         gameName: "",
         appId: "",
         ecpmConfigName: "tt156763da8a5b1b8e02_tingchexiaoxiao",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
-        company: "",
-        softCode: "",
-        ysCompanyName: "石家庄市高兴网络科技有限公司",
-        ysMail: "2361198052@qq.com",
-        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
         inter: "",
         banner: "",
         video: "",
@@ -196,13 +196,13 @@ exports.AdParams = {
     },
     hw: {
         gameName: "",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
-        company: "",
-        softCode: "",
-        ysCompanyName: "石家庄市高兴网络科技有限公司",
-        ysMail: "2361198052@qq.com",
-        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
         appId: "107420823",
         inter: "a1en1p9sb7",
         banner: "v5j7fxt80k",
@@ -212,7 +212,7 @@ exports.AdParams = {
         native_banner: "",
         native1: "e32q21trec",
         native2: "",
-        bannerOnTop: false,
+        bannerOnTop: false, //banner显示位置  true 上面  false 下面
         buildType: "debug",
         debug_inter: "testb4znbuh3n2",
         debug_banner: "testw6vs28auh3",
@@ -228,13 +228,13 @@ exports.AdParams = {
     },
     uc: {
         gameName: "",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
-        company: "",
-        softCode: "",
-        ysCompanyName: "石家庄市高兴网络科技有限公司",
-        ysMail: "2361198052@qq.com",
-        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
         inter: "",
         banner: "",
         video: "",
@@ -242,13 +242,13 @@ exports.AdParams = {
     },
     bd: {
         gameName: "",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
-        company: "",
-        softCode: "",
-        ysCompanyName: "石家庄市高兴网络科技有限公司",
-        ysMail: "2361198052@qq.com",
-        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
         inter: "",
         banner: "",
         appSid: "",
@@ -257,13 +257,13 @@ exports.AdParams = {
     },
     mz: {
         gameName: "",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111",
+        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
-        company: "",
-        softCode: "",
-        ysCompanyName: "石家庄市高兴网络科技有限公司",
-        ysMail: "2361198052@qq.com",
-        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
         inter: "",
         banner: "",
         video: "",
@@ -274,13 +274,13 @@ exports.AdParams = {
     },
     zfb: {
         "gameName": "",
-        labelName: "",
+        labelName: "", //标签名
         age: 12,
-        company: "",
-        softCode: "",
-        ysCompanyName: "石家庄市高兴网络科技有限公司",
-        ysMail: "2361198052@qq.com",
-        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009",
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
         inter: "ad_tiny_2021004124680383_202311102200070139",
         banner: "ad_tiny_2021004124680383_202311102200070028",
         video: "ad_tiny_2021004124680383_202311102200070140",

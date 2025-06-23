@@ -15,13 +15,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -142,7 +152,7 @@ class KsAdapter extends BaseAdapter_1.default {
                             }
                             // @ts-ignore
                             ks.request({
-                                url: "https://api.sjzgxwl.com/kwai/ks/code2session",
+                                url: "https://api.sjzgxwl.com/kwai/ks/code2session", //仅为示例，并非真实的接口地址
                                 data: {
                                     appId: host.appId,
                                     gameVersion: gameVersion,
@@ -229,7 +239,7 @@ class KsAdapter extends BaseAdapter_1.default {
         }
         // @ts-ignore
         ks.request({
-            url: "https://api.sjzgxwl.com/kwai/ks/reward",
+            url: "https://api.sjzgxwl.com/kwai/ks/reward", //仅为示例，并非真实的接口地址
             data: {
                 appId: this.systemInfo.host.appId,
                 gameVersion: gameVersion,
@@ -768,7 +778,7 @@ class KsAdapter extends BaseAdapter_1.default {
                 "content-type": "application/json"
             },
             method: "POST",
-            dataType: "JSON",
+            dataType: "JSON", // 指定返回数据的类型为 json
             responseType: "text",
             success(res) {
                 try {

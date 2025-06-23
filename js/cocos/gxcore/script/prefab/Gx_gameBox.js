@@ -52,18 +52,19 @@ let Gx_gameBox = (() => {
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    let _instanceExtraInitializers = [];
     let _boxNode_decorators;
     let _boxNode_initializers = [];
+    let _boxNode_extraInitializers = [];
     let _zaiLaiSanGe_decorators;
     let _zaiLaiSanGe_initializers = [];
+    let _zaiLaiSanGe_extraInitializers = [];
     var Gx_gameBox = _classThis = class extends _classSuper {
         constructor() {
             super(...arguments);
-            this.boxNode = (__runInitializers(this, _instanceExtraInitializers), __runInitializers(this, _boxNode_initializers, null));
-            this.zaiLaiSanGe = __runInitializers(this, _zaiLaiSanGe_initializers, null);
+            this.boxNode = __runInitializers(this, _boxNode_initializers, null);
+            this.zaiLaiSanGe = (__runInitializers(this, _boxNode_extraInitializers), __runInitializers(this, _zaiLaiSanGe_initializers, null));
             // LIFE-CYCLE CALLBACKS:
-            this.key = 3;
+            this.key = (__runInitializers(this, _zaiLaiSanGe_extraInitializers), 3);
             this.openBoxNum = 0;
             this.openBoxArr = [];
             this.canClick = false;
@@ -209,8 +210,8 @@ let Gx_gameBox = (() => {
         const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create((_a = _classSuper[Symbol.metadata]) !== null && _a !== void 0 ? _a : null) : void 0;
         _boxNode_decorators = [property(cc.Node)];
         _zaiLaiSanGe_decorators = [property(cc.Node)];
-        __esDecorate(null, null, _boxNode_decorators, { kind: "field", name: "boxNode", static: false, private: false, access: { has: obj => "boxNode" in obj, get: obj => obj.boxNode, set: (obj, value) => { obj.boxNode = value; } }, metadata: _metadata }, _boxNode_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _zaiLaiSanGe_decorators, { kind: "field", name: "zaiLaiSanGe", static: false, private: false, access: { has: obj => "zaiLaiSanGe" in obj, get: obj => obj.zaiLaiSanGe, set: (obj, value) => { obj.zaiLaiSanGe = value; } }, metadata: _metadata }, _zaiLaiSanGe_initializers, _instanceExtraInitializers);
+        __esDecorate(null, null, _boxNode_decorators, { kind: "field", name: "boxNode", static: false, private: false, access: { has: obj => "boxNode" in obj, get: obj => obj.boxNode, set: (obj, value) => { obj.boxNode = value; } }, metadata: _metadata }, _boxNode_initializers, _boxNode_extraInitializers);
+        __esDecorate(null, null, _zaiLaiSanGe_decorators, { kind: "field", name: "zaiLaiSanGe", static: false, private: false, access: { has: obj => "zaiLaiSanGe" in obj, get: obj => obj.zaiLaiSanGe, set: (obj, value) => { obj.zaiLaiSanGe = value; } }, metadata: _metadata }, _zaiLaiSanGe_initializers, _zaiLaiSanGe_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         Gx_gameBox = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });

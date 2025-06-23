@@ -61,15 +61,10 @@ let GxBgImg = (() => {
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    let _instanceExtraInitializers = [];
     let _imgName_decorators;
     let _imgName_initializers = [];
+    let _imgName_extraInitializers = [];
     var GxBgImg = _classThis = class extends _classSuper {
-        constructor() {
-            super(...arguments);
-            this.imgName = (__runInitializers(this, _instanceExtraInitializers), __runInitializers(this, _imgName_initializers, ImgNameEnum.NONE));
-            // update (dt) {}
-        }
         // LIFE-CYCLE CALLBACKS:
         onLoad() {
             this.node.opacity = 0;
@@ -99,13 +94,18 @@ let GxBgImg = (() => {
         }
         start() {
         }
+        constructor() {
+            super(...arguments);
+            this.imgName = __runInitializers(this, _imgName_initializers, ImgNameEnum.NONE);
+            __runInitializers(this, _imgName_extraInitializers);
+        }
     };
     __setFunctionName(_classThis, "GxBgImg");
     (() => {
         var _a;
         const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create((_a = _classSuper[Symbol.metadata]) !== null && _a !== void 0 ? _a : null) : void 0;
         _imgName_decorators = [property({ type: cc.Enum(ImgNameEnum) })];
-        __esDecorate(null, null, _imgName_decorators, { kind: "field", name: "imgName", static: false, private: false, access: { has: obj => "imgName" in obj, get: obj => obj.imgName, set: (obj, value) => { obj.imgName = value; } }, metadata: _metadata }, _imgName_initializers, _instanceExtraInitializers);
+        __esDecorate(null, null, _imgName_decorators, { kind: "field", name: "imgName", static: false, private: false, access: { has: obj => "imgName" in obj, get: obj => obj.imgName, set: (obj, value) => { obj.imgName = value; } }, metadata: _metadata }, _imgName_initializers, _imgName_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         GxBgImg = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });

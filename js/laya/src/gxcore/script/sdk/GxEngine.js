@@ -39,8 +39,8 @@ class GxEngine {
             sessionId: "",
             clickid: "",
             ecpmConfig: {
-                gameTime: 10.3,
-                targetEcpm: 300,
+                gameTime: 10.3, //游戏时长  分钟
+                targetEcpm: 300, //目标ecpm
                 targetVideo: 1 //目标激励视频数
             }
         };

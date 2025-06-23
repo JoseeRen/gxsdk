@@ -122,17 +122,17 @@ class WxCustomAd {
                                };*/
                     if (this._isLandscape) {
                         style = {
-                            left: (this._screenInfo.screenWidth / 2) - 180,
-                            top: 10,
-                            width: (this._screenInfo.screenWidth / 5),
+                            left: (this._screenInfo.screenWidth / 2) - 180, //横屏(AD_WX.sceneW/2)-180 竖屏 0
+                            top: 10, //横屏 10 竖屏 (AD_WX.sceneH/2)-230
+                            width: (this._screenInfo.screenWidth / 5), //横屏(AD_WX.sceneW/5) 竖屏 不写
                             // opacity: 0.8
                             fixed: false,
                         };
                     }
                     else {
                         style = {
-                            left: 0,
-                            top: (this._screenInfo.screenHeight / 2) - 230,
+                            left: 0, //横屏(AD_WX.sceneW/2)-180 竖屏 0
+                            top: (this._screenInfo.screenHeight / 2) - 230, //横屏 10 竖屏 (AD_WX.sceneH/2)-230
                             /*     width: (this._screenInfo.screenWidth/5),//横屏(AD_WX.sceneW/5) 竖屏 不写*/
                             // opacity: 0.8
                             fixed: false,

@@ -59,31 +59,36 @@ let FirstScene = (() => {
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    let _instanceExtraInitializers = [];
     let _jkTitle_decorators;
     let _jkTitle_initializers = [];
+    let _jkTitle_extraInitializers = [];
     let _jkContent_decorators;
     let _jkContent_initializers = [];
+    let _jkContent_extraInitializers = [];
     let _jkCompany_decorators;
     let _jkCompany_initializers = [];
+    let _jkCompany_extraInitializers = [];
     let _jkSoftCode_decorators;
     let _jkSoftCode_initializers = [];
+    let _jkSoftCode_extraInitializers = [];
     let _ageSp_decorators;
     let _ageSp_initializers = [];
+    let _ageSp_extraInitializers = [];
     let _gameSceneName_decorators;
     let _gameSceneName_initializers = [];
+    let _gameSceneName_extraInitializers = [];
     var FirstScene = _classThis = class extends _classSuper {
         constructor() {
             super(...arguments);
-            this.jkTitle = (__runInitializers(this, _instanceExtraInitializers), __runInitializers(this, _jkTitle_initializers, null));
-            this.jkContent = __runInitializers(this, _jkContent_initializers, null);
+            this.jkTitle = __runInitializers(this, _jkTitle_initializers, null);
+            this.jkContent = (__runInitializers(this, _jkTitle_extraInitializers), __runInitializers(this, _jkContent_initializers, null));
             //软著信息
-            this.jkCompany = __runInitializers(this, _jkCompany_initializers, null);
-            this.jkSoftCode = __runInitializers(this, _jkSoftCode_initializers, null);
-            this.ageSp = __runInitializers(this, _ageSp_initializers, null);
-            this.gameSceneName = __runInitializers(this, _gameSceneName_initializers, "GameScene");
+            this.jkCompany = (__runInitializers(this, _jkContent_extraInitializers), __runInitializers(this, _jkCompany_initializers, null));
+            this.jkSoftCode = (__runInitializers(this, _jkCompany_extraInitializers), __runInitializers(this, _jkSoftCode_initializers, null));
+            this.ageSp = (__runInitializers(this, _jkSoftCode_extraInitializers), __runInitializers(this, _ageSp_initializers, null));
+            this.gameSceneName = (__runInitializers(this, _ageSp_extraInitializers), __runInitializers(this, _gameSceneName_initializers, "GameScene"));
             // LIFE-CYCLE CALLBACKS:
-            this.canJumpToNext = false;
+            this.canJumpToNext = (__runInitializers(this, _gameSceneName_extraInitializers), false);
             // update (dt) {}
         }
         onLoad() {
@@ -230,12 +235,12 @@ let FirstScene = (() => {
         _jkSoftCode_decorators = [property(cc.Label)];
         _ageSp_decorators = [property(cc.Sprite)];
         _gameSceneName_decorators = [property];
-        __esDecorate(null, null, _jkTitle_decorators, { kind: "field", name: "jkTitle", static: false, private: false, access: { has: obj => "jkTitle" in obj, get: obj => obj.jkTitle, set: (obj, value) => { obj.jkTitle = value; } }, metadata: _metadata }, _jkTitle_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _jkContent_decorators, { kind: "field", name: "jkContent", static: false, private: false, access: { has: obj => "jkContent" in obj, get: obj => obj.jkContent, set: (obj, value) => { obj.jkContent = value; } }, metadata: _metadata }, _jkContent_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _jkCompany_decorators, { kind: "field", name: "jkCompany", static: false, private: false, access: { has: obj => "jkCompany" in obj, get: obj => obj.jkCompany, set: (obj, value) => { obj.jkCompany = value; } }, metadata: _metadata }, _jkCompany_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _jkSoftCode_decorators, { kind: "field", name: "jkSoftCode", static: false, private: false, access: { has: obj => "jkSoftCode" in obj, get: obj => obj.jkSoftCode, set: (obj, value) => { obj.jkSoftCode = value; } }, metadata: _metadata }, _jkSoftCode_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _ageSp_decorators, { kind: "field", name: "ageSp", static: false, private: false, access: { has: obj => "ageSp" in obj, get: obj => obj.ageSp, set: (obj, value) => { obj.ageSp = value; } }, metadata: _metadata }, _ageSp_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _gameSceneName_decorators, { kind: "field", name: "gameSceneName", static: false, private: false, access: { has: obj => "gameSceneName" in obj, get: obj => obj.gameSceneName, set: (obj, value) => { obj.gameSceneName = value; } }, metadata: _metadata }, _gameSceneName_initializers, _instanceExtraInitializers);
+        __esDecorate(null, null, _jkTitle_decorators, { kind: "field", name: "jkTitle", static: false, private: false, access: { has: obj => "jkTitle" in obj, get: obj => obj.jkTitle, set: (obj, value) => { obj.jkTitle = value; } }, metadata: _metadata }, _jkTitle_initializers, _jkTitle_extraInitializers);
+        __esDecorate(null, null, _jkContent_decorators, { kind: "field", name: "jkContent", static: false, private: false, access: { has: obj => "jkContent" in obj, get: obj => obj.jkContent, set: (obj, value) => { obj.jkContent = value; } }, metadata: _metadata }, _jkContent_initializers, _jkContent_extraInitializers);
+        __esDecorate(null, null, _jkCompany_decorators, { kind: "field", name: "jkCompany", static: false, private: false, access: { has: obj => "jkCompany" in obj, get: obj => obj.jkCompany, set: (obj, value) => { obj.jkCompany = value; } }, metadata: _metadata }, _jkCompany_initializers, _jkCompany_extraInitializers);
+        __esDecorate(null, null, _jkSoftCode_decorators, { kind: "field", name: "jkSoftCode", static: false, private: false, access: { has: obj => "jkSoftCode" in obj, get: obj => obj.jkSoftCode, set: (obj, value) => { obj.jkSoftCode = value; } }, metadata: _metadata }, _jkSoftCode_initializers, _jkSoftCode_extraInitializers);
+        __esDecorate(null, null, _ageSp_decorators, { kind: "field", name: "ageSp", static: false, private: false, access: { has: obj => "ageSp" in obj, get: obj => obj.ageSp, set: (obj, value) => { obj.ageSp = value; } }, metadata: _metadata }, _ageSp_initializers, _ageSp_extraInitializers);
+        __esDecorate(null, null, _gameSceneName_decorators, { kind: "field", name: "gameSceneName", static: false, private: false, access: { has: obj => "gameSceneName" in obj, get: obj => obj.gameSceneName, set: (obj, value) => { obj.gameSceneName = value; } }, metadata: _metadata }, _gameSceneName_initializers, _gameSceneName_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         FirstScene = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });

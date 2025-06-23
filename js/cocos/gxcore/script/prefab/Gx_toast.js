@@ -45,16 +45,18 @@ let Gx_toast = (() => {
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    let _instanceExtraInitializers = [];
     let _label_decorators;
     let _label_initializers = [];
+    let _label_extraInitializers = [];
     let _tips_box_decorators;
     let _tips_box_initializers = [];
+    let _tips_box_extraInitializers = [];
     var Gx_toast = _classThis = class extends _classSuper {
         constructor() {
             super(...arguments);
-            this.label = (__runInitializers(this, _instanceExtraInitializers), __runInitializers(this, _label_initializers, null));
-            this.tips_box = __runInitializers(this, _tips_box_initializers, null);
+            this.label = __runInitializers(this, _label_initializers, null);
+            this.tips_box = (__runInitializers(this, _label_extraInitializers), __runInitializers(this, _tips_box_initializers, null));
+            this.tips_tween = __runInitializers(this, _tips_box_extraInitializers);
         }
         show(desc) {
             if (this.node && !this.node.parent) {
@@ -105,8 +107,8 @@ let Gx_toast = (() => {
         const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create((_a = _classSuper[Symbol.metadata]) !== null && _a !== void 0 ? _a : null) : void 0;
         _label_decorators = [property(cc.Label)];
         _tips_box_decorators = [property(cc.Node)];
-        __esDecorate(null, null, _label_decorators, { kind: "field", name: "label", static: false, private: false, access: { has: obj => "label" in obj, get: obj => obj.label, set: (obj, value) => { obj.label = value; } }, metadata: _metadata }, _label_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _tips_box_decorators, { kind: "field", name: "tips_box", static: false, private: false, access: { has: obj => "tips_box" in obj, get: obj => obj.tips_box, set: (obj, value) => { obj.tips_box = value; } }, metadata: _metadata }, _tips_box_initializers, _instanceExtraInitializers);
+        __esDecorate(null, null, _label_decorators, { kind: "field", name: "label", static: false, private: false, access: { has: obj => "label" in obj, get: obj => obj.label, set: (obj, value) => { obj.label = value; } }, metadata: _metadata }, _label_initializers, _label_extraInitializers);
+        __esDecorate(null, null, _tips_box_decorators, { kind: "field", name: "tips_box", static: false, private: false, access: { has: obj => "tips_box" in obj, get: obj => obj.tips_box, set: (obj, value) => { obj.tips_box = value; } }, metadata: _metadata }, _tips_box_initializers, _tips_box_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         Gx_toast = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });

@@ -69,7 +69,7 @@ class GxChecker {
     }
 }
 GxChecker.MsgType = {
-    jkzg: "jkzg",
+    jkzg: "jkzg", /*健康忠告*/
     initSDK: "initSDK",
     lvStart: "lvStart",
     lvEnd: "lvEnd",
@@ -78,15 +78,15 @@ GxChecker.MsgType = {
     ad_otherInter: "ad_otherInter",
     ad_banner_show: "ad_banner_show",
     ad_banner_hide: "ad_banner_hide",
-    event: "event",
-    btn_event: "btn_event",
+    event: "event", /*自定义事件*/
+    btn_event: "btn_event", /*按钮点击事件*/
     showGameAgeBtn: "showGameAgeBtn",
     showGamePrivacy: "showGamePrivacy",
-    showGamePrivacyBtn: "showGamePrivacyBtn",
-    showUserPrivacyBtn: "showUserPrivacyBtn",
+    showGamePrivacyBtn: "showGamePrivacyBtn", /*隐私政策按钮*/
+    showUserPrivacyBtn: "showUserPrivacyBtn", /*用户协议 按钮  qq*/
     showAddDesktopBtn: "showAddDesktopBtn",
     showMoreGameBtn: "showMoreGameBtn",
-    showCancelAccountBtn: "showCancelAccountBtn",
+    showCancelAccountBtn: "showCancelAccountBtn", /*华为注销账户*/
     codeError: "codeError", /*代码异常*/
 };
 exports.default = GxChecker;

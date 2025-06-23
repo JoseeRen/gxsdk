@@ -43,7 +43,7 @@ class UCAdapter extends BaseAdapter_1.default {
         //@ts-ignore
         this.bannerAd = uc.createBannerAd({
             style: {
-                gravity: 7,
+                gravity: 7, // 0:左上 1：顶部居中 2：右上
                 // 3：左边垂直居中 4：居中 5：右边垂直居中
                 // 6：左下 7：底部居中 8：右下 （默认为0）
                 width: GxGame_1.default.screenWidth,

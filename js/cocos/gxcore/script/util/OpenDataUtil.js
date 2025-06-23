@@ -16,9 +16,9 @@ const OpenDataConstant = {
         InitChannel: "InitChannel",
         FetchFriend: "FetchFriend",
         FetchGroup: "FetchGroup",
-        FetchFriendLevel: "FetchFriendLevel",
-        FetchFriendScore: "FetchFriendScore",
-        HorConmpar: "HorConmpar",
+        FetchFriendLevel: "FetchFriendLevel", //好友关卡进度排行
+        FetchFriendScore: "FetchFriendScore", //好友关卡得分排行
+        HorConmpar: "HorConmpar", //横向比较 horizontal comparison
         Paging: "Paging",
         Scrolling: "Scrolling",
         AddScore: "AddScore",

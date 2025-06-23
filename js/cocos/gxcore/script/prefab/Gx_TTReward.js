@@ -55,22 +55,26 @@ let NewClass = (() => {
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    let _instanceExtraInitializers = [];
     let _getReward_decorators;
     let _getReward_initializers = [];
+    let _getReward_extraInitializers = [];
     let _gotoBtn_decorators;
     let _gotoBtn_initializers = [];
+    let _gotoBtn_extraInitializers = [];
     let _stringlabel_decorators;
     let _stringlabel_initializers = [];
+    let _stringlabel_extraInitializers = [];
     let _haverewardtip_decorators;
     let _haverewardtip_initializers = [];
+    let _haverewardtip_extraInitializers = [];
     var NewClass = _classThis = class extends _classSuper {
         constructor() {
             super(...arguments);
-            this.getReward = (__runInitializers(this, _instanceExtraInitializers), __runInitializers(this, _getReward_initializers, null));
-            this.gotoBtn = __runInitializers(this, _gotoBtn_initializers, null);
-            this.stringlabel = __runInitializers(this, _stringlabel_initializers, null);
-            this.haverewardtip = __runInitializers(this, _haverewardtip_initializers, null);
+            this.getReward = __runInitializers(this, _getReward_initializers, null);
+            this.gotoBtn = (__runInitializers(this, _getReward_extraInitializers), __runInitializers(this, _gotoBtn_initializers, null));
+            this.stringlabel = (__runInitializers(this, _gotoBtn_extraInitializers), __runInitializers(this, _stringlabel_initializers, null));
+            this.haverewardtip = (__runInitializers(this, _stringlabel_extraInitializers), __runInitializers(this, _haverewardtip_initializers, null));
+            this.curRootNode = __runInitializers(this, _haverewardtip_extraInitializers);
             this.havettreward = false;
             this.Reward = () => {
             };
@@ -184,10 +188,10 @@ let NewClass = (() => {
         _gotoBtn_decorators = [property(cc.Node)];
         _stringlabel_decorators = [property(cc.Label)];
         _haverewardtip_decorators = [property(cc.Node)];
-        __esDecorate(null, null, _getReward_decorators, { kind: "field", name: "getReward", static: false, private: false, access: { has: obj => "getReward" in obj, get: obj => obj.getReward, set: (obj, value) => { obj.getReward = value; } }, metadata: _metadata }, _getReward_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _gotoBtn_decorators, { kind: "field", name: "gotoBtn", static: false, private: false, access: { has: obj => "gotoBtn" in obj, get: obj => obj.gotoBtn, set: (obj, value) => { obj.gotoBtn = value; } }, metadata: _metadata }, _gotoBtn_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _stringlabel_decorators, { kind: "field", name: "stringlabel", static: false, private: false, access: { has: obj => "stringlabel" in obj, get: obj => obj.stringlabel, set: (obj, value) => { obj.stringlabel = value; } }, metadata: _metadata }, _stringlabel_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _haverewardtip_decorators, { kind: "field", name: "haverewardtip", static: false, private: false, access: { has: obj => "haverewardtip" in obj, get: obj => obj.haverewardtip, set: (obj, value) => { obj.haverewardtip = value; } }, metadata: _metadata }, _haverewardtip_initializers, _instanceExtraInitializers);
+        __esDecorate(null, null, _getReward_decorators, { kind: "field", name: "getReward", static: false, private: false, access: { has: obj => "getReward" in obj, get: obj => obj.getReward, set: (obj, value) => { obj.getReward = value; } }, metadata: _metadata }, _getReward_initializers, _getReward_extraInitializers);
+        __esDecorate(null, null, _gotoBtn_decorators, { kind: "field", name: "gotoBtn", static: false, private: false, access: { has: obj => "gotoBtn" in obj, get: obj => obj.gotoBtn, set: (obj, value) => { obj.gotoBtn = value; } }, metadata: _metadata }, _gotoBtn_initializers, _gotoBtn_extraInitializers);
+        __esDecorate(null, null, _stringlabel_decorators, { kind: "field", name: "stringlabel", static: false, private: false, access: { has: obj => "stringlabel" in obj, get: obj => obj.stringlabel, set: (obj, value) => { obj.stringlabel = value; } }, metadata: _metadata }, _stringlabel_initializers, _stringlabel_extraInitializers);
+        __esDecorate(null, null, _haverewardtip_decorators, { kind: "field", name: "haverewardtip", static: false, private: false, access: { has: obj => "haverewardtip" in obj, get: obj => obj.haverewardtip, set: (obj, value) => { obj.haverewardtip = value; } }, metadata: _metadata }, _haverewardtip_initializers, _haverewardtip_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         NewClass = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });

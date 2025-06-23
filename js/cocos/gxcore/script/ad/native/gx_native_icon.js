@@ -52,22 +52,29 @@ let native_icon = (() => {
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    let _instanceExtraInitializers = [];
     let _icon_close_decorators;
     let _icon_close_initializers = [];
+    let _icon_close_extraInitializers = [];
     let _native_node_decorators;
     let _native_node_initializers = [];
+    let _native_node_extraInitializers = [];
     let _img_icon_decorators;
     let _img_icon_initializers = [];
+    let _img_icon_extraInitializers = [];
     let _ad_logo_decorators;
     let _ad_logo_initializers = [];
+    let _ad_logo_extraInitializers = [];
     var native_icon = _classThis = class extends _classSuper {
         constructor() {
             super();
-            this.icon_close = (__runInitializers(this, _instanceExtraInitializers), __runInitializers(this, _icon_close_initializers, null));
-            this.native_node = __runInitializers(this, _native_node_initializers, null);
-            this.img_icon = __runInitializers(this, _img_icon_initializers, null);
-            this.ad_logo = __runInitializers(this, _ad_logo_initializers, null);
+            this.icon_close = __runInitializers(this, _icon_close_initializers, null);
+            this.native_node = (__runInitializers(this, _icon_close_extraInitializers), __runInitializers(this, _native_node_initializers, null));
+            this.img_icon = (__runInitializers(this, _native_node_extraInitializers), __runInitializers(this, _img_icon_initializers, null));
+            this.ad_logo = (__runInitializers(this, _img_icon_extraInitializers), __runInitializers(this, _ad_logo_initializers, null));
+            /**
+             * 原生广告数据
+             */
+            this.native_data = __runInitializers(this, _ad_logo_extraInitializers);
             this.set_background_on_show();
         }
         on_click_adv() {
@@ -209,10 +216,10 @@ let native_icon = (() => {
         _native_node_decorators = [property(cc.Node)];
         _img_icon_decorators = [property(cc.Sprite)];
         _ad_logo_decorators = [property(cc.Label)];
-        __esDecorate(null, null, _icon_close_decorators, { kind: "field", name: "icon_close", static: false, private: false, access: { has: obj => "icon_close" in obj, get: obj => obj.icon_close, set: (obj, value) => { obj.icon_close = value; } }, metadata: _metadata }, _icon_close_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _native_node_decorators, { kind: "field", name: "native_node", static: false, private: false, access: { has: obj => "native_node" in obj, get: obj => obj.native_node, set: (obj, value) => { obj.native_node = value; } }, metadata: _metadata }, _native_node_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _img_icon_decorators, { kind: "field", name: "img_icon", static: false, private: false, access: { has: obj => "img_icon" in obj, get: obj => obj.img_icon, set: (obj, value) => { obj.img_icon = value; } }, metadata: _metadata }, _img_icon_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _ad_logo_decorators, { kind: "field", name: "ad_logo", static: false, private: false, access: { has: obj => "ad_logo" in obj, get: obj => obj.ad_logo, set: (obj, value) => { obj.ad_logo = value; } }, metadata: _metadata }, _ad_logo_initializers, _instanceExtraInitializers);
+        __esDecorate(null, null, _icon_close_decorators, { kind: "field", name: "icon_close", static: false, private: false, access: { has: obj => "icon_close" in obj, get: obj => obj.icon_close, set: (obj, value) => { obj.icon_close = value; } }, metadata: _metadata }, _icon_close_initializers, _icon_close_extraInitializers);
+        __esDecorate(null, null, _native_node_decorators, { kind: "field", name: "native_node", static: false, private: false, access: { has: obj => "native_node" in obj, get: obj => obj.native_node, set: (obj, value) => { obj.native_node = value; } }, metadata: _metadata }, _native_node_initializers, _native_node_extraInitializers);
+        __esDecorate(null, null, _img_icon_decorators, { kind: "field", name: "img_icon", static: false, private: false, access: { has: obj => "img_icon" in obj, get: obj => obj.img_icon, set: (obj, value) => { obj.img_icon = value; } }, metadata: _metadata }, _img_icon_initializers, _img_icon_extraInitializers);
+        __esDecorate(null, null, _ad_logo_decorators, { kind: "field", name: "ad_logo", static: false, private: false, access: { has: obj => "ad_logo" in obj, get: obj => obj.ad_logo, set: (obj, value) => { obj.ad_logo = value; } }, metadata: _metadata }, _ad_logo_initializers, _ad_logo_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         native_icon = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });

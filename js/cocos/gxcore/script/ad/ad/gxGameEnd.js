@@ -55,20 +55,22 @@ let GxGameEnd = (() => {
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    let _instanceExtraInitializers = [];
     let _btnArr_decorators;
     let _btnArr_initializers = [];
+    let _btnArr_extraInitializers = [];
     let _touchNode_decorators;
     let _touchNode_initializers = [];
+    let _touchNode_extraInitializers = [];
     let _dotNode_decorators;
     let _dotNode_initializers = [];
+    let _dotNode_extraInitializers = [];
     var GxGameEnd = _classThis = class extends _classSuper {
         constructor() {
             super(...arguments);
-            this.btnArr = (__runInitializers(this, _instanceExtraInitializers), __runInitializers(this, _btnArr_initializers, []));
-            this.touchNode = __runInitializers(this, _touchNode_initializers, null);
-            this.dotNode = __runInitializers(this, _dotNode_initializers, null);
-            this.switchOpen = false;
+            this.btnArr = __runInitializers(this, _btnArr_initializers, []);
+            this.touchNode = (__runInitializers(this, _btnArr_extraInitializers), __runInitializers(this, _touchNode_initializers, null));
+            this.dotNode = (__runInitializers(this, _touchNode_extraInitializers), __runInitializers(this, _dotNode_initializers, null));
+            this.switchOpen = (__runInitializers(this, _dotNode_extraInitializers), false);
             // update (dt) {}
         }
         // LIFE-CYCLE CALLBACKS:
@@ -137,9 +139,9 @@ let GxGameEnd = (() => {
         _btnArr_decorators = [property({ type: cc.Button, tooltip: "要控制的按钮" })];
         _touchNode_decorators = [property({ type: cc.Node, tooltip: "触摸控制点显示不显示" })];
         _dotNode_decorators = [property({ type: cc.Node, tooltip: "点" })];
-        __esDecorate(null, null, _btnArr_decorators, { kind: "field", name: "btnArr", static: false, private: false, access: { has: obj => "btnArr" in obj, get: obj => obj.btnArr, set: (obj, value) => { obj.btnArr = value; } }, metadata: _metadata }, _btnArr_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _touchNode_decorators, { kind: "field", name: "touchNode", static: false, private: false, access: { has: obj => "touchNode" in obj, get: obj => obj.touchNode, set: (obj, value) => { obj.touchNode = value; } }, metadata: _metadata }, _touchNode_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _dotNode_decorators, { kind: "field", name: "dotNode", static: false, private: false, access: { has: obj => "dotNode" in obj, get: obj => obj.dotNode, set: (obj, value) => { obj.dotNode = value; } }, metadata: _metadata }, _dotNode_initializers, _instanceExtraInitializers);
+        __esDecorate(null, null, _btnArr_decorators, { kind: "field", name: "btnArr", static: false, private: false, access: { has: obj => "btnArr" in obj, get: obj => obj.btnArr, set: (obj, value) => { obj.btnArr = value; } }, metadata: _metadata }, _btnArr_initializers, _btnArr_extraInitializers);
+        __esDecorate(null, null, _touchNode_decorators, { kind: "field", name: "touchNode", static: false, private: false, access: { has: obj => "touchNode" in obj, get: obj => obj.touchNode, set: (obj, value) => { obj.touchNode = value; } }, metadata: _metadata }, _touchNode_initializers, _touchNode_extraInitializers);
+        __esDecorate(null, null, _dotNode_decorators, { kind: "field", name: "dotNode", static: false, private: false, access: { has: obj => "dotNode" in obj, get: obj => obj.dotNode, set: (obj, value) => { obj.dotNode = value; } }, metadata: _metadata }, _dotNode_initializers, _dotNode_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         GxGameEnd = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });

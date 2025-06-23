@@ -1,11 +1,4 @@
 "use strict";
-var __runInitializers = (this && this.__runInitializers) || function (thisArg, initializers, value) {
-    var useValue = arguments.length > 2;
-    for (var i = 0; i < initializers.length; i++) {
-        value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
-    }
-    return useValue ? value : void 0;
-};
 var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
     function accept(f) { if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected"); return f; }
     var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
@@ -33,6 +26,13 @@ var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, 
     if (target) Object.defineProperty(target, contextIn.name, descriptor);
     done = true;
 };
+var __runInitializers = (this && this.__runInitializers) || function (thisArg, initializers, value) {
+    var useValue = arguments.length > 2;
+    for (var i = 0; i < initializers.length; i++) {
+        value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
+    }
+    return useValue ? value : void 0;
+};
 var __setFunctionName = (this && this.__setFunctionName) || function (f, name, prefix) {
     if (typeof name === "symbol") name = name.description ? "[".concat(name.description, "]") : "";
     return Object.defineProperty(f, "name", { configurable: true, value: prefix ? "".concat(prefix, " ", name) : name });
@@ -51,37 +51,31 @@ let Gx_authorize = (() => {
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    let _instanceExtraInitializers = [];
     let _userNode_decorators;
     let _userNode_initializers = [];
+    let _userNode_extraInitializers = [];
     let _andTextNode_decorators;
     let _andTextNode_initializers = [];
+    let _andTextNode_extraInitializers = [];
     let _privacyNode_decorators;
     let _privacyNode_initializers = [];
+    let _privacyNode_extraInitializers = [];
     let _erCiNode_decorators;
     let _erCiNode_initializers = [];
+    let _erCiNode_extraInitializers = [];
     let _refuseBtn_decorators;
     let _refuseBtn_initializers = [];
+    let _refuseBtn_extraInitializers = [];
     let _agreeBtn_decorators;
     let _agreeBtn_initializers = [];
+    let _agreeBtn_extraInitializers = [];
     let _closeBtn_decorators;
     let _closeBtn_initializers = [];
+    let _closeBtn_extraInitializers = [];
     let _tipsLabel_decorators;
     let _tipsLabel_initializers = [];
+    let _tipsLabel_extraInitializers = [];
     var Gx_authorize = _classThis = class extends _classSuper {
-        constructor() {
-            super(...arguments);
-            this.onAgree = (__runInitializers(this, _instanceExtraInitializers), null);
-            this.onRefuse = null;
-            this.userNode = __runInitializers(this, _userNode_initializers, null);
-            this.andTextNode = __runInitializers(this, _andTextNode_initializers, null);
-            this.privacyNode = __runInitializers(this, _privacyNode_initializers, null);
-            this.erCiNode = __runInitializers(this, _erCiNode_initializers, null);
-            this.refuseBtn = __runInitializers(this, _refuseBtn_initializers, null);
-            this.agreeBtn = __runInitializers(this, _agreeBtn_initializers, null);
-            this.closeBtn = __runInitializers(this, _closeBtn_initializers, null);
-            this.tipsLabel = __runInitializers(this, _tipsLabel_initializers, null);
-        }
         show(on_agree, on_refuse) {
             if (this.node.parent)
                 return;
@@ -142,6 +136,20 @@ let Gx_authorize = (() => {
             }
             this.node.destroy();
         }
+        constructor() {
+            super(...arguments);
+            this.onAgree = null;
+            this.onRefuse = null;
+            this.userNode = __runInitializers(this, _userNode_initializers, null);
+            this.andTextNode = (__runInitializers(this, _userNode_extraInitializers), __runInitializers(this, _andTextNode_initializers, null));
+            this.privacyNode = (__runInitializers(this, _andTextNode_extraInitializers), __runInitializers(this, _privacyNode_initializers, null));
+            this.erCiNode = (__runInitializers(this, _privacyNode_extraInitializers), __runInitializers(this, _erCiNode_initializers, null));
+            this.refuseBtn = (__runInitializers(this, _erCiNode_extraInitializers), __runInitializers(this, _refuseBtn_initializers, null));
+            this.agreeBtn = (__runInitializers(this, _refuseBtn_extraInitializers), __runInitializers(this, _agreeBtn_initializers, null));
+            this.closeBtn = (__runInitializers(this, _agreeBtn_extraInitializers), __runInitializers(this, _closeBtn_initializers, null));
+            this.tipsLabel = (__runInitializers(this, _closeBtn_extraInitializers), __runInitializers(this, _tipsLabel_initializers, null));
+            __runInitializers(this, _tipsLabel_extraInitializers);
+        }
     };
     __setFunctionName(_classThis, "Gx_authorize");
     (() => {
@@ -155,14 +163,14 @@ let Gx_authorize = (() => {
         _agreeBtn_decorators = [property(cc.Node)];
         _closeBtn_decorators = [property(cc.Node)];
         _tipsLabel_decorators = [property(cc.Label)];
-        __esDecorate(null, null, _userNode_decorators, { kind: "field", name: "userNode", static: false, private: false, access: { has: obj => "userNode" in obj, get: obj => obj.userNode, set: (obj, value) => { obj.userNode = value; } }, metadata: _metadata }, _userNode_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _andTextNode_decorators, { kind: "field", name: "andTextNode", static: false, private: false, access: { has: obj => "andTextNode" in obj, get: obj => obj.andTextNode, set: (obj, value) => { obj.andTextNode = value; } }, metadata: _metadata }, _andTextNode_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _privacyNode_decorators, { kind: "field", name: "privacyNode", static: false, private: false, access: { has: obj => "privacyNode" in obj, get: obj => obj.privacyNode, set: (obj, value) => { obj.privacyNode = value; } }, metadata: _metadata }, _privacyNode_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _erCiNode_decorators, { kind: "field", name: "erCiNode", static: false, private: false, access: { has: obj => "erCiNode" in obj, get: obj => obj.erCiNode, set: (obj, value) => { obj.erCiNode = value; } }, metadata: _metadata }, _erCiNode_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _refuseBtn_decorators, { kind: "field", name: "refuseBtn", static: false, private: false, access: { has: obj => "refuseBtn" in obj, get: obj => obj.refuseBtn, set: (obj, value) => { obj.refuseBtn = value; } }, metadata: _metadata }, _refuseBtn_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _agreeBtn_decorators, { kind: "field", name: "agreeBtn", static: false, private: false, access: { has: obj => "agreeBtn" in obj, get: obj => obj.agreeBtn, set: (obj, value) => { obj.agreeBtn = value; } }, metadata: _metadata }, _agreeBtn_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _closeBtn_decorators, { kind: "field", name: "closeBtn", static: false, private: false, access: { has: obj => "closeBtn" in obj, get: obj => obj.closeBtn, set: (obj, value) => { obj.closeBtn = value; } }, metadata: _metadata }, _closeBtn_initializers, _instanceExtraInitializers);
-        __esDecorate(null, null, _tipsLabel_decorators, { kind: "field", name: "tipsLabel", static: false, private: false, access: { has: obj => "tipsLabel" in obj, get: obj => obj.tipsLabel, set: (obj, value) => { obj.tipsLabel = value; } }, metadata: _metadata }, _tipsLabel_initializers, _instanceExtraInitializers);
+        __esDecorate(null, null, _userNode_decorators, { kind: "field", name: "userNode", static: false, private: false, access: { has: obj => "userNode" in obj, get: obj => obj.userNode, set: (obj, value) => { obj.userNode = value; } }, metadata: _metadata }, _userNode_initializers, _userNode_extraInitializers);
+        __esDecorate(null, null, _andTextNode_decorators, { kind: "field", name: "andTextNode", static: false, private: false, access: { has: obj => "andTextNode" in obj, get: obj => obj.andTextNode, set: (obj, value) => { obj.andTextNode = value; } }, metadata: _metadata }, _andTextNode_initializers, _andTextNode_extraInitializers);
+        __esDecorate(null, null, _privacyNode_decorators, { kind: "field", name: "privacyNode", static: false, private: false, access: { has: obj => "privacyNode" in obj, get: obj => obj.privacyNode, set: (obj, value) => { obj.privacyNode = value; } }, metadata: _metadata }, _privacyNode_initializers, _privacyNode_extraInitializers);
+        __esDecorate(null, null, _erCiNode_decorators, { kind: "field", name: "erCiNode", static: false, private: false, access: { has: obj => "erCiNode" in obj, get: obj => obj.erCiNode, set: (obj, value) => { obj.erCiNode = value; } }, metadata: _metadata }, _erCiNode_initializers, _erCiNode_extraInitializers);
+        __esDecorate(null, null, _refuseBtn_decorators, { kind: "field", name: "refuseBtn", static: false, private: false, access: { has: obj => "refuseBtn" in obj, get: obj => obj.refuseBtn, set: (obj, value) => { obj.refuseBtn = value; } }, metadata: _metadata }, _refuseBtn_initializers, _refuseBtn_extraInitializers);
+        __esDecorate(null, null, _agreeBtn_decorators, { kind: "field", name: "agreeBtn", static: false, private: false, access: { has: obj => "agreeBtn" in obj, get: obj => obj.agreeBtn, set: (obj, value) => { obj.agreeBtn = value; } }, metadata: _metadata }, _agreeBtn_initializers, _agreeBtn_extraInitializers);
+        __esDecorate(null, null, _closeBtn_decorators, { kind: "field", name: "closeBtn", static: false, private: false, access: { has: obj => "closeBtn" in obj, get: obj => obj.closeBtn, set: (obj, value) => { obj.closeBtn = value; } }, metadata: _metadata }, _closeBtn_initializers, _closeBtn_extraInitializers);
+        __esDecorate(null, null, _tipsLabel_decorators, { kind: "field", name: "tipsLabel", static: false, private: false, access: { has: obj => "tipsLabel" in obj, get: obj => obj.tipsLabel, set: (obj, value) => { obj.tipsLabel = value; } }, metadata: _metadata }, _tipsLabel_initializers, _tipsLabel_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         Gx_authorize = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });

@@ -5,13 +5,6 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/reference/attributes.html
 // Learn life-cycle callbacks:
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
-var __runInitializers = (this && this.__runInitializers) || function (thisArg, initializers, value) {
-    var useValue = arguments.length > 2;
-    for (var i = 0; i < initializers.length; i++) {
-        value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
-    }
-    return useValue ? value : void 0;
-};
 var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
     function accept(f) { if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected"); return f; }
     var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
@@ -39,6 +32,13 @@ var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, 
     if (target) Object.defineProperty(target, contextIn.name, descriptor);
     done = true;
 };
+var __runInitializers = (this && this.__runInitializers) || function (thisArg, initializers, value) {
+    var useValue = arguments.length > 2;
+    for (var i = 0; i < initializers.length; i++) {
+        value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
+    }
+    return useValue ? value : void 0;
+};
 var __setFunctionName = (this && this.__setFunctionName) || function (f, name, prefix) {
     if (typeof name === "symbol") name = name.description ? "[".concat(name.description, "]") : "";
     return Object.defineProperty(f, "name", { configurable: true, value: prefix ? "".concat(prefix, " ", name) : name });
@@ -57,18 +57,10 @@ let Gx_shareFriend = (() => {
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    let _instanceExtraInitializers = [];
     let _sprite_decorators;
     let _sprite_initializers = [];
+    let _sprite_extraInitializers = [];
     var Gx_shareFriend = _classThis = class extends _classSuper {
-        constructor() {
-            super(...arguments);
-            this.texture = (__runInitializers(this, _instanceExtraInitializers), new cc.Texture2D());
-            this.shareCallback = null;
-            this.shareSuccess = false;
-            this.sprite = __runInitializers(this, _sprite_initializers, null);
-            // update (dt) {}
-        }
         onLoad() {
         }
         start() {
@@ -165,13 +157,21 @@ let Gx_shareFriend = (() => {
                 return openDataContext.canvas;
             }
         }
+        constructor() {
+            super(...arguments);
+            this.texture = new cc.Texture2D();
+            this.shareCallback = null;
+            this.shareSuccess = false;
+            this.sprite = __runInitializers(this, _sprite_initializers, null);
+            __runInitializers(this, _sprite_extraInitializers);
+        }
     };
     __setFunctionName(_classThis, "Gx_shareFriend");
     (() => {
         var _a;
         const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create((_a = _classSuper[Symbol.metadata]) !== null && _a !== void 0 ? _a : null) : void 0;
         _sprite_decorators = [property(cc.Sprite)];
-        __esDecorate(null, null, _sprite_decorators, { kind: "field", name: "sprite", static: false, private: false, access: { has: obj => "sprite" in obj, get: obj => obj.sprite, set: (obj, value) => { obj.sprite = value; } }, metadata: _metadata }, _sprite_initializers, _instanceExtraInitializers);
+        __esDecorate(null, null, _sprite_decorators, { kind: "field", name: "sprite", static: false, private: false, access: { has: obj => "sprite" in obj, get: obj => obj.sprite, set: (obj, value) => { obj.sprite = value; } }, metadata: _metadata }, _sprite_initializers, _sprite_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         Gx_shareFriend = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });

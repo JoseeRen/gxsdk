@@ -18,8 +18,8 @@ class TTAdMonitor {
         this.gameTimeEnd = false;
         this._openId = "";
         this.ecpmObj = {
-            targetEcpm: 300,
-            gameTime: 10,
+            targetEcpm: 300, //目标ecpm
+            gameTime: 10, //目标游戏时长  分钟
             targetVideo: 2 //目标激励视频次数
         };
     }

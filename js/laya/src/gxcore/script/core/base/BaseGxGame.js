@@ -2589,7 +2589,7 @@ BaseGxGame.adConfig = {
     //原生点击后是否自动刷新 还是关闭
     canRefresh: false,
     bannerDelay: 0.1,
-    useNative: false,
+    useNative: false, //使用原生自渲染广告还是原生模板广告
     /*  /!**Banner广告位 *!/
           adunit_banner: [],
           /!**原生广告位 *!/
