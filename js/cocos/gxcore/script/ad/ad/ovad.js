@@ -80,9 +80,12 @@ window.ovad = {
             window.removeEventListener("touchstart", window["ovad"]._touchEnd, false);
         }
         window["ovad"]._logger("播放广告");
-        GxGame_1.default.Ad().showVideo((res) => {
-            window["ovad"]._touchEndCallback && window["ovad"]._touchEndCallback();
-        }, "tv");
+        GxGame_1.default.Ad().showNativeInterstitial(() => {
+        }, () => {
+        }, 0);
+        // GxGame.Ad().showVideo((res) => {
+        //     window["ovad"]._touchEndCallback && window["ovad"]._touchEndCallback();
+        // }, "tv");
     },
     _logger(...msg) {
         if (this._logEnable) {

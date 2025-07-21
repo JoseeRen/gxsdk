@@ -22,11 +22,18 @@ class GxGame extends BaseGxGame_1.default {
      * 是否需要显示隐私政策授权框
      */
     static needShowAuthorize() {
+        /*if (GxConstant.IS_VIVO_GAME) {
+            if (!AdParams.vivo.needPrivacy) {
+
+                return false;
+            }
+        }*/
         if (GxConstant_1.default.IS_OPPO_GAME ||
             GxConstant_1.default.IS_VIVO_GAME ||
             GxConstant_1.default.IS_HUAWEI_GAME ||
             GxConstant_1.default.IS_QQ_GAME ||
-            GxConstant_1.default.IS_MI_GAME) {
+            GxConstant_1.default.IS_MI_GAME ||
+            GxConstant_1.default.IS_RONGYAO_Game) {
             //隐私政策和和适龄
             let item1 = DataStorage_1.default.getItem(GxConstant_1.default.KEY_PRIVACY_AGREE);
             if (item1) {
@@ -42,6 +49,12 @@ class GxGame extends BaseGxGame_1.default {
      * 是否需要显示隐私政策按钮
      */
     static needShowAuthorizeBtn() {
+        /* if (GxConstant.IS_VIVO_GAME) {
+             if (!AdParams.vivo.needPrivacy) {
+ 
+                 return false;
+             }
+         }*/
         /*    if (GxConstant.IS_ANDROID_H5) {
 
                 if (this.isH5Hall) {
@@ -58,8 +71,20 @@ class GxGame extends BaseGxGame_1.default {
             GxConstant_1.default.IS_QQ_GAME ||
             GxConstant_1.default.IS_ANDROID_NATIVE ||
             GxConstant_1.default.IS_ANDROID_H5 ||
-            GxConstant_1.default.IS_MI_GAME) {
+            GxConstant_1.default.IS_MI_GAME || GxConstant_1.default.IS_HARMONYOSNEXT_NATIVE) {
             //隐私政策和和适龄
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    /**
+     *
+     * 是否需要显示常用按钮
+     */
+    static needCommonUseBtn() {
+        if (GxConstant_1.default.IS_KS_GAME) {
             return true;
         }
         else {
@@ -73,24 +98,65 @@ class GxGame extends BaseGxGame_1.default {
     static needAddDesktopBtn() {
         if (GxConstant_1.default.IS_OPPO_GAME ||
             GxConstant_1.default.IS_VIVO_GAME ||
-            GxConstant_1.default.IS_QQ_GAME) {
+            GxConstant_1.default.IS_BILI_GAME ||
+            GxConstant_1.default.IS_QQ_GAME ||
+            GxConstant_1.default.IS_KS_GAME ||
+            GxConstant_1.default.IS_TT_GAME) {
             return true;
         }
         else {
             return false;
         }
     }
-    static needTTBoxBtn() {
-        if (GxConstant_1.default.IS_TT_GAME) {
+    static needTTBoxBtn(callback = null) {
+        if (GxConstant_1.default.IS_BILI_GAME) {
+            // @ts-ignore
+            bl.checkScene({
+                scene: "sidebar",
+                success: (res) => {
+                    console.log("check scene success: ", res.isExist);
+                    //成功回调逻辑
+                    callback && callback(res.isExist);
+                },
+                fail: (res) => {
+                    console.log("check scene fail:", res);
+                    //失败回调逻辑
+                    callback && callback(false);
+                }
+            });
+        }
+        else if (GxConstant_1.default.IS_TT_GAME) {
             // @ts-ignore
             if (tt["checkScene"]) {
-                return true;
+                callback && callback(true);
             }
-            else
-                return false;
+            else {
+                callback && callback(false);
+            }
+        }
+        else if (GxConstant_1.default.IS_KS_GAME) {
+            GxGame.Ad().canUseSideBar((res) => {
+                if (res) {
+                    callback && callback(true);
+                }
+                else {
+                    callback && callback(false);
+                }
+            });
+            /*   // @ts-ignore
+               ks.checkSliderBarIsAvailable({
+                   success: (result) => {
+                       console.log("KS 侧边栏可用:" + JSON.stringify(result));
+                       callback && callback(true);
+                   },
+                   fail: (result) => {
+                       console.log("KS 侧边栏不可用:" + JSON.stringify(result));
+                       callback && callback(false);
+                   },
+               })*/
         }
         else {
-            return false;
+            callback && callback(false);
         }
     }
     static getJkShowTime() {
@@ -98,20 +164,22 @@ class GxGame extends BaseGxGame_1.default {
             // @ts-ignore
             let systemInfoSync = ks.getSystemInfoSync();
             let env = systemInfoSync.host.env;
-            if (env == "kwaipro" || env == "snackvideo" || env == "kwaime") {
+            if (GxAdParams_1.AdParams.ks.appId.startsWith("kwai") || env == "kwaipro" || env == "snackvideo" || env == "kwaime") {
                 return 0.001;
             }
             else {
-                return 3;
+                return 2.2;
             }
         }
         if (GxConstant_1.default.IS_OPPO_GAME ||
             GxConstant_1.default.IS_VIVO_GAME ||
             GxConstant_1.default.IS_HUAWEI_GAME ||
             GxConstant_1.default.IS_QQ_GAME ||
+            GxConstant_1.default.IS_BILI_GAME ||
             GxConstant_1.default.IS_MI_GAME ||
-            GxConstant_1.default.IS_ZFB_GAME) {
-            return 3;
+            GxConstant_1.default.IS_ZFB_GAME ||
+            GxConstant_1.default.IS_RONGYAO_Game) {
+            return 2.2;
         }
         else if (GxConstant_1.default.IS_TT_GAME) {
             return 1;
@@ -190,9 +258,30 @@ class GxGame extends BaseGxGame_1.default {
         GxGame.gameEvent(clickId);
         callback && callback();
     }
+    static showRankFriend(callback) {
+        if (GxConstant_1.default.IS_WECHAT_GAME || GxConstant_1.default.IS_QQ_GAME) {
+            ResUtil_1.default.loadPrefab("gx/prefab/subopenRank", (err, prefab) => {
+                if (err) {
+                    GxLog_1.default.e("加载排行预制体失败 无法显示分享");
+                    return;
+                }
+                let node = cc.instantiate(prefab);
+                if (!!GxGame.uiGroup) {
+                    node.group = GxGame.uiGroup;
+                }
+                let shareView = node.getComponent("Gx_subOpenRank");
+                shareView.show();
+                shareView.setShareCallback(callback);
+            });
+        }
+        else {
+            GxLog_1.default.w("非qq 微信不显示分享");
+        }
+    }
 }
 //隐私政策是否显示用户协议  qq必须显示
 GxGame.canShowUser = false;
 GxGame.LogoSp = null;
 GxGame.canshowTTBoxBtn = true;
+GxGame.gxResBundle = null;
 exports.default = GxGame;

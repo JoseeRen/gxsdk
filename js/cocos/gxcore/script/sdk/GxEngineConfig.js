@@ -18,9 +18,10 @@ class GxEngineConfig {
         this.appId = "";
         this.appToken = "";
         this.openId = "";
+        this.unionId = "";
         // BASE_URL = "http://localhost:19800/api1";
         this.BASE_URL = "https://api.sjzgxwl.com";
-        this.engineName = "ge";
+        this.engineName = "gxe";
         this.maxRetries = 1;
         this.sendTimeout = 5000;
         this.disableEventList = [];

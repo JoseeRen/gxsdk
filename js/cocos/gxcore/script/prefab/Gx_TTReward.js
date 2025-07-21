@@ -48,33 +48,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const GxGame_1 = __importDefault(require("../GxGame"));
+const GxConstant_1 = __importDefault(require("../core/GxConstant"));
 const { ccclass, property } = cc._decorator;
-let NewClass = (() => {
+let Gx_TTReward = (() => {
     let _classDecorators = [ccclass];
     let _classDescriptor;
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    let _getReward_decorators;
-    let _getReward_initializers = [];
-    let _getReward_extraInitializers = [];
-    let _gotoBtn_decorators;
-    let _gotoBtn_initializers = [];
-    let _gotoBtn_extraInitializers = [];
-    let _stringlabel_decorators;
-    let _stringlabel_initializers = [];
-    let _stringlabel_extraInitializers = [];
-    let _haverewardtip_decorators;
-    let _haverewardtip_initializers = [];
-    let _haverewardtip_extraInitializers = [];
-    var NewClass = _classThis = class extends _classSuper {
+    let _blNode_decorators;
+    let _blNode_initializers = [];
+    let _blNode_extraInitializers = [];
+    let _ttNode_decorators;
+    let _ttNode_initializers = [];
+    let _ttNode_extraInitializers = [];
+    let _ksNode_decorators;
+    let _ksNode_initializers = [];
+    let _ksNode_extraInitializers = [];
+    var Gx_TTReward = _classThis = class extends _classSuper {
         constructor() {
             super(...arguments);
-            this.getReward = __runInitializers(this, _getReward_initializers, null);
-            this.gotoBtn = (__runInitializers(this, _getReward_extraInitializers), __runInitializers(this, _gotoBtn_initializers, null));
-            this.stringlabel = (__runInitializers(this, _gotoBtn_extraInitializers), __runInitializers(this, _stringlabel_initializers, null));
-            this.haverewardtip = (__runInitializers(this, _stringlabel_extraInitializers), __runInitializers(this, _haverewardtip_initializers, null));
-            this.curRootNode = __runInitializers(this, _haverewardtip_extraInitializers);
+            this.blNode = __runInitializers(this, _blNode_initializers, null);
+            this.ttNode = (__runInitializers(this, _blNode_extraInitializers), __runInitializers(this, _ttNode_initializers, null));
+            this.ksNode = (__runInitializers(this, _ttNode_extraInitializers), __runInitializers(this, _ksNode_initializers, null));
+            this.curRootNode = __runInitializers(this, _ksNode_extraInitializers);
             this.havettreward = false;
             this.Reward = () => {
             };
@@ -89,114 +86,214 @@ let NewClass = (() => {
                     this.havettreward = true;
                 }
             }
-            let width = cc.winSize.width;
-            let height = cc.winSize.height;
-            if (width > height) {
-                //横屏
-                this.curRootNode = this.node.getChildByName("land");
-                this.node.getChildByName("land").active = true;
-                this.node.getChildByName("main").active = false;
-            }
-            else {
-                this.curRootNode = this.node.getChildByName("main");
-                this.node.getChildByName("land").active = false;
-                this.node.getChildByName("main").active = true;
-            }
-            this.getReward = this.curRootNode.getChildByName("领取奖励");
-            this.gotoBtn = this.curRootNode.getChildByName("去侧边栏");
-            this.stringlabel = this.curRootNode.getChildByName("rewardlabel").getComponent(cc.Label);
-            this.haverewardtip = this.curRootNode.getChildByName("havereward");
         }
         start() {
-            this.haverewardtip.active = false;
+            this.getRewardBtn.active = false;
+            this.ceBianLanBtn.active = false;
+            this.haveRewardTip.active = false;
+            // 是否已经领取奖励
             if (this.havettreward) {
-                // if (GxGame.havettreward) {//当天是否已经领取过奖励
-                this.getReward.getComponent(cc.Button).interactable = false;
-                this.getReward.active = true;
-                this.gotoBtn.active = false;
-                this.haverewardtip.active = true;
+                this.haveRewardTip.active = true;
             }
             else {
-                if (GxGame_1.default.Ad().canReward) { //判断是不是从侧边栏启动的
-                    this.getReward.active = true;
-                    this.gotoBtn.active = false;
+                if (GxGame_1.default.Ad().canReward) { // 判断是不是从侧边栏启动的
+                    this.getRewardBtn.active = true;
                 }
                 else {
-                    this.getReward.active = false;
-                    this.gotoBtn.active = true;
+                    this.ceBianLanBtn.active = true;
                 }
-                // @ts-ignore
-                tt.onShow(this.onShow.bind(this));
+                if (GxConstant_1.default.IS_TT_GAME) {
+                    // @ts-ignore
+                    tt.onShow(this.onShow.bind(this));
+                }
+                else if (GxConstant_1.default.IS_BILI_GAME) {
+                    // @ts-ignore
+                    bl.onShow(this.onShow.bind(this));
+                }
+                else if (GxConstant_1.default.IS_KS_GAME) {
+                    // @ts-ignore
+                    ks.onShow(this.onShow.bind(this));
+                }
+            }
+        }
+        init(rewardCallback, rewardLabel, rewardUI, iconName, icon) {
+            this.initUI(iconName, rewardUI);
+            this.Reward = rewardCallback;
+            let component = this.iconUI.getComponent(cc.Sprite);
+            if (component && icon) {
+                component.spriteFrame = icon;
+            }
+            if (rewardLabel && rewardLabel.length > 0) {
+                this.rewardLabel.string = rewardLabel;
+            }
+            else {
+                this.rewardLabel.string = "";
+            }
+        }
+        initUI(iconName, rewardUI) {
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
+            let width = cc.winSize.width;
+            let height = cc.winSize.height;
+            this.ttNode.active = false;
+            this.blNode.active = false;
+            this.ksNode.active = false;
+            //得到真正的UI
+            if (GxConstant_1.default.IS_TT_GAME) {
+                this.ttNode.active = true;
+                this.ttNode.getChildByName("main").active = false;
+                this.ttNode.getChildByName("land").active = false;
+                if (width > height) {
+                    this.curRootNode = (_a = this.ttNode) === null || _a === void 0 ? void 0 : _a.getChildByName("land");
+                }
+                else {
+                    this.curRootNode = (_b = this.ttNode) === null || _b === void 0 ? void 0 : _b.getChildByName("main");
+                }
+            }
+            else if (GxConstant_1.default.IS_BILI_GAME) {
+                this.blNode.active = true;
+                this.blNode.getChildByName("main").active = false;
+                this.blNode.getChildByName("land").active = false;
+                if (width > height) {
+                    this.curRootNode = (_c = this.blNode) === null || _c === void 0 ? void 0 : _c.getChildByName("land");
+                }
+                else {
+                    this.curRootNode = (_d = this.blNode) === null || _d === void 0 ? void 0 : _d.getChildByName("main");
+                }
+            }
+            else if (GxConstant_1.default.IS_KS_GAME) {
+                this.ksNode.active = true;
+                this.ksNode.getChildByName("main").active = false;
+                this.ksNode.getChildByName("land").active = false;
+                if (width > height) {
+                    this.curRootNode = (_e = this.ksNode) === null || _e === void 0 ? void 0 : _e.getChildByName("land");
+                }
+                else {
+                    this.curRootNode = (_f = this.ksNode) === null || _f === void 0 ? void 0 : _f.getChildByName("main");
+                }
+            }
+            else {
+                this.ksNode.active = true;
+                this.ksNode.getChildByName("main").active = false;
+                this.ksNode.getChildByName("land").active = false;
+                if (width > height) {
+                    this.curRootNode = (_g = this.ksNode) === null || _g === void 0 ? void 0 : _g.getChildByName("land");
+                }
+                else {
+                    this.curRootNode = (_h = this.ksNode) === null || _h === void 0 ? void 0 : _h.getChildByName("main");
+                }
+            }
+            this.curRootNode.active = true;
+            let btn = (_j = this.curRootNode) === null || _j === void 0 ? void 0 : _j.getChildByName("btn");
+            this.getRewardBtn = btn === null || btn === void 0 ? void 0 : btn.getChildByName("lingQu");
+            this.ceBianLanBtn = btn === null || btn === void 0 ? void 0 : btn.getChildByName("ceBianLan");
+            this.haveRewardTip = (_k = this.curRootNode) === null || _k === void 0 ? void 0 : _k.getChildByName("haveReward");
+            let body = (_l = this.curRootNode) === null || _l === void 0 ? void 0 : _l.getChildByName("body");
+            this.rewardLabel = (_m = body === null || body === void 0 ? void 0 : body.getChildByName("3")) === null || _m === void 0 ? void 0 : _m.getChildByName("Layout").getChildByName("rewardLabel").getComponent(cc.Label);
+            this.rewardLabel.node.active = true;
+            let rewardUINode = (_o = body === null || body === void 0 ? void 0 : body.getChildByName("3")) === null || _o === void 0 ? void 0 : _o.getChildByName("Layout").getChildByName("rewardUI");
+            rewardUINode.getComponent(cc.Sprite).spriteFrame = rewardUI;
+            this.iconUI = (_r = (_q = (_p = body === null || body === void 0 ? void 0 : body.getChildByName("2")) === null || _p === void 0 ? void 0 : _p.getChildByName("quan")) === null || _q === void 0 ? void 0 : _q.getChildByName("mask")) === null || _r === void 0 ? void 0 : _r.getChildByName("iconUI");
+            let iconNameNode = body === null || body === void 0 ? void 0 : body.getChildByName("iconName");
+            for (let i = 0; i < iconNameNode.childrenCount; i++) {
+                let iconNameLab = iconNameNode.children[i].getComponent(cc.Label);
+                iconNameLab.string = iconName;
             }
         }
         // update (dt) {}
         onClickgotoBtn() {
-            // @ts-ignore
-            tt.navigateToScene({
-                scene: "sidebar",
-                success: (res) => {
-                    console.log("navigate to scene success");
-                    // 跳转成功回调逻辑
-                },
-                fail: (res) => {
-                    console.log("navigate to scene fail: ", res);
-                    // 跳转失败回调逻辑
-                }
-            });
+            if (GxConstant_1.default.IS_TT_GAME) {
+                // @ts-ignore
+                tt.navigateToScene({
+                    scene: "sidebar",
+                    success: (res) => {
+                        console.log("navigate to scene success");
+                        // 跳转成功回调逻辑
+                    },
+                    fail: (res) => {
+                        console.log("navigate to scene fail: ", res);
+                        // 跳转失败回调逻辑
+                    }
+                });
+            }
+            else if (GxConstant_1.default.IS_BILI_GAME) {
+                // @ts-ignore
+                bl.navigateToScene({
+                    scene: "sidebar",
+                    success: (res) => {
+                        console.log("navigate to scene success");
+                        // 跳转成功回调逻辑
+                    },
+                    fail: (res) => {
+                        console.log("navigate to scene fail: ", res);
+                        // 跳转失败回调逻辑
+                    }
+                });
+            }
+            else if (GxConstant_1.default.IS_KS_GAME) {
+                console.log("得自己手动进侧边栏......");
+                this.close();
+            }
+            else {
+                GxGame_1.default.Ad().canReward = true;
+                this.close();
+            }
         }
         onclickgetReward() {
-            this.Reward();
+            this.Reward && this.Reward();
             this.havettreward = true;
             var nowdate = new Date();
             var nowtime = "" + nowdate.getFullYear() + (nowdate.getMonth() + 1) + nowdate.getDate();
             cc.sys.localStorage.setItem("TTRewardTime", nowtime);
-            this.getReward.getComponent(cc.Button).interactable = false;
-            this.haverewardtip.active = true;
+            this.getRewardBtn.active = false;
+            this.haveRewardTip.active = true;
         }
         close() {
             this.node.destroy();
         }
         onShow(res) {
-            console.log("启动场景字段：", res.launch_from, ", ", res.location);
-            if (res.launch_from == "homepage" || res.location == "sidebar_card") {
-                console.log("是从侧边栏启动的");
-                this.getReward.active = true;
-                this.gotoBtn.active = false;
-                /* if (GxGame.havettreward) {
-                     this.getReward.getComponent(cc.Button).interactable = false;
-                     this.haverewardtip.active = true;
-                 }*/
-            }
-        }
-        init(rewardCallback, rewardNum, iconAndName) {
-            this.Reward = rewardCallback;
-            let component = this.curRootNode.getChildByName("icon").getComponent(cc.Sprite);
-            if (component) {
-                component.spriteFrame = iconAndName;
+            console.warn("热启动场景字段：", res.from);
+            if (res["scene"] == "021036" ||
+                res.launch_from == "homepage" ||
+                res.location == "sidebar_card" ||
+                GxConstant_1.default.IS_KS_GAME && (res.from == "sidebar_miniprogram" || res.from == "sidebar_new")) {
+                console.log("是从侧边栏启动的1");
+                if (this && this.isValid) {
+                    this.getRewardBtn.active = true;
+                    this.ceBianLanBtn.active = false;
+                    GxGame_1.default.Ad().canReward = true;
+                }
             }
         }
         onDestroy() {
-            // @ts-ignore
-            tt.offShow(this.onShow);
+            if (GxConstant_1.default.IS_TT_GAME) {
+                // @ts-ignore
+                tt.offShow(this.onShow.bind(this));
+            }
+            else if (GxConstant_1.default.IS_BILI_GAME) {
+                // @ts-ignore
+                bl.offShow(this.onShow.bind(this));
+            }
+            else if (GxConstant_1.default.IS_KS_GAME) {
+                // @ts-ignore
+                ks.offShow(this.onShow.bind(this));
+            }
         }
     };
-    __setFunctionName(_classThis, "NewClass");
+    __setFunctionName(_classThis, "Gx_TTReward");
     (() => {
         var _a;
         const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create((_a = _classSuper[Symbol.metadata]) !== null && _a !== void 0 ? _a : null) : void 0;
-        _getReward_decorators = [property(cc.Node)];
-        _gotoBtn_decorators = [property(cc.Node)];
-        _stringlabel_decorators = [property(cc.Label)];
-        _haverewardtip_decorators = [property(cc.Node)];
-        __esDecorate(null, null, _getReward_decorators, { kind: "field", name: "getReward", static: false, private: false, access: { has: obj => "getReward" in obj, get: obj => obj.getReward, set: (obj, value) => { obj.getReward = value; } }, metadata: _metadata }, _getReward_initializers, _getReward_extraInitializers);
-        __esDecorate(null, null, _gotoBtn_decorators, { kind: "field", name: "gotoBtn", static: false, private: false, access: { has: obj => "gotoBtn" in obj, get: obj => obj.gotoBtn, set: (obj, value) => { obj.gotoBtn = value; } }, metadata: _metadata }, _gotoBtn_initializers, _gotoBtn_extraInitializers);
-        __esDecorate(null, null, _stringlabel_decorators, { kind: "field", name: "stringlabel", static: false, private: false, access: { has: obj => "stringlabel" in obj, get: obj => obj.stringlabel, set: (obj, value) => { obj.stringlabel = value; } }, metadata: _metadata }, _stringlabel_initializers, _stringlabel_extraInitializers);
-        __esDecorate(null, null, _haverewardtip_decorators, { kind: "field", name: "haverewardtip", static: false, private: false, access: { has: obj => "haverewardtip" in obj, get: obj => obj.haverewardtip, set: (obj, value) => { obj.haverewardtip = value; } }, metadata: _metadata }, _haverewardtip_initializers, _haverewardtip_extraInitializers);
+        _blNode_decorators = [property(cc.Node)];
+        _ttNode_decorators = [property(cc.Node)];
+        _ksNode_decorators = [property(cc.Node)];
+        __esDecorate(null, null, _blNode_decorators, { kind: "field", name: "blNode", static: false, private: false, access: { has: obj => "blNode" in obj, get: obj => obj.blNode, set: (obj, value) => { obj.blNode = value; } }, metadata: _metadata }, _blNode_initializers, _blNode_extraInitializers);
+        __esDecorate(null, null, _ttNode_decorators, { kind: "field", name: "ttNode", static: false, private: false, access: { has: obj => "ttNode" in obj, get: obj => obj.ttNode, set: (obj, value) => { obj.ttNode = value; } }, metadata: _metadata }, _ttNode_initializers, _ttNode_extraInitializers);
+        __esDecorate(null, null, _ksNode_decorators, { kind: "field", name: "ksNode", static: false, private: false, access: { has: obj => "ksNode" in obj, get: obj => obj.ksNode, set: (obj, value) => { obj.ksNode = value; } }, metadata: _metadata }, _ksNode_initializers, _ksNode_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
-        NewClass = _classThis = _classDescriptor.value;
+        Gx_TTReward = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
         __runInitializers(_classThis, _classExtraInitializers);
     })();
-    return NewClass = _classThis;
+    return Gx_TTReward = _classThis;
 })();
-exports.default = NewClass;
+exports.default = Gx_TTReward;

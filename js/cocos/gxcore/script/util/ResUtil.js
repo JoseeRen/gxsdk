@@ -10,9 +10,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const GxLog_1 = __importDefault(require("./GxLog"));
+const GxGame_1 = __importDefault(require("../GxGame"));
 class ResUtil {
     static loadPrefab(url, callback) {
-        if (cc.resources) {
+        if (GxGame_1.default.gxResBundle) {
+            GxGame_1.default.gxResBundle.load(url, cc.Prefab, (err, prefab) => {
+                if (err) {
+                    console.error("[gx_game] " + url + " loadJsonAsset Failed" + err);
+                    cc.resources.load(url, cc.Prefab, (err, prefab) => {
+                        if (err) {
+                            console.error("[gx_game] " + url + " loadPrefab Failed" + err);
+                        }
+                        callback && callback(err, prefab);
+                    });
+                }
+                else {
+                    callback && callback(err, prefab);
+                }
+            });
+        }
+        else if (cc.resources) {
             cc.resources.load(url, cc.Prefab, (err, prefab) => {
                 if (err) {
                     console.error("[gx_game] " + url + " loadPrefab Failed" + err);
@@ -33,7 +50,24 @@ class ResUtil {
         }
     }
     static loadJsonAsset(url, callback) {
-        if (cc.resources) {
+        /*  callback && callback("gxresbundle is null", null);*/
+        if (GxGame_1.default.gxResBundle) {
+            GxGame_1.default.gxResBundle.load(url, cc.JsonAsset, (err, json) => {
+                if (err) {
+                    console.error("[gx_game] " + url + " loadJsonAsset Failed" + err);
+                    cc.resources.load(url, cc.JsonAsset, (err, prefab) => {
+                        if (err) {
+                            console.error("[gx_game] " + url + " loadJsonAsset Failed" + err);
+                        }
+                        callback && callback(err, prefab);
+                    });
+                }
+                else {
+                    callback && callback(err, json);
+                }
+            });
+        }
+        else if (cc.resources) {
             cc.resources.load(url, cc.JsonAsset, (err, prefab) => {
                 if (err) {
                     console.error("[gx_game] " + url + " loadJsonAsset Failed" + err);
@@ -52,9 +86,45 @@ class ResUtil {
         else {
             callback && callback("no loader", null);
         }
+        /*
+                if (cc.resources) {
+                    cc.resources.load(url, cc.JsonAsset, (err, prefab) => {
+                        if (err) {
+                            console.error("[gx_game] " + url + " loadJsonAsset Failed" + err)
+                        }
+                        callback && callback(err, prefab)
+
+                    })
+                } else if (cc.loader) {
+                    cc.loader.loadRes(url, cc.JsonAsset, (err, prefab) => {
+                        if (err) {
+                            console.error("[gx_game] " + url + " loadJsonAsset Failed" + err)
+                        }
+                        callback && callback(err, prefab)
+
+                    })
+                } else {
+                    callback && callback("no loader", null)
+                }*/
     }
     static loadSprite(url, callback) {
-        if (cc.resources) {
+        if (GxGame_1.default.gxResBundle) {
+            GxGame_1.default.gxResBundle.load(url, cc.SpriteFrame, (err, json) => {
+                if (err) {
+                    console.error("[gx_game] " + url + " loadJsonAsset Failed" + err);
+                    cc.resources.load(url, cc.SpriteFrame, (err, prefab) => {
+                        if (err) {
+                            console.error("[gx_game] " + url + " loadSprite Failed" + err);
+                        }
+                        callback && callback(err, prefab);
+                    });
+                }
+                else {
+                    callback && callback(err, json);
+                }
+            });
+        }
+        else if (cc.resources) {
             cc.resources.load(url, cc.SpriteFrame, (err, prefab) => {
                 if (err) {
                     console.error("[gx_game] " + url + " loadSprite Failed" + err);
@@ -78,7 +148,7 @@ class ResUtil {
                 }
                 else {
                 }
-                callback && callback('', prefab);
+                callback && callback("", prefab);
             }));
         }
         else {
@@ -87,10 +157,32 @@ class ResUtil {
     }
     static loadResDir(path, type) {
         return new Promise((resolve, reject) => {
-            if (cc.resources) {
+            if (GxGame_1.default.gxResBundle) {
+                GxGame_1.default.gxResBundle.loadDir(path, type, (err, assets) => {
+                    if (err) {
+                        GxLog_1.default.e("加载失败", path);
+                        if (cc.resources) {
+                            cc.resources.loadDir(path, type, (err, assets) => {
+                                if (err) {
+                                    GxLog_1.default.e("加载失败", path);
+                                    return reject(err);
+                                }
+                                resolve(assets);
+                            });
+                        }
+                        else {
+                            return reject(err);
+                        }
+                    }
+                    else {
+                        resolve(assets);
+                    }
+                });
+            }
+            else if (cc.resources) {
                 cc.resources.loadDir(path, type, (err, assets) => {
                     if (err) {
-                        GxLog_1.default.e('加载失败', path);
+                        GxLog_1.default.e("加载失败", path);
                         return reject(err);
                     }
                     resolve(assets);
@@ -99,7 +191,7 @@ class ResUtil {
             else {
                 cc.loader.loadResDir(path, type, (err, assets) => {
                     if (err) {
-                        GxLog_1.default.e('加载失败', path);
+                        GxLog_1.default.e("加载失败", path);
                         return reject(err);
                     }
                     resolve(assets);
@@ -141,12 +233,12 @@ class ResUtil {
         }
         else {
             if (cc.assetManager) {
-                cc.assetManager.loadRemote(url, { ext: '.png' }, (err, texture) => {
+                cc.assetManager.loadRemote(url, { ext: ".png" }, (err, texture) => {
                     callback(err, texture ? new cc.SpriteFrame(texture) : null);
                 });
             }
             else {
-                cc.loader.load({ url: url, type: 'png' }, (err, texture) => {
+                cc.loader.load({ url: url, type: "png" }, (err, texture) => {
                     if (err) {
                         console.log(err);
                     }

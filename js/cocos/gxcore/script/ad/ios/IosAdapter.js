@@ -48,10 +48,10 @@ class IosAdapter extends BaseAdapter_1.default {
         }, GxGame_1.default.adConfig.adCdTime * 1000);
     }
     getNativePlatform() {
-        return GxUtils_1.default.callMethod('getNativePlatform');
+        return GxUtils_1.default.callMethod("getNativePlatform");
     }
     showNormalBanner() {
-        GxUtils_1.default.callMethod('showBanner', null, ret => {
+        GxUtils_1.default.callMethod("showBanner", null, ret => {
             if (ret == 2 /* RET_TYPE.SHOW */) {
                 if (this.bannerTimer)
                     this.bannerTimer.stop();
@@ -70,7 +70,7 @@ class IosAdapter extends BaseAdapter_1.default {
            });*/
     }
     hideNormalBanner() {
-        GxUtils_1.default.callMethod('hideBanner');
+        GxUtils_1.default.callMethod("hideBanner");
     }
     destroyNormalBanner() {
         this.hideNormalBanner();
@@ -129,9 +129,9 @@ class IosAdapter extends BaseAdapter_1.default {
             return;
         this.showVideoTime = this.get_time();
         super.showVideo(null, flag);
-        GxUtils_1.default.callMethod('showVideo', null, ret => {
+        GxUtils_1.default.callMethod("showVideo", null, ret => {
             if (ret == -1 /* RET_TYPE.ERROR */) {
-                this.createToast('暂无视频，请稍后再试');
+                this.createToast("暂无视频，请稍后再试");
             } /* else if (ret == RET_TYPE.CLOSE) {
                 AudioUtil.setMusicVolume(1);
                 AudioUtil.setSoundVolume(1);
@@ -139,34 +139,34 @@ class IosAdapter extends BaseAdapter_1.default {
                 AudioUtil.setMusicVolume(0);
                 AudioUtil.setSoundVolume(0);
             }*/
-            if (flag && flag.length > 0) {
-                if (ret == 1 /* RET_TYPE.SUCC */) {
-                    // GxGame.gameEvent("reward_complete_" + flag)
-                    this._videoCompleteEvent();
+            // if (!!flag && flag.length > 0) {
+            if (ret == 1 /* RET_TYPE.SUCC */) {
+                // GxGame.gameEvent("reward_complete_" + flag)
+                this._videoCompleteEvent();
+            }
+            else {
+                if (ret == -1 /* RET_TYPE.ERROR */) {
+                    // GxGame.gameEvent("reward_error_" + flag)
+                    this._videoErrorEvent();
                 }
                 else {
-                    if (ret == -1 /* RET_TYPE.ERROR */) {
-                        // GxGame.gameEvent("reward_error_" + flag)
-                        this._videoErrorEvent();
-                    }
-                    else {
-                        // GxGame.gameEvent("reward_close_" + flag)
-                        this._videoCloseEvent();
-                    }
+                    // GxGame.gameEvent("reward_close_" + flag)
+                    this._videoCloseEvent();
                 }
             }
+            // }
             setTimeout(() => {
                 //延迟下  防止字体乱
-                complete && complete(ret == 1 /* RET_TYPE.SUCC */);
+                complete && complete(ret == 1 /* RET_TYPE.SUCC */, ret == 1 /* RET_TYPE.SUCC */ ? 1 : 0);
             }, 500);
         });
     }
     destroyVideo() {
-        GxUtils_1.default.callMethod('destroyVideo');
+        GxUtils_1.default.callMethod("destroyVideo");
     }
     showInterstitial(on_show, on_close) {
-        GxUtils_1.default.callMethod('showInter', null, ret => {
-            console.log('[gx_game] showInter ret = ', ret);
+        GxUtils_1.default.callMethod("showInter", null, ret => {
+            console.log("[gx_game] showInter ret = ", ret);
             if (ret == 2 /* RET_TYPE.SHOW */) {
                 this.hideBanner();
                 on_show && on_show();
@@ -197,8 +197,8 @@ class IosAdapter extends BaseAdapter_1.default {
          });*/
     }
     showOtherInterstitial(on_show, on_close) {
-        GxUtils_1.default.callMethod('showOtherInter', null, ret => {
-            console.log('[gx_game] showInter ret = ', ret);
+        GxUtils_1.default.callMethod("showOtherInter", null, ret => {
+            console.log("[gx_game] showInter ret = ", ret);
             if (ret == 2 /* RET_TYPE.SHOW */) {
                 this.hideBanner();
                 on_show && on_show();
@@ -229,12 +229,12 @@ class IosAdapter extends BaseAdapter_1.default {
          });*/
     }
     destroyNormalInter() {
-        GxUtils_1.default.callMethod('destroyInter');
+        GxUtils_1.default.callMethod("destroyInter");
     }
     showInterVideo(on_show, on_close) {
         console.log("[gx_game]showInterVideo 不能用");
-        GxUtils_1.default.callMethod('showFullScreen', null, ret => {
-            console.log('[gx_game] 233 showFullScreen ret = ', ret);
+        GxUtils_1.default.callMethod("showFullScreen", null, ret => {
+            console.log("[gx_game] 233 showFullScreen ret = ", ret);
             if (ret == 2 /* RET_TYPE.SHOW */) {
                 this.hideBanner();
                 on_show && on_show();
@@ -271,8 +271,8 @@ class IosAdapter extends BaseAdapter_1.default {
     }
     showOtherInterVideo(on_show, on_close) {
         console.log("[gx_game]showInterVideo 不能用");
-        GxUtils_1.default.callMethod('showOtherFullScreen', null, ret => {
-            console.log('[gx_game] 233 showFullScreen ret = ', ret);
+        GxUtils_1.default.callMethod("showOtherFullScreen", null, ret => {
+            console.log("[gx_game] 233 showFullScreen ret = ", ret);
             if (ret == 2 /* RET_TYPE.SHOW */) {
                 this.hideBanner();
                 on_show && on_show();
@@ -308,11 +308,11 @@ class IosAdapter extends BaseAdapter_1.default {
            });*/
     }
     destroyInterVideo() {
-        GxUtils_1.default.callMethod('destroyInterVideo');
+        GxUtils_1.default.callMethod("destroyInterVideo");
     }
     create_ad(ad_type) {
         return new Promise((resolve, reject) => {
-            GxUtils_1.default.callMethod('createNativeAd', ad_type.toString(), ret => {
+            GxUtils_1.default.callMethod("createNativeAd", ad_type.toString(), ret => {
                 console.log("[gx_game]native data load succ:" + JSON.stringify(ret));
                 if (ret == -1 /* RET_TYPE.ERROR */) {
                 }
@@ -442,7 +442,7 @@ class IosAdapter extends BaseAdapter_1.default {
     hideNativeIcon() {
         super.hideNativeIcon();
         if (this.platformVersion() == GxEnum_1.PLATFORM.VIVO) {
-            GxUtils_1.default.callMethod('hideNativeIcon');
+            GxUtils_1.default.callMethod("hideNativeIcon");
         }
     }
     /**
@@ -455,14 +455,14 @@ class IosAdapter extends BaseAdapter_1.default {
     reportAdClick(native_data) {
         if (!native_data || native_data === undefined)
             return;
-        GxUtils_1.default.callMethod('reportAdClick', native_data.adId);
+        GxUtils_1.default.callMethod("reportAdClick", native_data.adId);
         this.remove_native_data(native_data);
     }
     showFeedAd(on_show, on_close) {
         if (this.isGameCd) {
             return console.log("[gx_game]showFeedAd 广告CD中");
         }
-        GxUtils_1.default.callMethod('showFeedAd', null, ret => {
+        GxUtils_1.default.callMethod("showFeedAd", null, ret => {
             if (ret == 2 /* RET_TYPE.SHOW */) {
                 on_show && on_show();
                 GxAudioUtil_1.default.setMusicVolume(0);
@@ -476,27 +476,24 @@ class IosAdapter extends BaseAdapter_1.default {
         });
     }
     destroyFeedAd() {
-        GxUtils_1.default.callMethod('destroyFeedAd');
+        GxUtils_1.default.callMethod("destroyFeedAd");
     }
     showGamePortal() {
-        GxUtils_1.default.callMethod('jumpLeisureSubject');
+        GxUtils_1.default.callMethod("jumpLeisureSubject");
     }
     openUrl(url) {
-        GxUtils_1.default.callMethod('openUrl', url);
+        GxUtils_1.default.callMethod("openUrl", url);
     }
     showPrivacy(type = "privacy") {
-        GxUtils_1.default.callMethod('showPrivacy', type);
+        GxUtils_1.default.callMethod("showPrivacy", type);
     }
     showVivoIcon() {
-        GxUtils_1.default.callMethod('showVivoIcon');
+        GxUtils_1.default.callMethod("showVivoIcon");
     }
     hideVivoIcon() {
-        GxUtils_1.default.callMethod('hideVivoIcon');
+        GxUtils_1.default.callMethod("hideVivoIcon");
     }
     supportGameBox() {
-        if (this.getNativePlatform() == GxEnum_1.PLATFORM.OPPO || this.getNativePlatform() == GxEnum_1.PLATFORM.VIVO) {
-            return true;
-        }
         return false;
     }
 }

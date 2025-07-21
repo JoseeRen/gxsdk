@@ -129,6 +129,7 @@ class AndroidH5Adapter extends BaseAdapter_1.default {
             return;
         this.showVideoTime = this.get_time();
         super.showVideo(null, flag);
+        this._videoCallEvent(flag);
         this.callMethod('showVideo', null, ret => {
             if (ret == -1 /* RET_TYPE.ERROR */) {
                 this.createToast('暂无视频，请稍后再试');

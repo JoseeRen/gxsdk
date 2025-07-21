@@ -500,19 +500,31 @@ class QQAdapter extends BaseAdapter_1.default {
         });
         this.videoAd.onError(function (err) {
             // Utils.emit(EVENT_TYPE.AD_ERROR, 0);
-            self._videoErrorEvent();
+            try {
+                self._videoErrorUploadEvent(err["errCode"] + err["errMsg"] || "", err["errCode"] || "", err["errMsg"] || "");
+            }
+            catch (e) {
+            }
         });
         this.videoAd.onClose(res => {
             GxAudioUtil_1.default.setMusicVolume(1);
             GxAudioUtil_1.default.setSoundVolume(1);
             if (res && res.isEnded) {
                 self.logi("正常播放结束，可以下发游戏奖励");
-                this.videocallback && this.videocallback(true);
-                this._videoCompleteEvent();
+                this.videocallback && this.videocallback(true, 1);
+                try {
+                    this._videoCompleteEvent();
+                }
+                catch (e) {
+                }
             }
             else {
-                this._videoCloseEvent();
-                this.videocallback && this.videocallback(false);
+                try {
+                    this._videoCloseEvent();
+                }
+                catch (e) {
+                }
+                this.videocallback && this.videocallback(false, 0);
             }
             this.isShowingVideo = false;
             if (this.canshowovervideo2) {
@@ -532,25 +544,43 @@ class QQAdapter extends BaseAdapter_1.default {
     }
     showVideo(complete, flag = "") {
         if (this.isShowingVideo) {
-            complete && complete(false);
+            complete && complete(false, 0);
             return;
         }
         super.showVideo(null, flag);
+        try {
+            this._videoCallEvent(flag);
+        }
+        catch (e) {
+        }
         if (this.videoAd == null) {
             this.initVideo();
         }
         if (this.videoAd == null) {
-            complete && complete(true);
-            this._videoErrorEvent();
+            complete && complete(false, 0);
+            try {
+                this._videoErrorEvent("ad null");
+            }
+            catch (e) {
+            }
             return;
         }
         this.videocallback = complete;
         this.videoAd.show().then(() => {
+            try {
+                this._videoShowEvent();
+            }
+            catch (e) {
+            }
             GxAudioUtil_1.default.setMusicVolume(0);
             GxAudioUtil_1.default.setSoundVolume(0);
             this.isShowingVideo = true;
-        }).catch(() => {
-            this._videoErrorEvent();
+        }).catch((err) => {
+            try {
+                this._videoErrorEvent(err["errCode"] + err["errMsg"] || "", err["errCode"] || "", err["errMsg"] || "");
+            }
+            catch (e) {
+            }
             this.createToast("暂无视频，请稍后再试");
             // this.videoAd.load()
             this.initVideo();

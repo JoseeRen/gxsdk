@@ -42,6 +42,7 @@ const GxAdParams_1 = require("../../GxAdParams");
 const DataStorage_1 = __importDefault(require("../../util/DataStorage"));
 const GxConstant_1 = __importDefault(require("../../core/GxConstant"));
 const GxEngine_1 = __importDefault(require("../../sdk/GxEngine"));
+let GravityEngine = require("../../sdk/gravityengine.mg.cocoscreator.min");
 class KsAdapter extends BaseAdapter_1.default {
     constructor() {
         super(...arguments);
@@ -51,9 +52,15 @@ class KsAdapter extends BaseAdapter_1.default {
         this.systemInfo = null;
         this.kwaiOpenId = "";
         this.gxEngine = null;
+        this.canReward = false;
+        this.isFromSideBarLaunch = false;
+        this._videoShowing = false;
+        this._videoTryCount = 0;
         this.openId = "";
         this.union_id = "";
         this.getOpenidTry = 0;
+        this._subsidyList = null;
+        this.onShowOption = null;
     }
     static getInstance() {
         if (this.instance == null) {
@@ -65,8 +72,11 @@ class KsAdapter extends BaseAdapter_1.default {
         // @ts-ignore
         let systemInfoSync = ks.getSystemInfoSync();
         let env = systemInfoSync.host.env;
+        console.log(systemInfoSync);
         this.systemInfo = systemInfoSync;
-        if (env == "kwaipro" || env == "snackvideo" || env == "kwaime") {
+        // @ts-ignore
+        let launchOptionsSync = ks.getLaunchOptionsSync();
+        if (GxAdParams_1.AdParams.ks.appId.startsWith("kwai") || env == "kwaipro" || env == "snackvideo" || env == "kwaime") {
             console.log("海外版本：" + env);
             this.isHaiWai = true;
             this.interTimeLimit = 60;
@@ -96,18 +106,36 @@ class KsAdapter extends BaseAdapter_1.default {
                         profileType: 1
                     });
                 }
-                //window["ge"]
                 this.gxEngine.init({ openId: openId, appToken: GxAdParams_1.AdParams.ks.appId, appId: GxAdParams_1.AdParams.ks.appId }).then(e => {
                     console.log("gxEngine初始化成功");
                 }).catch(e => {
                     console.log(e);
                     console.log("gxEngine初始化失败:" + e);
                 });
+                this.initGravityEngine();
+                this.initThinkData();
+                GxGame_1.default.gameEvent("kslaunch", { "from": launchOptionsSync["from"] || "" });
             });
         }
-        this.initVideo();
+        console.log("launchOptionsSync", launchOptionsSync);
+        if (launchOptionsSync.from == "sidebar_miniprogram" || launchOptionsSync.from == "sidebar_new") {
+            console.log("是从侧边栏启动的 adapter");
+            this.isFromSideBarLaunch = true;
+            this.canReward = true;
+        }
+        // this.initVideo();
         this.initRecorder();
         // this.startLogin()
+        //@ts-ignore
+        ks.onShow(this.onShow.bind(this));
+        setTimeout(() => {
+            //延时获取jili
+            let gGB = GxGame_1.default.gGB("jili");
+            if (gGB) {
+                //判断jili开后播放视频
+                this._showJiLi();
+            }
+        }, 5 * 1000);
     }
     startLogin() {
         let self = this;
@@ -127,6 +155,7 @@ class KsAdapter extends BaseAdapter_1.default {
                     console.log(res, res.code);
                     //    通过游戏服务器获取自定义登录态 // 携带 res.code
                     //    发起业务请求 // 携带自定义登录态
+                    // @ts-ignore
                     let host = ks.getSystemInfoSync().host;
                     // @ts-ignore
                     ks.login({
@@ -136,6 +165,7 @@ class KsAdapter extends BaseAdapter_1.default {
                             if (gameVersion == undefined) {
                                 gameVersion = host.version;
                             }
+                            // @ts-ignore
                             ks.request({
                                 url: "https://api.sjzgxwl.com/kwai/ks/code2session", //仅为示例，并非真实的接口地址
                                 data: {
@@ -153,6 +183,7 @@ class KsAdapter extends BaseAdapter_1.default {
                                     console.log(res.data);
                                     if (res && res.data.code == 1) {
                                         this.kwaiOpenId = res.data.data.open_id;
+                                        // @ts-ignore
                                         ks.hideLoading();
                                         console.log("登录成功：" + this.kwaiOpenId);
                                         this.rewardKwaiCoins("test666");
@@ -190,6 +221,7 @@ class KsAdapter extends BaseAdapter_1.default {
         }
     }
     showConfirm() {
+        // @ts-ignore
         ks.hideLoading();
         //默认巴西
         let title = "prompt";
@@ -199,6 +231,7 @@ class KsAdapter extends BaseAdapter_1.default {
             title = "prompt";
             content = "Silakan log masuk";
         }
+        // @ts-ignore
         ks.showModal({
             title: title,
             content: content,
@@ -219,6 +252,7 @@ class KsAdapter extends BaseAdapter_1.default {
         if (gameVersion == undefined) {
             gameVersion = host.version;
         }
+        // @ts-ignore
         ks.request({
             url: "https://api.sjzgxwl.com/kwai/ks/reward", //仅为示例，并非真实的接口地址
             data: {
@@ -298,17 +332,22 @@ class KsAdapter extends BaseAdapter_1.default {
             }
         }, this.interTimeLimit * 1000);
     }
-    initVideo() {
+    initVideo(param = {}) {
         if (GxAdParams_1.AdParams.ks.video == null || GxAdParams_1.AdParams.ks.video.length <= 0) {
             this.videoAd = null;
             return;
         }
         this.destroyVideo();
-        // @ts-ignore
-        this.videoAd = ks.createRewardedVideoAd({
+        let newVar = {
             adUnitId: GxAdParams_1.AdParams.ks.video
-        });
-        console.log(this.videoAd);
+        };
+        if (this.systemInfo.platform == "android" && this.isKuaiShouOrKsLite()) {
+            if (param && param["multiton"]) {
+                Object.assign(newVar, param);
+            }
+        }
+        // @ts-ignore
+        this.videoAd = ks.createRewardedVideoAd(newVar);
         if (this.videoAd) {
             this.videoAd.onError(this._videoError.bind(this));
             this.videoAd.onClose(this._videoClose.bind(this));
@@ -320,44 +359,124 @@ class KsAdapter extends BaseAdapter_1.default {
     _videoError(err) {
         console.log("[gx_game]video error: " + JSON.stringify(err), "color: red");
         if (this.videocallback) {
-            this.videocallback(false);
+            this.videocallback(false, 0);
         }
         this.videocallback = null;
         if (this.videoAd) {
-            this.videoAd.offError(this._videoError);
-            this.videoAd.offClose(this._videoClose);
+            this.videoAd.offError(this._videoError.bind(this));
+            this.videoAd.offClose(this._videoClose.bind(this));
+        }
+        try {
+            if (!this.isHaiWai) {
+                this._videoErrorUploadEvent(err["code"] + err["msg"] || "", err["code"] || "", err["msg"] || "");
+            }
+        }
+        catch (e) {
         }
     }
     _videoClose(res) {
         console.log(res);
         this.recorderResume();
+        this._videoShowing = false;
         if ((res && res.isEnded) || res === undefined) {
             if (this.gxEngine) {
                 this.gxEngine.rewardAdEnd();
             }
-            this.videocallback && this.videocallback(true);
+            let re = res["count"];
+            if (!re) {
+                re = 0;
+            }
+            this.videocallback && this.videocallback(true, re);
+            try {
+                if (!this.isHaiWai) {
+                    this._videoCompleteEvent();
+                }
+            }
+            catch (e) {
+            }
         }
         else {
-            this.videocallback && this.videocallback(false);
+            this.videocallback && this.videocallback(false, 0);
+            try {
+                if (!this.isHaiWai) {
+                    this._videoCloseEvent();
+                }
+            }
+            catch (e) {
+            }
         }
         if (this.videoAd) {
-            this.videoAd.offError(this._videoError);
-            this.videoAd.offClose(this._videoClose);
+            this.videoAd.offError(this._videoError.bind(this));
+            this.videoAd.offClose(this._videoClose.bind(this));
         }
         this.videocallback = null;
     }
-    showVideo(complete, flag = "") {
-        if (this.videoAd == null) {
-            this.initVideo();
+    showVideo(complete, flag = "", multitonRewardMsgArr = [], multitonRewardTimes = 1) {
+        if (this._videoShowing) {
+            this._videoTryCount++;
+            complete && complete(false, 0);
+            if (this._videoTryCount >= 2) {
+                this._videoShowing = false;
+                this._videoTryCount = 0;
+            }
+            return;
         }
+        this._videoShowing = true;
+        this._videoTryCount = 0;
         super.showVideo(null, flag);
+        try {
+            this._videoCallEvent(flag);
+        }
+        catch (e) {
+        }
+        let arr = [];
+        let multiton = false;
+        if (typeof flag != "string") {
+            try {
+                if (flag.multitonRewardMsgArr && flag.multitonRewardMsgArr.length > 0) {
+                    multitonRewardMsgArr = flag.multitonRewardMsgArr;
+                }
+                if (!!flag.multitonRewardTimes) {
+                    multitonRewardTimes = flag.multitonRewardTimes;
+                }
+            }
+            catch (e) {
+                console.warn(e);
+            }
+        }
+        if (this.systemInfo.platform == "android" && this.isKuaiShouOrKsLite() && multitonRewardMsgArr && Array.isArray(multitonRewardMsgArr) && multitonRewardMsgArr.length > 0) {
+            //长度只能是小于等于7
+            arr = [multitonRewardMsgArr[0].substring(0, 7)];
+            //快手只能是1
+            multitonRewardTimes = 1;
+            this.destroyVideo();
+            /*  if (this.videoAd) {
+                  this.videoAd.offError(this._videoError.bind(this));
+
+                  this.videoAd.offClose(this._videoClose.bind(this));
+                  this.videoAd.destroy()
+
+              }
+              this.videoAd = null;*/
+            multiton = true;
+        }
+        //快手不预加载了  多倍奖励看完后  再看其他的也会变多倍
+        // if (this.videoAd == null) {
+        this.initVideo({ multiton: multiton, multitonRewardMsg: arr, multitonRewardTimes: multitonRewardTimes });
+        // }
         if (this.videoAd == null) {
-            complete && complete(false);
+            complete && complete(false, 0);
+            this._videoShowing = false;
             if (this.isHaiWai) {
                 this.createToast("Tente novamente mais tarde");
             }
             else {
                 this.createToast("暂无视频，请稍后再试");
+                try {
+                    this._videoErrorEvent("ad null");
+                }
+                catch (e) {
+                }
             }
             return;
         }
@@ -365,16 +484,27 @@ class KsAdapter extends BaseAdapter_1.default {
         this.videoAd
             .show()
             .then(() => {
+            try {
+                this._videoShowEvent();
+            }
+            catch (e) {
+            }
             this.recorderPause();
-            console.log("视频展示成功");
         })
-            .catch(() => {
-            console.warn("海外的不能有中文  先注释掉了");
+            .catch((err) => {
+            console.log(err);
+            console.log("激励视频-失败 catch");
+            this._videoShowing = false;
             if (this.isHaiWai) {
                 this.createToast("Tente novamente mais tarde");
             }
             else {
                 this.createToast("暂无视频，请稍后再试");
+                try {
+                    this._videoErrorEvent(err["code"] + err["msg"] || "", err["code"] || "", err["msg"] || "");
+                }
+                catch (e) {
+                }
             }
             // this.createToast('暂无视频，请稍后再试');
         });
@@ -382,6 +512,7 @@ class KsAdapter extends BaseAdapter_1.default {
     createToast(desc) {
         // @ts-ignore
         ks.showToast({
+            icon: "none",
             title: desc,
             duration: 2000
         });
@@ -390,6 +521,7 @@ class KsAdapter extends BaseAdapter_1.default {
         if (!GxAdParams_1.AdParams.ks.inter) {
             console.log("插屏参数空");
             on_hide && on_hide();
+            return;
         }
         // @ts-ignore
         let interstitialAd = ks.createInterstitialAd({
@@ -447,8 +579,8 @@ class KsAdapter extends BaseAdapter_1.default {
     }
     destroyVideo() {
         if (this.videoAd) {
-            this.videoAd.offError(this._videoError);
-            this.videoAd.offClose(this._videoClose);
+            this.videoAd.offError(this._videoError.bind(this));
+            this.videoAd.offClose(this._videoClose.bind(this));
             this.videoAd.destroy();
         }
         this.videoAd = null;
@@ -515,8 +647,20 @@ class KsAdapter extends BaseAdapter_1.default {
         this.gameRecorder && this.gameRecorder.stop();
     }
     shareRecorder(on_succ, on_fail) {
-        if (this.gameRecorder == null || this.videoPath == null)
+        if (this.gameRecorder == null || this.videoPath == null) {
+            //走普通分享
+            window["ks"].shareAppMessage({
+                success(res) {
+                    on_succ && on_succ();
+                },
+                fail(e) {
+                    console.log(e);
+                    on_fail && on_fail();
+                }
+            });
             return;
+        }
+        ;
         this.gameRecorder.publishVideo({
             video: this.videoPath,
             callback: (error) => {
@@ -554,17 +698,82 @@ class KsAdapter extends BaseAdapter_1.default {
             has_add && has_add();
         }
     }
+    hasDesktop(has_add) {
+        // @ts-ignore
+        ks.checkShortcut({
+            success(res) {
+                //根据res.installed 来判断是否添加成功
+                console.log("是否已添加快捷方式", res.installed);
+                has_add && has_add(res.installed);
+            },
+            fail(err) {
+                if (err.code === -10005) {
+                    console.log("暂不支持该功能");
+                    has_add && has_add(false);
+                }
+                else {
+                    console.log("检查快捷方式失败", err.msg);
+                    has_add && has_add(false);
+                }
+            }
+        });
+    }
     /**创建桌面图标 */
     addDesktop(on_succ, on_fail) {
         // @ts-ignore
-        if (ks["saveAPKShortcut"]) {
-            // @ts-ignore
-            ks.saveAPKShortcut((result) => {
-                console.log("addDesktop", JSON.stringify(result));
-                if (result.code === 1) {
-                    on_succ && on_succ();
+        // if (ks["saveAPKShortcut"]) {
+        //     // @ts-ignore
+        //     ks.saveAPKShortcut((result) => {
+        //         console.log("addDesktop", JSON.stringify(result));
+        //         if (result.code === 1) {
+        //             on_succ && on_succ();
+        //         } else {
+        //             on_fail && on_fail();
+        //         }
+        //     });
+        // } else {
+        //     on_succ && on_succ();
+        // }
+        if (this.systemInfo.platform == "ios") {
+            console.log("ios桌面消失");
+            on_succ && on_succ();
+            on_succ = null;
+        }
+        // @ts-ignore
+        ks.addShortcut({
+            success() {
+                console.log("添加桌面成功");
+                on_succ && on_succ();
+            },
+            fail(err) {
+                if (err.code === -10005) {
+                    console.log("暂不支持该功能");
+                    on_fail && on_fail();
                 }
                 else {
+                    console.log("添加桌面失败", err.msg);
+                    on_fail && on_fail();
+                }
+            }
+        });
+    }
+    /**创建常用图标 */
+    addCommonUse(on_succ, on_fail) {
+        // @ts-ignore
+        if (ks["addCommonUse"]) {
+            // @ts-ignore
+            ks.addCommonUse({
+                success() {
+                    console.log("设为常用成功");
+                    on_succ && on_succ();
+                },
+                fail(err) {
+                    if (err.code === -10005) {
+                        console.log("暂不支持该功能");
+                    }
+                    else {
+                        console.log("设为常用失败", err.msg);
+                    }
                     on_fail && on_fail();
                 }
             });
@@ -577,7 +786,7 @@ class KsAdapter extends BaseAdapter_1.default {
         let self = this;
         let item = DataStorage_1.default.getItem("__gx_openId__", null);
         let union_id = DataStorage_1.default.getItem("__gx_unionId__", null);
-        if (!!item && !!union_id) {
+        if (!!item && !!union_id && !!self.openId) {
             console.log("获取到缓存的openid：" + item);
             console.log("获取到缓存的union_id：" + union_id);
             self.openId = item;
@@ -681,7 +890,7 @@ class KsAdapter extends BaseAdapter_1.default {
                         header: res.header,
                         data: JSON.parse(res.data)
                     });
-                    console.log("转换成功");
+                    // console.log("转换成功");
                 }
                 catch (e) {
                     console.log(e);
@@ -735,6 +944,591 @@ class KsAdapter extends BaseAdapter_1.default {
         catch (e) {
             callback && callback(false);
         }
+    }
+    initGravityEngine() {
+        if (!!GxAdParams_1.AdParams.ks.gravityEngineAccessToken) {
+            console.log("初始化ge");
+            let debug = "none";
+            if (window["geDebug"]) {
+                debug = "debug";
+            }
+            const config = {
+                accessToken: GxAdParams_1.AdParams.ks.gravityEngineAccessToken, // 项目通行证，在：网站后台-->设置-->应用列表中找到Access Token列 复制（首次使用可能需要先新增应用）
+                clientId: this.openId, // 用户唯一标识，如产品为小游戏，则必须填用户openid（注意，不是小游戏的APPID！！！）
+                autoTrack: {
+                    appLaunch: true, // 自动采集 $MPLaunch
+                    appShow: true, // 自动采集 $MPShow
+                    appHide: true // 自动采集 $MPHide
+                },
+                name: "ge", // 全局变量名称, 默认为 gravityengine
+                debugMode: debug // 是否开启测试模式，开启测试模式后，可以在 网站后台--设置--元数据--事件流中查看实时数据上报结果。（测试时使用，上线之后一定要关掉，改成none或者删除）
+            };
+            const ge = new GravityEngine(config);
+            ge.setupAndStart();
+            let item = DataStorage_1.default.getItem("geInit");
+            if (!!item) {
+                console.log("ge inited");
+            }
+            else {
+                //@ts-ignore
+                let systemInfoSync = ks.getSystemInfoSync();
+                let versionNumber = 100;
+                try {
+                    let hostElement = systemInfoSync.host["gameVersion"];
+                    if (!!hostElement && hostElement != "0.0.0" && (hostElement + "").indexOf(".") != -1) {
+                        let replace = hostElement.replace(/\./g, "");
+                        let re = parseInt(replace);
+                        if (!isNaN(re)) {
+                            versionNumber = re;
+                        }
+                    }
+                }
+                catch (e) {
+                }
+                ge.initialize({
+                    name: this.openId,
+                    version: versionNumber,
+                    openid: this.openId,
+                    enable_sync_attribution: false
+                })
+                    .then((res) => {
+                    console.log("ge initialize success " + res);
+                    DataStorage_1.default.setItem("geInit", "1");
+                })
+                    .catch((err) => {
+                    console.log("ge initialize failed, error is " + err);
+                });
+            }
+        }
+        else {
+            console.log("不初始化ge");
+        }
+    }
+    initThinkData() {
+        let gameAppId = "";
+        let gameAppVersion = "";
+        let newVar1 = window["ks"]["getSystemInfoSync"]();
+        console.log(newVar1);
+        if (newVar1) {
+            if (newVar1["host"]) {
+                gameAppId = newVar1["host"]["appId"];
+                gameAppVersion = newVar1["host"]["gameVersion"];
+                if (!gameAppVersion) {
+                    gameAppVersion = newVar1["host"]["version"];
+                }
+                if (gameAppVersion == undefined) {
+                    gameAppVersion = "";
+                }
+            }
+        }
+        // TE SDK 配置对象
+        let appId = "commonAppId_" + gameAppId;
+        if (GxAdParams_1.AdParams.ks["fl_appId"]) {
+            appId = GxAdParams_1.AdParams.ks["fl_appId"];
+        }
+        var config = {
+            appId: appId, // 项目 APP ID
+            serverUrl: GxConstant_1.default.DataServerUrl, // 上报地址
+            autoTrack: {
+                appShow: true, // 自动采集 ta_mg_show
+                appHide: true // 自动采集 ta_mg_hide
+            },
+            enableLog: false,
+            accountId: this.openId
+        };
+        // 初始化
+        window["TDAnalytics"].init(config);
+        window["TDAnalytics"].login(this.openId);
+        let launchOptionsSync = window["ks"].getLaunchOptionsSync();
+        // let sessionId = new Date().valueOf() + (Math.random() * 10000 + 100) + this.openId;
+        var superProperties = {
+            launchOptions: launchOptionsSync,
+            gameAppId: gameAppId,
+            gameAppVersion: gameAppVersion,
+            unionId: this.union_id /*,
+            "#session_id": sessionId*/
+        };
+        window["TDAnalytics"].setSuperProperties(superProperties);
+        /*     window["TDAnalytics"].track({
+                 eventName: "ta_login"  //上报登录事件
+
+             });*/
+    }
+    /**
+     * 支付
+     * @param productId
+     * @param successCallback  返回true 成功购买 还没发道具    false成功购买但发过道具了
+     * @param failedCallback  失败
+     * @param orderDataCallback
+     */
+    payOrder(productId, successCallback, failedCallback, orderDataCallback = null) {
+        //@ts-ignore
+        ks.showLoading({
+            title: "加载中",
+            mask: true
+        });
+        let self = this;
+        //@ts-ignore
+        let systemInfoSync = ks.getSystemInfoSync();
+        this.requestPost("https://api.sjzgxwl.com/game_api/ks/pay/createPayOrder", {
+            appId: GxAdParams_1.AdParams.ks.appId,
+            openId: this.openId,
+            os: systemInfoSync.platform,
+            productId: productId
+        }, (res) => {
+            try {
+                console.log(JSON.stringify(res));
+            }
+            catch (e) {
+                console.log(res);
+            }
+            if (res.data.code == 1) {
+                // successCallback && successCallback(res);
+                let data = res.data.data;
+                orderDataCallback && orderDataCallback({ third_party_trade_no: data.payContent.third_party_trade_no });
+                //@ts-ignore
+                ks.requestGamePayment({
+                    "zone_id": data.payContent.zone_id,
+                    "os": data.payContent.os,
+                    "currency_type": data.payContent.currency_type,
+                    "buy_quantity": data.payContent.buy_quantity,
+                    "third_party_trade_no": data.payContent.third_party_trade_no,
+                    "extension": data.payContent.extension,
+                    "product_type": data.payContent.product_type,
+                    "sign": data.payContent.sign,
+                    "goods_category": data.payContent.goods_category,
+                    "goods_name": data.payContent.goods_name,
+                    success: (res) => {
+                        console.log(res);
+                        setTimeout(() => {
+                            self._subsidyList = null;
+                            self.checkOrder(data.payContent.third_party_trade_no, (orderStatus, productId) => {
+                                self.getSubsidyList(() => {
+                                }, () => {
+                                });
+                                try {
+                                    if (orderStatus == 2 || orderStatus == 3) {
+                                        if (window["ge"]) {
+                                            window["ge"].payEvent(data.payContent.buy_quantity * 10, "CNY", data.payContent.third_party_trade_no, productId + "", "支付宝");
+                                        }
+                                    }
+                                }
+                                catch (e) {
+                                }
+                                if (orderStatus == 2) {
+                                    //@ts-ignore
+                                    ks.hideLoading();
+                                    self.createToast("购买成功");
+                                    successCallback && successCallback(true, {
+                                        orderData: {
+                                            third_party_trade_no: data.payContent.third_party_trade_no,
+                                            productId: productId
+                                        }
+                                    });
+                                }
+                                else if (orderStatus == 3) {
+                                    //@ts-ignore
+                                    ks.hideLoading();
+                                    self.createToast("已经成功购买");
+                                    successCallback && successCallback(false, {
+                                        orderData: {
+                                            third_party_trade_no: data.payContent.third_party_trade_no,
+                                            productId: productId
+                                        }
+                                    });
+                                }
+                                else {
+                                    //@ts-ignore
+                                    ks.hideLoading();
+                                    self.createToast("未支付");
+                                    failedCallback && failedCallback(res, {
+                                        orderData: {
+                                            third_party_trade_no: data.payContent.third_party_trade_no,
+                                            productId: productId
+                                        }
+                                    });
+                                }
+                            }, (err) => {
+                                self.getSubsidyList(() => {
+                                }, () => {
+                                });
+                                //@ts-ignore
+                                ks.hideLoading();
+                                self.createToast(err);
+                                failedCallback && failedCallback(res, {
+                                    orderData: {
+                                        third_party_trade_no: data.payContent.third_party_trade_no,
+                                        productId: productId
+                                    }
+                                });
+                            });
+                        }, 3 * 1000);
+                        self._subsidyList = null;
+                        self.getSubsidyList(() => {
+                        }, () => {
+                        });
+                    },
+                    fail: (err) => {
+                        //@ts-ignore
+                        ks.hideLoading();
+                        console.log(err);
+                        if (err && err.msg && err.msg.includes("cancel")) {
+                            self.createToast("取消支付");
+                        }
+                        else {
+                            self.createToast((err.msg || err.errorMsg) + (err.code || err.errorCode));
+                        }
+                        failedCallback && failedCallback(err, {
+                            orderData: {
+                                third_party_trade_no: data.payContent.third_party_trade_no,
+                                productId: productId
+                            }
+                        });
+                        self._subsidyList = null;
+                        self.getSubsidyList(() => {
+                        }, () => {
+                        });
+                    }
+                });
+            }
+            else {
+                failedCallback && failedCallback(res, null);
+                //@ts-ignore
+                ks.hideLoading();
+                self.createToast("下单失败");
+            }
+        }, (err) => {
+            console.log(err);
+            failedCallback && failedCallback(err, null);
+            //@ts-ignore
+            ks.hideLoading();
+            self.createToast("下单失败");
+        });
+    }
+    checkOrder(third_party_trade_no, successCallback, failedCallback) {
+        this._checkOrder(third_party_trade_no, successCallback, failedCallback);
+    }
+    _checkOrder(third_party_trade_no, successCallback, failedCallback, tryCount = 0) {
+        this.requestPost("https://api.sjzgxwl.com/game_api/ks/pay/checkOrder", {
+            appId: GxAdParams_1.AdParams.ks.appId,
+            openId: this.openId,
+            third_party_trade_no
+        }, (res) => {
+            try {
+                console.log(JSON.stringify(res));
+            }
+            catch (e) {
+                console.log(res);
+            }
+            if (res.data.code == 1) {
+                if (tryCount < 5 && res.data.data.orderStatus == 1) {
+                    ++tryCount;
+                    setTimeout(() => {
+                        this._checkOrder(third_party_trade_no, successCallback, failedCallback, tryCount);
+                    }, tryCount * 1000);
+                }
+                else {
+                    //orderStatus 1未支付   2 支付成功  3已经发过道具了
+                    successCallback && successCallback(res.data.data.orderStatus, res.data.data.productId);
+                }
+            }
+            else {
+                if (tryCount < 5) {
+                    ++tryCount;
+                    setTimeout(() => {
+                        this._checkOrder(third_party_trade_no, successCallback, failedCallback, tryCount);
+                    }, tryCount * 1000);
+                }
+                else {
+                    failedCallback && failedCallback(res.data.msg);
+                }
+            }
+        }, (err) => {
+            console.log(err);
+            if (tryCount < 5) {
+                ++tryCount;
+                setTimeout(() => {
+                    this._checkOrder(third_party_trade_no, successCallback, failedCallback, tryCount);
+                }, tryCount * 1000);
+            }
+            else {
+                failedCallback && failedCallback(err);
+            }
+        });
+    }
+    /**
+     * 获取已经购买过的道具列表
+     * @param successCallback  返回list    [{productId:132,num:0}] //num大于0就是买过了
+     * @param failedCallback
+     */
+    getBuyPropList(successCallback, failedCallback) {
+        this.requestPost("https://api.sjzgxwl.com/game_api/ks/pay/payRecord", {
+            appId: GxAdParams_1.AdParams.ks.appId,
+            openId: this.openId
+        }, (res) => {
+            try {
+                console.log(JSON.stringify(res));
+            }
+            catch (e) {
+                console.log(res);
+            }
+            if (res.data.code == 1) {
+                //orderStatus 1未支付   2 支付成功  3已经发过道具了
+                successCallback && successCallback(res.data.data.list);
+            }
+            else {
+                failedCallback && failedCallback(res.data.msg);
+            }
+        }, (err) => {
+            console.log(err);
+            failedCallback && failedCallback(err);
+        });
+    }
+    /**
+     * 获取补贴
+     * @param price 价格元
+     * @param successCallback  true有优惠 第二个返回的是优惠后的价格   false没有优惠
+     * @param failedCallback
+     */
+    getSubsidy(price, successCallback, failedCallback) {
+        this.getSubsidyList((data) => {
+            if (data["hasSubsidy"] && data["subsidyLevels"]) {
+                let number = price * 10;
+                let datumElement = data["subsidyLevels"][number + ""];
+                if (datumElement) {
+                    if (datumElement["subsidyMoney"] == 0) {
+                        successCallback(false);
+                    }
+                    else {
+                        let number1 = datumElement["subsidyAfterMoney"] / 100;
+                        successCallback(true, number1);
+                    }
+                }
+                else {
+                    console.log("没这个金额");
+                    successCallback(false);
+                }
+            }
+            else {
+                console.log("空的");
+                successCallback(false);
+            }
+        }, (err) => {
+            successCallback(false);
+        });
+    }
+    getSubsidyList(successCallback, failedCallback) {
+        if (this._subsidyList != null) {
+            successCallback && successCallback(this._subsidyList);
+            return;
+        }
+        //@ts-ignore
+        let systemInfoSync = ks.getSystemInfoSync();
+        this.requestPost("https://api.sjzgxwl.com/game_api/ks/pay/subsidy", {
+            appId: GxAdParams_1.AdParams.ks.appId,
+            os: systemInfoSync.platform,
+            openId: this.openId
+        }, (res) => {
+            try {
+                console.log(JSON.stringify(res));
+            }
+            catch (e) {
+                console.log(res);
+            }
+            if (res.data.code == 1) {
+                this._subsidyList = res.data.data;
+                successCallback && successCallback(res.data.data);
+            }
+            else {
+                failedCallback && failedCallback(res.data.msg);
+            }
+        }, (err) => {
+            console.log(err);
+            failedCallback && failedCallback(err);
+        });
+    }
+    /**
+     *检查某个是否购买过
+     * @param productId
+     * @param successCallback
+     * @param failedCallback
+     */
+    checkIsBuy(productId, successCallback, failedCallback) {
+        //没购买过  0没买过    返回的是购买过的数量
+        // successCallback && successCallback(0);
+        this.requestPost("https://api.sjzgxwl.com/game_api/ks/pay/payRecord", {
+            appId: GxAdParams_1.AdParams.ks.appId,
+            openId: this.openId
+        }, (res) => {
+            try {
+                console.log(JSON.stringify(res));
+            }
+            catch (e) {
+                console.log(res);
+            }
+            if (res.data.code == 1) {
+                //orderStatus 1未支付   2 支付成功  3已经发过道具了
+                let list = res.data.data.list;
+                let num = 0;
+                for (let i = 0; i < list.length; i++) {
+                    if (list[i]["productId"] == productId) {
+                        num = list[i]["num"];
+                    }
+                }
+                successCallback && successCallback(num);
+            }
+            else {
+                failedCallback && failedCallback(res.data.msg);
+            }
+        }, (err) => {
+            console.log(err);
+            failedCallback && failedCallback(err);
+        });
+    }
+    /**
+     * 保存数据
+     * @param key
+     * @param data
+     * @param callback
+     */
+    saveData(key, data, callback) {
+        this.getOpenId((openId, anonymousId) => {
+            if (!!openId) {
+                let encryptData = this.encrypt(GxAdParams_1.AdParams.ks.appId, openId, key, data);
+                this.requestPost("https://api.sjzgxwl.com/commonData/data/saveData/v2", encryptData, (res) => {
+                    if (res["data"] && res["data"]["code"] == 1) {
+                        callback && callback(null);
+                    }
+                    else {
+                        callback && callback(res);
+                    }
+                }, (err) => {
+                    callback && callback(err);
+                });
+            }
+            else {
+                console.error("没有获取到openId 不能保存数据");
+                callback && callback("openId is null");
+            }
+        });
+    }
+    /**
+     *
+     * @param key
+     * @param callback  callback返回两个参数  第一个error  第二个是数据
+     */
+    getData(key, callback) {
+        this.getOpenId((openId, anonymousId) => {
+            if (!!openId) {
+                this.requestPost("https://api.sjzgxwl.com/commonData/data/getData/v1", {
+                    appId: GxAdParams_1.AdParams.ks.appId,
+                    openId: openId,
+                    key: key
+                }, (res) => {
+                    if (res["data"] && res["data"]["code"] == 1 && res["data"]["data"]) {
+                        let datumElement = res.data["data"]["data"];
+                        if (datumElement == undefined) {
+                            callback && callback(null, null);
+                        }
+                        else {
+                            callback && callback(null, datumElement);
+                        }
+                    }
+                    else {
+                        callback && callback(res, null);
+                    }
+                }, (err) => {
+                    callback && callback(err, null);
+                });
+            }
+            else {
+                console.error("没有获取到openId 不能获取数据");
+                callback && callback("openId is null", null);
+            }
+        });
+    }
+    shareAppMessage(shareObj = {}) {
+        //@ts-ignore
+        ks.shareAppMessage(shareObj);
+    }
+    /**
+     * 是否可以用侧边栏
+     * @param callback  true可以显示礼包  false不可以显示礼包
+     */
+    canUseSideBar(callback) {
+        //@ts-ignore
+        if (!ks["checkSliderBarIsAvailable"]) {
+            callback && callback(false);
+            return;
+        }
+        //@ts-ignore
+        ks.checkSliderBarIsAvailable({
+            success: (result) => {
+                if (result["available"]) {
+                    callback && callback(true);
+                }
+                else {
+                    console.warn("快手不备案不能显示侧边栏");
+                    callback && callback(false);
+                }
+                /* this.content.string =
+                     "侧边栏调用成功: " + JSON.stringify(result);*/
+            },
+            fail: (result) => {
+                callback && callback(false);
+                /*   this.content.string =
+                       "侧边栏调用失败: " + JSON.stringify(result);*/
+            }
+        });
+    }
+    onShow(res) {
+        this.onShowOption = res;
+        if (this.onShowOption && this.onShowOption["from"] == "sidebar_new") {
+            this.isFromSideBarLaunch = true;
+            this.canReward = true;
+        }
+        if (this.onShowOption) {
+            GxGame_1.default.gameEvent("kshotlaunch", { "from": this.onShowOption["from"] || "" });
+        }
+    }
+    checkIsFromSideBar(callback) {
+        if (this.isFromSideBarLaunch || this.onShowOption && this.onShowOption["from"] == "sidebar_new") {
+            callback && callback(true);
+        }
+        else {
+            //@ts-ignore
+            callback && callback(false);
+        }
+    }
+    /**
+     * 判断是不是快手或者快手极速版本
+     */
+    isKuaiShouOrKsLite() {
+        //kuaishou        nebula
+        try {
+            if (this.systemInfo && (this.systemInfo.host.env == "kuaishou" || this.systemInfo.host.env == "nebula")) {
+                return true;
+            }
+        }
+        catch (e) {
+        }
+        return false;
+    }
+    /**
+     * 是否可以使用添加桌面
+     * @param callback
+     */
+    canUseAddDesktop(callback) {
+        callback && callback(true);
+    }
+    _showJiLi() {
+        this.showVideo((res) => {
+            //播放完后定时播放下一次
+            let time = GxGame_1.default.gGN("time");
+            setTimeout(() => {
+                this._showJiLi();
+            }, time * 1000);
+        }, "jili");
     }
 }
 exports.default = KsAdapter;

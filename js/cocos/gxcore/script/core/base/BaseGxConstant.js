@@ -42,5 +42,13 @@ BaseGxConstant.IS_4399_BOX_GAME = false;
 /**支付宝小游戏 */
 BaseGxConstant.IS_ZFB_GAME = false;
 BaseGxConstant.IS_MEIZU_GAME = false;
+/**最右小游戏*/
+BaseGxConstant.IS_ZYPP_GAME = false;
 BaseGxConstant.KEY_PRIVACY_AGREE = "_GxPrivacyAgree_";
+/*bilibili小游戏*/
+BaseGxConstant.IS_BILI_GAME = false;
+/**荣耀 小游戏*/
+BaseGxConstant.IS_RONGYAO_Game = false;
+/**鸿蒙next原生  */
+BaseGxConstant.IS_HARMONYOSNEXT_NATIVE = false;
 exports.default = BaseGxConstant;

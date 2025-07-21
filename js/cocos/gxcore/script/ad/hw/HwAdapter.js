@@ -10,6 +10,9 @@ const GxUtils_1 = __importDefault(require("../../util/GxUtils"));
 const BaseAdapter_1 = __importDefault(require("../base/BaseAdapter"));
 const GxEnum_1 = require("../../core/GxEnum");
 const GxAdParams_1 = require("../../GxAdParams");
+const GxGameUtil_1 = __importDefault(require("../../core/GxGameUtil"));
+const DataStorage_1 = __importDefault(require("../../util/DataStorage"));
+const GxLog_1 = __importDefault(require("../../util/GxLog"));
 class HwAdapter extends BaseAdapter_1.default {
     constructor() {
         super(...arguments);
@@ -50,6 +53,7 @@ class HwAdapter extends BaseAdapter_1.default {
             this.initNativeAd();
             this.initGamePortal();
         }
+        this.initReleaseType();
     }
     /**
      * 初始化普通banner
@@ -80,7 +84,7 @@ class HwAdapter extends BaseAdapter_1.default {
         });
         console.log("banner4");
         this.bannerAd.onError(err => {
-            console.error('[gx_game]normal banner error: ', JSON.stringify(err));
+            console.error("[gx_game]normal banner error: ", JSON.stringify(err));
             // if (err && err.errCode == 30002) {
             this.destroyNormalBanner();
             //}
@@ -154,8 +158,8 @@ class HwAdapter extends BaseAdapter_1.default {
                 // this.showCustomBanner();
             }
             else {
-                let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_banner', cc.Prefab));
-                this.bannerNode = node.getComponent('gx_native_banner');
+                let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_banner", cc.Prefab));
+                this.bannerNode = node.getComponent("gx_native_banner");
                 this.bannerNode.show(native_data, () => {
                 }, () => {
                     this.bannerTimer && this.bannerTimer.clear();
@@ -183,27 +187,27 @@ class HwAdapter extends BaseAdapter_1.default {
                 GxAudioUtil_1.default.setMusicVolume(0);
                 GxAudioUtil_1.default.setSoundVolume(0);
             }).catch(() => {
-                this.createToast('暂无视频，请稍后再试');
+                this.createToast("暂无视频，请稍后再试");
                 // this.videoAd.load()
                 this.videoShowing = false;
-                this.videocallback && this.videocallback(false);
+                this.videocallback && this.videocallback(false, 0);
             });
         });
         this.videoAd.onError((err) => {
             // Utils.emit(EVENT_TYPE.AD_ERROR, 0);
             this.destroyVideo();
             this.videoShowing = false;
-            this.videocallback && this.videocallback(false);
+            this.videocallback && this.videocallback(false, 0);
         });
         this.videoAd.onClose(res => {
             GxAudioUtil_1.default.setMusicVolume(1);
             GxAudioUtil_1.default.setSoundVolume(1);
             if (res && res.isEnded) {
                 console.log("正常播放结束，可以下发游戏奖励");
-                this.videocallback && this.videocallback(true);
+                this.videocallback && this.videocallback(true, 1);
             }
             else {
-                this.videocallback && this.videocallback(false);
+                this.videocallback && this.videocallback(false, 0);
             }
             // this.videoAd.load()
             this.videoShowing = false;
@@ -214,10 +218,11 @@ class HwAdapter extends BaseAdapter_1.default {
     showVideo(complete, flag = "") {
         if (this.videoShowing) {
             this.logi("video showing");
-            complete && complete(false);
+            complete && complete(false, 0);
             return;
         }
         super.showVideo(null, flag);
+        this._videoCallEvent(flag);
         this.videoShowing = true;
         setTimeout(() => {
             this.videoShowing = false;
@@ -275,7 +280,7 @@ class HwAdapter extends BaseAdapter_1.default {
         this.interAd.load().then(res => {
             this.logi("showInterstitial show");
         }).catch(err => {
-            console.log('普通插屏展示失败' + JSON.stringify(err));
+            console.log("普通插屏展示失败" + JSON.stringify(err));
             on_close && on_close();
         });
     }
@@ -298,9 +303,9 @@ class HwAdapter extends BaseAdapter_1.default {
             else if (ad_type == GxEnum_1.ad_native_type.inter2) {
                 posId = GxAdParams_1.AdParams.hw.native2;
             }
-            this.logi(ad_type, 'posId = ', posId);
-            if (posId == '' || posId === undefined || posId == null || this.is_limit_native_length(ad_type)) {
-                this.logi('native null');
+            this.logi(ad_type, "posId = ", posId);
+            if (posId == "" || posId === undefined || posId == null || this.is_limit_native_length(ad_type)) {
+                this.logi("native null");
                 return resolve(null);
             }
             //@ts-ignore
@@ -348,8 +353,8 @@ class HwAdapter extends BaseAdapter_1.default {
             on_hide && on_hide();
         }
         else {
-            let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_inner_interstitial', cc.Prefab));
-            this.innerInter = node.getComponent('gx_native_inner_interstitial');
+            let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_inner_interstitial", cc.Prefab));
+            this.innerInter = node.getComponent("gx_native_inner_interstitial");
             this.innerInter && this.innerInter.show(parent, native_data, on_click, () => {
                 this.hideBanner();
                 on_show && on_show();
@@ -405,8 +410,8 @@ class HwAdapter extends BaseAdapter_1.default {
                         }
                         else {
                             // if (Utils.randomInt(1, 100) > GxGame.adConfig.showInterRto) return on_hide && on_hide();
-                            let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_interstitial', cc.Prefab));
-                            this.nativeInter = node.getComponent('gx_native_interstitial');
+                            let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_interstitial", cc.Prefab));
+                            this.nativeInter = node.getComponent("gx_native_interstitial");
                             this.nativeInter && this.nativeInter.show(native_data, () => {
                                 this.interShowTime = this.get_time();
                                 this.logi("showNativeInterstitial show");
@@ -485,8 +490,8 @@ class HwAdapter extends BaseAdapter_1.default {
             return console.log("[gx_game]showNativeIcon 暂无广告数据");
         }
         else {
-            let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/ad/native_icon', cc.Prefab));
-            this.nativeIcon = node.getComponent('gx_native_icon');
+            let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_icon", cc.Prefab));
+            this.nativeIcon = node.getComponent("gx_native_icon");
             this.nativeIcon && this.nativeIcon.show(parent, native_data);
         }
     }
@@ -504,7 +509,7 @@ class HwAdapter extends BaseAdapter_1.default {
     /**
      * 盒子9宫格
      */
-    initGamePortal(on_show, on_hide, show_toast = true, image = '', marginTop = 300) {
+    initGamePortal(on_show, on_hide, show_toast = true, image = "", marginTop = 300) {
         /*   //@ts-ignore
            this.portalAd = qg.createBoxPortalAd({
                adUnitId: GxGame.adConfig.adunit_portal,
@@ -530,8 +535,8 @@ class HwAdapter extends BaseAdapter_1.default {
                this.portalAd.show()
            })*/
     }
-    showGamePortal(on_show, on_hide, show_toast = true, image = '', marginTop = 300) {
-        console.log('暂不支持互推盒子相关 API');
+    showGamePortal(on_show, on_hide, show_toast = true, image = "", marginTop = 300) {
+        console.log("暂不支持互推盒子相关 API");
         /* if (qg.createBoxPortalAd && GxGame.adConfig.adunit_portal) {
              if (this.portalAd == null) {
                  this.initGamePortal(on_show, on_hide, show_toast, image, marginTop);
@@ -589,13 +594,13 @@ class HwAdapter extends BaseAdapter_1.default {
     showAddDesktop(on_close, on_succ) {
         if (this.addIconNode && this.addIconNode !== undefined && cc.isValid(this.addIconNode.node, true))
             return;
-        let node = cc.instantiate(GxUtils_1.default.getRes('gx/prefab/add_icon', cc.Prefab));
-        this.addIconNode = node.getComponent('Gx_add_icon');
+        let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/add_icon", cc.Prefab));
+        this.addIconNode = node.getComponent("Gx_add_icon");
         this.addIconNode && this.addIconNode.show(on_succ);
     }
     /**判断是否支持添加桌面 */
     hasAddDesktop(can_add, has_add, on_fail) {
-        console.log('不支持添加桌面');
+        console.log("不支持添加桌面");
         on_fail && on_fail();
         /*  if (this.platformVersion() >= 1041) {
               qg.hasShortcutInstalled({
@@ -661,7 +666,7 @@ class HwAdapter extends BaseAdapter_1.default {
                     //在中国大陆的情况下，此时需要禁止玩家进入游戏。
                     if (code == 7021) {
                         console.log("The player has canceled identity verification. Forbid the player from entering the game.");
-                        this.createToast('登录失败：' + code);
+                        this.createToast("登录失败：" + code);
                     }
                     let node = new cc.Node();
                     node.addComponent(cc.Label).string = "重新登录";
@@ -676,18 +681,18 @@ class HwAdapter extends BaseAdapter_1.default {
                     on_fail && on_fail(code);
                     // @ts-ignore
                     qg.showModal({
-                        title: '提示',
-                        content: '请登录后使用',
+                        title: "提示",
+                        content: "请登录后使用",
                         confirmText: "登录",
                         cancelText: "退出游戏",
                         success(res) {
                             if (res.confirm) {
-                                console.log('用户点击确定');
+                                console.log("用户点击确定");
                                 node.removeFromParent(true);
                                 self.login(on_succ, on_fail);
                             }
                             else if (res.cancel) {
-                                console.log('用户点击取消');
+                                console.log("用户点击取消");
                                 // @ts-ignore
                                 qg.exitApplication({
                                     success: function () {
@@ -726,7 +731,7 @@ class HwAdapter extends BaseAdapter_1.default {
     /**
      * 原生模板
      */
-    showCustomBanner() {
+    _showCustomBanner() {
         let ad_id = GxAdParams_1.AdParams.hw.custom_banner;
         //@ts-ignore
         if (ad_id == null || ad_id === undefined || !qg.createCustomAd) {
@@ -740,7 +745,7 @@ class HwAdapter extends BaseAdapter_1.default {
         });
         this.customBanner.show().then(() => {
         }).catch(err => {
-            console.error('[gx_game] custom banner show error: ' + JSON.stringify(err));
+            console.error("[gx_game] custom banner show error: " + JSON.stringify(err));
             this.destroyCustomBanner();
             this.showNormalBanner();
         });
@@ -788,7 +793,7 @@ class HwAdapter extends BaseAdapter_1.default {
         };
         this.customInter.onClose(on_hide);
         let on_error = err => {
-            console.error('[gx_game] custom inter error: ' + JSON.stringify(err));
+            console.error("[gx_game] custom inter error: " + JSON.stringify(err));
             this.customInter.offError(on_error);
             this.destroyCustomInter();
             this.showInterstitial(on_show, on_close);
@@ -806,6 +811,89 @@ class HwAdapter extends BaseAdapter_1.default {
     }
     loge(...data) {
         super.LOGE("[HwAdapter]", ...data);
+    }
+    cancelAccount() {
+        // @ts-ignore
+        qg.showModal({
+            title: "注销账号提示",
+            content: "确定注销账号吗？注销后将无法恢复！",
+            confirmText: "确定注销",
+            success(res) {
+                if (res.confirm) {
+                    console.log("用户点击确定");
+                    cc.sys.localStorage.clear();
+                    // @ts-ignore
+                    qg.exitApplication({
+                        success: function () {
+                            console.log("exitApplication success");
+                        },
+                        fail: function () {
+                            console.log("exitApplication fail");
+                        },
+                        complete: function () {
+                            console.log("exitApplication complete");
+                        }
+                    });
+                }
+                else if (res.cancel) {
+                    console.log("用户点击取消");
+                }
+            }
+        });
+    }
+    initReleaseType() {
+        let callback = (isRelease) => {
+            if (isRelease) {
+                GxAdParams_1.AdParams.hw.inter = GxAdParams_1.AdParams.hw.debug_inter || "testb4znbuh3n2";
+                GxAdParams_1.AdParams.hw.banner = GxAdParams_1.AdParams.hw.debug_banner || "testw6vs28auh3";
+                GxAdParams_1.AdParams.hw.video = GxAdParams_1.AdParams.hw.debug_video || "testx9dtjwj8hp";
+                GxAdParams_1.AdParams.hw.native1 = GxAdParams_1.AdParams.hw.debug_native1 || "testu7m3hc4gvm";
+                GxLog_1.default.e("使用测试参数");
+            }
+            else {
+                GxLog_1.default.e("使用正式参数");
+            }
+        };
+        if (GxAdParams_1.AdParams.hw.buildType != "debug") {
+            //如果包内是release  直接就release
+            callback(true);
+        }
+        else {
+            let item = DataStorage_1.default.getItem("isRelease", "");
+            if (item == "1") {
+                //如果包内是debug   并且本地存储了release 则是release
+                callback(true);
+            }
+            else {
+                if (GxAdParams_1.AdParams.hw["manifest"] && GxAdParams_1.AdParams.hw["manifest"]["package"] && GxAdParams_1.AdParams.hw["manifest"]["versionCode"]) {
+                    //有maifest则获取网络配置
+                    let url = `https://res2.sjzgxwl.com/huawei/rpk/${GxAdParams_1.AdParams.hw["manifest"].package}.${GxAdParams_1.AdParams.hw["manifest"].versionCode}.json?t=${Math.floor(new Date().valueOf() / 10000)}`;
+                    console.log(url);
+                    GxGameUtil_1.default.getInstance()._httpGets(url, {}, (res) => {
+                        if (res != -1 && res != -2) {
+                            try {
+                                let parse = JSON.parse(res);
+                                if (parse && parse["isRelease"] == 1) {
+                                    DataStorage_1.default.setItem("isRelease", "1");
+                                    callback(true);
+                                }
+                            }
+                            catch (e) {
+                                console.warn(e);
+                                callback(false);
+                            }
+                        }
+                        else {
+                            callback(false);
+                        }
+                    });
+                }
+                else {
+                    //没有 就直接false
+                    callback(false);
+                }
+            }
+        }
     }
 }
 exports.default = HwAdapter;

@@ -128,6 +128,20 @@ class GxGameUtil extends cc.Component {
             return defaultValue;
         }
     }
+    gGG(key, defaultValue) {
+        if (this.labels && this.labels.hasOwnProperty("selfswitch")) {
+            for (let i = 0; i < this.labels.selfswitch.length; i++) {
+                let val = this.labels.selfswitch[i];
+                if (val.switchname == key) {
+                    return val.switchvalue;
+                }
+            }
+            return defaultValue;
+        }
+        else {
+            return defaultValue;
+        }
+    }
     _gameLogin() {
         console.log("init login ======label:");
         let self = this;
@@ -137,11 +151,11 @@ class GxGameUtil extends cc.Component {
                 console.error("init login 失败了 sjzgxwl ");
             }
             else if (res != -1) {
-                console.log(res);
+                // console.log(res);
                 if (res && res.indexOf("City") != -1) {
                     console.log("解析了1");
                     let s = JSON.parse(res).City;
-                    console.log(s);
+                    // console.log(s);
                     if (s.indexOf("省") != -1) {
                         s = s.substring(0, s.indexOf("省"));
                     }
@@ -151,7 +165,7 @@ class GxGameUtil extends cc.Component {
                     else {
                         s = s.substring(0, 2);
                     }
-                    console.log(s);
+                    // console.log(s);
                     self.lw_z = s;
                     self._initIsS();
                 }
@@ -322,7 +336,7 @@ class GxGameUtil extends cc.Component {
         };
         xhr.open("GET", url, true);
         if (cc.sys.isNative) {
-            xhr.setRequestHeader("Accept-Encoding", "gzip,deflate");
+            //在荣耀小游戏上有问题 xhr.setRequestHeader("Accept-Encoding", "gzip,deflate");
         }
         xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
         // note: In Internet Explorer, the timeout property may be set only after calling the open()
@@ -391,7 +405,7 @@ class GxGameUtil extends cc.Component {
             };
             xhr.open("GET", url, true);
             if (cc.sys.isNative) {
-                xhr.setRequestHeader("Accept-Encoding", "gzip,deflate");
+                //在荣耀小游戏上有问题 xhr.setRequestHeader("Accept-Encoding", "gzip,deflate");
             }
             xhr.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
             xhr.setRequestHeader("Accept", "*/*");

@@ -47,6 +47,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const GxConstant_1 = __importDefault(require("../../core/GxConstant"));
 const GxGame_1 = __importDefault(require("../../GxGame"));
 const { ccclass, property } = cc._decorator;
 let GxGameEnd = (() => {
@@ -71,6 +72,7 @@ let GxGameEnd = (() => {
             this.touchNode = (__runInitializers(this, _btnArr_extraInitializers), __runInitializers(this, _touchNode_initializers, null));
             this.dotNode = (__runInitializers(this, _touchNode_extraInitializers), __runInitializers(this, _dotNode_initializers, null));
             this.switchOpen = (__runInitializers(this, _dotNode_extraInitializers), false);
+            this.switchtime = 0;
             // update (dt) {}
         }
         // LIFE-CYCLE CALLBACKS:
@@ -97,15 +99,21 @@ let GxGameEnd = (() => {
                 if (btnArrElement) {
                     btnArrElement.enableAutoGrayEffect = false;
                     btnArrElement.interactable = false;
+                    //cc.Node.EventType.TOUCH_END
                     btnArrElement.node.on(cc.Node.EventType.TOUCH_END, (event) => {
                         if (this.dotNode.opacity == 255) {
-                            GxGame_1.default.Ad().showVideo(() => {
-                                // btnArrElement.clickEvents[0].emit([]);
-                                cc.Component.EventHandler.emitEvents(btnArrElement.clickEvents, event);
+                            GxGame_1.default.Ad().showVideo((res) => {
+                                if (GxConstant_1.default.IS_KS_GAME) {
+                                    if (res) {
+                                        cc.Component.EventHandler.emitEvents(btnArrElement.clickEvents, event);
+                                    }
+                                }
+                                else {
+                                    cc.Component.EventHandler.emitEvents(btnArrElement.clickEvents, event);
+                                }
                             });
                         }
                         else {
-                            // btnArrElement.clickEvents[0].emit([]);
                             cc.Component.EventHandler.emitEvents(btnArrElement.clickEvents, event);
                         }
                     }, this);
@@ -114,21 +122,53 @@ let GxGameEnd = (() => {
         }
         onEnable() {
             this.switchOpen = GxGame_1.default.gGB("gev");
-            if (this.switchOpen) {
-                this.touchNode.opacity = 255;
-                this.dotNode.opacity = 255;
-            }
-            else {
+            this.switchtime = GxGame_1.default.gGN('time');
+            // this.switchOpen = true
+            // this.switchtime = 60
+            // 从localStorage获取上次执行时间
+            const lastExecutionTime = parseInt(localStorage.getItem('lastExecutionTime') || '0', 10);
+            const currentTime = new Date().getTime();
+            // 判断是否在时间内执行过
+            if (lastExecutionTime && (currentTime - lastExecutionTime < this.switchtime * 1000)) {
+                // 如果在60秒内执行过，dotNode和touchNode不显示
                 this.dotNode.opacity = 0;
                 this.touchNode.opacity = 0;
-            }
-            for (let i = 0; i < this.btnArr.length; i++) {
-                if (this.btnArr[i]) {
-                    let childByName = this.btnArr[i].node.getChildByName("videoIcon");
-                    if (childByName) {
-                        childByName.active = this.switchOpen;
+                for (let i = 0; i < this.btnArr.length; i++) {
+                    if (this.btnArr[i]) {
+                        let childByName = this.btnArr[i].node.getChildByName("videoIcon");
+                        if (childByName) {
+                            childByName.active = false;
+                        }
                     }
                 }
+            }
+            else {
+                if (this.switchOpen) {
+                    this.touchNode.opacity = 255;
+                    this.dotNode.opacity = 255;
+                    for (let i = 0; i < this.btnArr.length; i++) {
+                        if (this.btnArr[i]) {
+                            let childByName = this.btnArr[i].node.getChildByName("videoIcon");
+                            if (childByName) {
+                                childByName.active = this.switchOpen;
+                            }
+                        }
+                    }
+                }
+                else {
+                    this.dotNode.opacity = 0;
+                    this.touchNode.opacity = 0;
+                    for (let i = 0; i < this.btnArr.length; i++) {
+                        if (this.btnArr[i]) {
+                            let childByName = this.btnArr[i].node.getChildByName("videoIcon");
+                            if (childByName) {
+                                childByName.active = false;
+                            }
+                        }
+                    }
+                }
+                // 更新localStorage中的执行时间
+                localStorage.setItem('lastExecutionTime', currentTime.toString());
             }
         }
     };

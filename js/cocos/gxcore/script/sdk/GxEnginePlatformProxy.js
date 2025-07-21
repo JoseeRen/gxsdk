@@ -15,11 +15,17 @@ class GxEnginePlatformProxy {
         this._config = n;
     }
     static createInstance() {
-        if (window["tt"]) {
+        if (window["qq"]) {
+            return this._createInstance("qq_mg");
+        }
+        else if (window["tt"]) {
             return this._createInstance("tt_mg");
         }
         else if (window["ks"]) {
             return this._createInstance("kuaishou_mg");
+        }
+        else if (window["wx"]) {
+            return this._createInstance("wechat_mg");
         }
     }
     static _createInstance(platfromName) {

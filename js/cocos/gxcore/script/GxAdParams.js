@@ -19,7 +19,8 @@ exports.AdParams = void 0;
 //qq更新策略，在结算页调用   GxGame.gameEventLevelEnd()  必接，对应策略第一条
 //qq单独用分享按钮 GxGame.showQQShareBtnWithParent(parentNode) parentNode为需要放置按钮的空节点 用法和隐私一样
 exports.AdParams = {
-    labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
+    channel: {},
+    labelName: "", //标签名
     age: 12,
     company: "", //健康忠告的公司名
     softCode: "", //软著号
@@ -29,7 +30,7 @@ exports.AdParams = {
     gameName: "",
     heJiConfig: "",
     oppo: {
-        "gameName": "",
+        gameName: "",
         labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
         company: "", //健康忠告的公司名
@@ -55,7 +56,9 @@ exports.AdParams = {
         heJiConfig: "",
         havebox: false, //结算页是否弹全屏点击广告 true 弹
         umAppKey: "",
-        tdAppKey: ""
+        tdAppKey: "",
+        gravityEngineAccessToken: "",
+        packageName: ""
     },
     mi: {
         gameName: "",
@@ -88,7 +91,7 @@ exports.AdParams = {
         tdAppKey: ""
     },
     vivo: {
-        "gameName": "",
+        gameName: "",
         labelName: "csyx_csyxvivorpk0424_1_vivo_xyx_20240424", //标签名
         adLabelName: "", //标签名
         age: 12,
@@ -98,13 +101,13 @@ exports.AdParams = {
         ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
         ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
         inter: "",
-        banner: "7e605ccce5e249b4b5ccf0590e72d6ff",
-        custom1: "6dcc9ec70ee8472e9ca48233dba5ea2f", //原生模板插屏
-        custom2: "81b6d57253dd4942b1d46a5e413e4477", //原生模板插屏
+        banner: "",
+        custom1: "", //原生模板插屏
+        custom2: "", //原生模板插屏
         custom_banner: "", //原生模板banner
         native1: "", //原生 自渲染
         native2: "", ////原生 自渲染
-        video: "050a726b94944e138d7de4ec0faf9be6",
+        video: "",
         native_icon: "", //占位待用
         //以下是盒子广告 占位待用
         boxBanner: "",
@@ -113,10 +116,15 @@ exports.AdParams = {
         labelVersion: "",
         havebox: false, //结算页是否弹全屏点击广告 true 弹
         heJiConfig: "",
-        tdAppKey: ""
+        tdAppKey: "",
+        gravityEngineAccessToken: "",
+        accountAppKey: "",
+        accountAppSecret: "",
+        packageName: "",
+        needPrivacy: true //是否需要隐私政策
     },
     wx: {
-        "gameName": "",
+        gameName: "",
         labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
         company: "", //健康忠告的公司名
@@ -124,22 +132,30 @@ exports.AdParams = {
         ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
         ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
         ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
-        appId: "wx4c32596749743cf9",
+        appId: "wx7c5a6814f923cfc7",
         //其他参数待定吧  有点复杂~~
-        video: "adunit-d07b4473f0e01c0f",
-        banner: "adunit-a8da4c3fda27eba1",
-        inter: "adunit-d92be1b1d8ab6324",
-        inter_custom: "adunit-e6d377baf12c177c",
+        video: "adunit-f4728ad2a406f493",
+        banner: "",
+        inter: "",
+        inter_custom: "",
         custom_left: "",
         custom_right: "",
+        custom_v: [], //竖格子
+        custom_h: [], //横格子
         labelVersion: "",
         subIds: [], //订阅id 数组
         heJiConfig: "",
         shareImgUrl: "", //https://res.sjzgxwl.com/shareimage/.jpg
-        tdAppKey: ""
+        tdAppKey: "",
+        gravityEngineAccessToken: "", //引力的access_token
+        app_key: "", //微信互跳用的 和引力没关系
+        app_version: "" //微信互跳用的 和引力没关系
+        /*
+                gravityEngineAccessToken:"qyNWxktvh43Qi1oJqdakFLpsMvae6fhg"
+        */
     },
     qq: {
-        "gameName": "",
+        gameName: "",
         labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
         company: "", //健康忠告的公司名
@@ -169,7 +185,7 @@ exports.AdParams = {
     },
     ks: {
         gameName: "",
-        appId: "",
+        appId: "ks684265670100075193",
         labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
         company: "", //健康忠告的公司名
@@ -177,35 +193,40 @@ exports.AdParams = {
         ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
         ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
         ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
-        inter: "",
+        inter: "2300005890_02",
         banner: "",
-        video: "2300005032_01",
+        video: "2300018042_01",
         labelVersion: "",
         heJiConfig: "",
-        tdAppKey: ""
+        tdAppKey: "",
+        gravityEngineAccessToken: ""
     },
     tt: {
-        "gameName": "",
-        appId: "",
+        gameName: "",
+        appId: "ttd6d5a06849e2289502",
         ecpmConfigName: "",
-        labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
+        labelName: "", //标签名
         age: 12,
         company: "", //健康忠告的公司名
         softCode: "", //软著号
         ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
         ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
         ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
-        inter: "",
-        banner: "",
-        video: "4r2q3gc5f2f1pg9mbm",
+        inter: "eh4e9q79cr7f9t4ppx",
+        banner: "1tmimtidccod28k8hd",
+        video: "3962abfj2d96deq4if",
         labelVersion: "",
         umAppKey: "",
         shareTemplateId: "",
         heJiConfig: "",
-        tdAppKey: ""
+        tdAppKey: "",
+        gravityEngineAccessToken: "", //引力的access_token
+        subIds: [], //一次性订阅
+        //版本更新  体力恢复
+        subIdsLong: [] //长期订阅
     },
     hw: {
-        "gameName": "",
+        gameName: "",
         labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
         company: "", //健康忠告的公司名
@@ -235,10 +256,11 @@ exports.AdParams = {
         labelVersion: "",
         umAppKey: "",
         heJiConfig: "",
-        tdAppKey: ""
+        tdAppKey: "",
+        privacy_url: ""
     },
     uc: {
-        "gameName": "",
+        gameName: "",
         labelName: "srxsmg_srxsmgqq_100_qq_xyx_20221111", //标签名
         age: 12,
         company: "", //健康忠告的公司名
@@ -253,7 +275,7 @@ exports.AdParams = {
         tdAppKey: ""
     },
     zfb: {
-        "gameName": "",
+        gameName: "",
         labelName: "", //标签名
         age: 12,
         company: "", //健康忠告的公司名
@@ -266,5 +288,36 @@ exports.AdParams = {
         video: "ad_tiny_2021004124680383_202311102200070140",
         labelVersion: "",
         tdAppKey: ""
+    },
+    bilibili: {
+        gameName: "",
+        appId: "biligame87d45e31eed3fd24",
+        labelName: "", //标签名
+        age: 12,
+        shareTemplateId: "",
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
+        inter: "",
+        banner: "",
+        video: "bili-211729751454346283",
+        labelVersion: "",
+        tdAppKey: "",
+        gravityEngineAccessToken: ""
+    },
+    rongyao: {
+        gameName: "",
+        labelName: "csyx_csyxvivorpk0424_1_vivo_xyx_20240424", //标签名
+        age: 12,
+        company: "", //健康忠告的公司名
+        softCode: "", //软著号
+        ysCompanyName: "石家庄市高兴网络科技有限公司", //隐私政策中公司名
+        ysMail: "2361198052@qq.com", //隐私政策中联系邮箱
+        ysAddress: "河北省石家庄市高新区天山世界之门大厦H-1009", //隐私政策中公司地址
+        inter: "",
+        banner: "",
+        video: ""
     }
 };

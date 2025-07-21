@@ -51,7 +51,6 @@ const GxGame_1 = __importDefault(require("../GxGame"));
 const ResUtil_1 = __importDefault(require("../util/ResUtil"));
 const GxAdParams_1 = require("../GxAdParams");
 const GxConstant_1 = __importDefault(require("../core/GxConstant"));
-const GxChecker_1 = __importDefault(require("../GxChecker"));
 const { ccclass, property } = cc._decorator;
 let FirstScene = (() => {
     let _classDecorators = [ccclass];
@@ -59,18 +58,12 @@ let FirstScene = (() => {
     let _classExtraInitializers = [];
     let _classThis;
     let _classSuper = cc.Component;
-    let _jkTitle_decorators;
-    let _jkTitle_initializers = [];
-    let _jkTitle_extraInitializers = [];
-    let _jkContent_decorators;
-    let _jkContent_initializers = [];
-    let _jkContent_extraInitializers = [];
+    let _jkInfo_decorators;
+    let _jkInfo_initializers = [];
+    let _jkInfo_extraInitializers = [];
     let _jkCompany_decorators;
     let _jkCompany_initializers = [];
     let _jkCompany_extraInitializers = [];
-    let _jkSoftCode_decorators;
-    let _jkSoftCode_initializers = [];
-    let _jkSoftCode_extraInitializers = [];
     let _ageSp_decorators;
     let _ageSp_initializers = [];
     let _ageSp_extraInitializers = [];
@@ -80,19 +73,27 @@ let FirstScene = (() => {
     var FirstScene = _classThis = class extends _classSuper {
         constructor() {
             super(...arguments);
-            this.jkTitle = __runInitializers(this, _jkTitle_initializers, null);
-            this.jkContent = (__runInitializers(this, _jkTitle_extraInitializers), __runInitializers(this, _jkContent_initializers, null));
+            this.jkInfo = __runInitializers(this, _jkInfo_initializers, null);
             //软著信息
-            this.jkCompany = (__runInitializers(this, _jkContent_extraInitializers), __runInitializers(this, _jkCompany_initializers, null));
-            this.jkSoftCode = (__runInitializers(this, _jkCompany_extraInitializers), __runInitializers(this, _jkSoftCode_initializers, null));
-            this.ageSp = (__runInitializers(this, _jkSoftCode_extraInitializers), __runInitializers(this, _ageSp_initializers, null));
+            this.jkCompany = (__runInitializers(this, _jkInfo_extraInitializers), __runInitializers(this, _jkCompany_initializers, null));
+            this.ageSp = (__runInitializers(this, _jkCompany_extraInitializers), __runInitializers(this, _ageSp_initializers, null));
             this.gameSceneName = (__runInitializers(this, _ageSp_extraInitializers), __runInitializers(this, _gameSceneName_initializers, "GameScene"));
             // LIFE-CYCLE CALLBACKS:
             this.canJumpToNext = (__runInitializers(this, _gameSceneName_extraInitializers), false);
             // update (dt) {}
         }
         onLoad() {
-            GxChecker_1.default.getInstance().init();
+            cc.assetManager.loadBundle("gxresbundle", (err, bundle) => {
+                if (err) {
+                    console.error(err);
+                }
+                if (bundle) {
+                    GxGame_1.default.gxResBundle = bundle;
+                }
+                this.initSDK();
+            });
+        }
+        initSDK() {
             let winSize = cc.winSize;
             if (winSize.width > winSize.height) {
                 this.node.getComponent(cc.Canvas).designResolution = cc.size(1280, 720);
@@ -105,14 +106,15 @@ let FirstScene = (() => {
                 this.node.getComponent(cc.Canvas).fitHeight = false;
             }
             this.canJumpToNext = true;
-            this.jkTitle.node.active = false;
-            this.jkContent.node.active = false;
-            GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.jkzg, {});
+            this.jkInfo.node.active = false;
+            this.jkCompany.node.active = false;
+            this.ageSp.node.active = false;
             GxGame_1.default.initPlatform(() => {
                 GxGame_1.default.initGame(() => {
                     //隐私政策和和适龄
                     let jkShowTime = GxGame_1.default.getJkShowTime();
                     if (jkShowTime >= 1) {
+                        this.ageSp.node.active = true;
                         let gameAge = GxGame_1.default.getGameAge();
                         if (gameAge > 0) {
                             ResUtil_1.default.loadSprite("gx/texture/icon" + gameAge, (err, spriteFrame) => {
@@ -163,20 +165,27 @@ let FirstScene = (() => {
                                 this.jkCompany.string = "需要著作权人：";
                             }
                         }
-                        if (GxAdParams_1.AdParams.softCode && GxAdParams_1.AdParams.softCode.length > 0) {
-                            this.jkSoftCode.string = "软著登记号：" + GxAdParams_1.AdParams.softCode;
+                        let str = `著作权人:${GxAdParams_1.AdParams.company} 著作权登记号:${GxAdParams_1.AdParams.softCode}`;
+                        /*
+                        let str = `著作权人:${AdParams.company} 著作权登记号:${AdParams.softCode}
+    审批文号:国新出审[2024]666号 出版物号:ISBN 978-7-498-13456-1
+    出版服务单位：上海双盟网络科技有限公司`;*/
+                        if (GxAdParams_1.AdParams.softCode && GxAdParams_1.AdParams.softCode.length > 0 && GxAdParams_1.AdParams.company && GxAdParams_1.AdParams.company.length > 0) {
                         }
                         else {
-                            if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_QQ_GAME) {
+                            if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_QQ_GAME || GxConstant_1.default.IS_KS_GAME) {
                                 this.canJumpToNext = false;
-                                this.jkCompany.string = "软著登记号：";
                             }
                         }
-                        this.jkTitle.node.active = true;
-                        this.jkContent.node.active = true;
+                        this.jkCompany.string = str;
+                        this.jkInfo.node.active = true;
+                        this.jkCompany.node.active = true;
                     }
                     this.scheduleOnce(() => {
-                        GxChecker_1.default.getInstance().check(GxChecker_1.default.MsgType.showGamePrivacy);
+                        if (GxConstant_1.default.IS_HUAWEI_GAME && !GxAdParams_1.AdParams.hw.privacy_url) {
+                            console.warn("华为没有配置隐私政策链接");
+                            return;
+                        }
                         if (GxGame_1.default.needShowAuthorize()) {
                             GxGame_1.default.Ad().showAuthorize(() => {
                                 // 同意继续游戏
@@ -195,9 +204,7 @@ let FirstScene = (() => {
         start() {
         }
         enterGame() {
-            setTimeout(() => {
-                GxGame_1.default.Ad().initAd();
-            }, 1000);
+            GxGame_1.default.Ad().initAd();
             GxGame_1.default.Ad().getDeviceId && GxGame_1.default.Ad().getDeviceId();
             if (this.canJumpToNext) {
                 if (GxConstant_1.default.IS_HUAWEI_GAME || GxConstant_1.default.IS_MI_GAME) {
@@ -207,12 +214,22 @@ let FirstScene = (() => {
                     }, () => {
                     });
                 }
+                else if (GxConstant_1.default.IS_IOS_NATIVE || GxConstant_1.default.IS_IOS_H5) {
+                    if (window["gameAnti"]) {
+                        window["gameAnti"].init(this.node, () => {
+                            this.jumpScene();
+                        });
+                    }
+                    else {
+                        this.jumpScene();
+                    }
+                }
                 else {
                     this.jumpScene();
                 }
             }
             else {
-                if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_QQ_GAME) {
+                if (GxConstant_1.default.IS_OPPO_GAME || GxConstant_1.default.IS_QQ_GAME || GxConstant_1.default.IS_KS_GAME) {
                     console.log("是不是没添加软著 信息");
                     console.log("是不是没添加软著 信息");
                     console.log("是不是没添加软著 信息");
@@ -229,16 +246,12 @@ let FirstScene = (() => {
     (() => {
         var _a;
         const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create((_a = _classSuper[Symbol.metadata]) !== null && _a !== void 0 ? _a : null) : void 0;
-        _jkTitle_decorators = [property(cc.Label)];
-        _jkContent_decorators = [property(cc.Label)];
+        _jkInfo_decorators = [property(cc.Label)];
         _jkCompany_decorators = [property(cc.Label)];
-        _jkSoftCode_decorators = [property(cc.Label)];
         _ageSp_decorators = [property(cc.Sprite)];
         _gameSceneName_decorators = [property];
-        __esDecorate(null, null, _jkTitle_decorators, { kind: "field", name: "jkTitle", static: false, private: false, access: { has: obj => "jkTitle" in obj, get: obj => obj.jkTitle, set: (obj, value) => { obj.jkTitle = value; } }, metadata: _metadata }, _jkTitle_initializers, _jkTitle_extraInitializers);
-        __esDecorate(null, null, _jkContent_decorators, { kind: "field", name: "jkContent", static: false, private: false, access: { has: obj => "jkContent" in obj, get: obj => obj.jkContent, set: (obj, value) => { obj.jkContent = value; } }, metadata: _metadata }, _jkContent_initializers, _jkContent_extraInitializers);
+        __esDecorate(null, null, _jkInfo_decorators, { kind: "field", name: "jkInfo", static: false, private: false, access: { has: obj => "jkInfo" in obj, get: obj => obj.jkInfo, set: (obj, value) => { obj.jkInfo = value; } }, metadata: _metadata }, _jkInfo_initializers, _jkInfo_extraInitializers);
         __esDecorate(null, null, _jkCompany_decorators, { kind: "field", name: "jkCompany", static: false, private: false, access: { has: obj => "jkCompany" in obj, get: obj => obj.jkCompany, set: (obj, value) => { obj.jkCompany = value; } }, metadata: _metadata }, _jkCompany_initializers, _jkCompany_extraInitializers);
-        __esDecorate(null, null, _jkSoftCode_decorators, { kind: "field", name: "jkSoftCode", static: false, private: false, access: { has: obj => "jkSoftCode" in obj, get: obj => obj.jkSoftCode, set: (obj, value) => { obj.jkSoftCode = value; } }, metadata: _metadata }, _jkSoftCode_initializers, _jkSoftCode_extraInitializers);
         __esDecorate(null, null, _ageSp_decorators, { kind: "field", name: "ageSp", static: false, private: false, access: { has: obj => "ageSp" in obj, get: obj => obj.ageSp, set: (obj, value) => { obj.ageSp = value; } }, metadata: _metadata }, _ageSp_initializers, _ageSp_extraInitializers);
         __esDecorate(null, null, _gameSceneName_decorators, { kind: "field", name: "gameSceneName", static: false, private: false, access: { has: obj => "gameSceneName" in obj, get: obj => obj.gameSceneName, set: (obj, value) => { obj.gameSceneName = value; } }, metadata: _metadata }, _gameSceneName_initializers, _gameSceneName_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);

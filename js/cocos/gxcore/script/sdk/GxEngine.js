@@ -91,7 +91,8 @@ class GxEngine {
                 appToken: this._config.appToken,
                 openId: this._config.openId,
                 appId: this._config.appId,
-                launchOptions: GxEnginePlatformAPI_1.GxEnginePlatformAPI.getAppOptions()
+                launchOptions: GxEnginePlatformAPI_1.GxEnginePlatformAPI.getAppOptions(),
+                unionId: this._config.unionId
             };
             this.serverUrl = `${this._config.BASE_URL}/event_center/event/collect`;
             this.store = new GxEnginePersistence_1.GxEnginePersistence(this._config, () => {

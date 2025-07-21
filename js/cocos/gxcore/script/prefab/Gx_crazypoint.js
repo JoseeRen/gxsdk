@@ -70,9 +70,6 @@ let Gx_crazypoint = (() => {
     let _title_decorators;
     let _title_initializers = [];
     let _title_extraInitializers = [];
-    let _title2_decorators;
-    let _title2_initializers = [];
-    let _title2_extraInitializers = [];
     var Gx_crazypoint = _classThis = class extends _classSuper {
         constructor() {
             super(...arguments);
@@ -81,8 +78,7 @@ let Gx_crazypoint = (() => {
             this.btnNode = (__runInitializers(this, _img_xiangPiCa_extraInitializers), __runInitializers(this, _btnNode_initializers, null));
             this.boxNode = (__runInitializers(this, _btnNode_extraInitializers), __runInitializers(this, _boxNode_initializers, null));
             this.title = (__runInitializers(this, _boxNode_extraInitializers), __runInitializers(this, _title_initializers, null));
-            this.title2 = (__runInitializers(this, _title_extraInitializers), __runInitializers(this, _title2_initializers, null));
-            this.onShow = __runInitializers(this, _title2_extraInitializers);
+            this.onShow = __runInitializers(this, _title_extraInitializers);
             this.time = 0;
             this.num = 0;
             this.boo = false;
@@ -95,10 +91,9 @@ let Gx_crazypoint = (() => {
         onLoad() {
             let winSize = cc.winSize;
             if (winSize.width > winSize.height) {
-                this.btnNode.setPosition(cc.v2(400, 0));
-                this.boxNode.setPosition(cc.v2(-310.119, -52));
-                this.title.setPosition(cc.v2(0, 245));
-                this.title2.setPosition(cc.v2(570, -90));
+                this.btnNode.setPosition(cc.v2(293, -210));
+                this.boxNode.setPosition(cc.v2(-288, -122));
+                this.title.setPosition(cc.v2(0, 219));
             }
             this.btnNode.opacity = 255;
             this.boxNode.opacity = 255;
@@ -264,13 +259,11 @@ let Gx_crazypoint = (() => {
         _btnNode_decorators = [property(cc.Node)];
         _boxNode_decorators = [property(cc.Node)];
         _title_decorators = [property(cc.Node)];
-        _title2_decorators = [property(cc.Node)];
         __esDecorate(null, null, _progressNode_decorators, { kind: "field", name: "progressNode", static: false, private: false, access: { has: obj => "progressNode" in obj, get: obj => obj.progressNode, set: (obj, value) => { obj.progressNode = value; } }, metadata: _metadata }, _progressNode_initializers, _progressNode_extraInitializers);
         __esDecorate(null, null, _img_xiangPiCa_decorators, { kind: "field", name: "img_xiangPiCa", static: false, private: false, access: { has: obj => "img_xiangPiCa" in obj, get: obj => obj.img_xiangPiCa, set: (obj, value) => { obj.img_xiangPiCa = value; } }, metadata: _metadata }, _img_xiangPiCa_initializers, _img_xiangPiCa_extraInitializers);
         __esDecorate(null, null, _btnNode_decorators, { kind: "field", name: "btnNode", static: false, private: false, access: { has: obj => "btnNode" in obj, get: obj => obj.btnNode, set: (obj, value) => { obj.btnNode = value; } }, metadata: _metadata }, _btnNode_initializers, _btnNode_extraInitializers);
         __esDecorate(null, null, _boxNode_decorators, { kind: "field", name: "boxNode", static: false, private: false, access: { has: obj => "boxNode" in obj, get: obj => obj.boxNode, set: (obj, value) => { obj.boxNode = value; } }, metadata: _metadata }, _boxNode_initializers, _boxNode_extraInitializers);
         __esDecorate(null, null, _title_decorators, { kind: "field", name: "title", static: false, private: false, access: { has: obj => "title" in obj, get: obj => obj.title, set: (obj, value) => { obj.title = value; } }, metadata: _metadata }, _title_initializers, _title_extraInitializers);
-        __esDecorate(null, null, _title2_decorators, { kind: "field", name: "title2", static: false, private: false, access: { has: obj => "title2" in obj, get: obj => obj.title2, set: (obj, value) => { obj.title2 = value; } }, metadata: _metadata }, _title2_initializers, _title2_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         Gx_crazypoint = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });

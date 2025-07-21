@@ -58,13 +58,21 @@ let Gx_gameBox = (() => {
     let _zaiLaiSanGe_decorators;
     let _zaiLaiSanGe_initializers = [];
     let _zaiLaiSanGe_extraInitializers = [];
+    let _rootLayout_decorators;
+    let _rootLayout_initializers = [];
+    let _rootLayout_extraInitializers = [];
+    let _itemNode_decorators;
+    let _itemNode_initializers = [];
+    let _itemNode_extraInitializers = [];
     var Gx_gameBox = _classThis = class extends _classSuper {
         constructor() {
             super(...arguments);
             this.boxNode = __runInitializers(this, _boxNode_initializers, null);
             this.zaiLaiSanGe = (__runInitializers(this, _boxNode_extraInitializers), __runInitializers(this, _zaiLaiSanGe_initializers, null));
+            this.rootLayout = (__runInitializers(this, _zaiLaiSanGe_extraInitializers), __runInitializers(this, _rootLayout_initializers, null));
+            this.itemNode = (__runInitializers(this, _rootLayout_extraInitializers), __runInitializers(this, _itemNode_initializers, null));
             // LIFE-CYCLE CALLBACKS:
-            this.key = (__runInitializers(this, _zaiLaiSanGe_extraInitializers), 3);
+            this.key = (__runInitializers(this, _itemNode_extraInitializers), 3);
             this.openBoxNum = 0;
             this.openBoxArr = [];
             this.canClick = false;
@@ -93,11 +101,18 @@ let Gx_gameBox = (() => {
             }, 1.5);
         }
         initBox() {
-            var boxParent = this.boxNode.getChildByName("content");
-            for (let i = 0; i < boxParent.children.length; i++) {
-                boxParent.children[i].children[0].active = false;
-                boxParent.children[i].children[1].active = false;
+            for (let i = 0; i < 9; i++) {
+                let node = cc.instantiate(this.itemNode);
+                node.parent = this.rootLayout.node;
             }
+            this.rootLayout.updateLayout();
+            this.scheduleOnce(() => {
+                var boxParent = this.rootLayout.node;
+                for (let i = 0; i < boxParent.children.length; i++) {
+                    boxParent.children[i].children[0].active = false;
+                    boxParent.children[i].children[1].active = false;
+                }
+            }, 1 / 60 * 2);
         }
         onDestroy() {
             this.onClose && this.onClose();
@@ -157,10 +172,11 @@ let Gx_gameBox = (() => {
                 }
                 var randomCoinNum = Math.floor(Math.random() * 50 + 70);
                 e.target.children[0].getChildByName("coin").getComponent(cc.Label).string = "" + randomCoinNum;
-                // globalData.addCoinNum(randomCoinNum);
                 this.onGet && this.onGet(randomCoinNum);
                 e.target.children[0].active = true;
-                this.openBoxArr.push(e.target._localZOrder - 1);
+                let items = e.target._localZOrder; // - 1;
+                console.log(items);
+                this.openBoxArr.push(items);
                 if (this.key <= 0) //没钥匙露出视频标
                  {
                     this.showVideoIcon();
@@ -185,15 +201,10 @@ let Gx_gameBox = (() => {
         showVideoIcon() {
             var boxParent = this.boxNode.getChildByName("content");
             for (let i = 0; i < boxParent.children.length; i++) {
-                let showVideo = false;
-                for (let j = 0; j < this.openBoxArr.length; j++) {
-                    if (i == this.openBoxArr[j]) {
-                        showVideo = false;
-                        break;
-                    }
-                    else {
-                        showVideo = true;
-                    }
+                let showVideo = true;
+                let localZOrder = boxParent.children[i]._localZOrder;
+                if (this.openBoxArr.includes(localZOrder)) {
+                    showVideo = false;
                 }
                 if (showVideo) {
                     boxParent.children[i].children[1].active = true;
@@ -210,8 +221,12 @@ let Gx_gameBox = (() => {
         const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create((_a = _classSuper[Symbol.metadata]) !== null && _a !== void 0 ? _a : null) : void 0;
         _boxNode_decorators = [property(cc.Node)];
         _zaiLaiSanGe_decorators = [property(cc.Node)];
+        _rootLayout_decorators = [property(cc.Layout)];
+        _itemNode_decorators = [property(cc.Node)];
         __esDecorate(null, null, _boxNode_decorators, { kind: "field", name: "boxNode", static: false, private: false, access: { has: obj => "boxNode" in obj, get: obj => obj.boxNode, set: (obj, value) => { obj.boxNode = value; } }, metadata: _metadata }, _boxNode_initializers, _boxNode_extraInitializers);
         __esDecorate(null, null, _zaiLaiSanGe_decorators, { kind: "field", name: "zaiLaiSanGe", static: false, private: false, access: { has: obj => "zaiLaiSanGe" in obj, get: obj => obj.zaiLaiSanGe, set: (obj, value) => { obj.zaiLaiSanGe = value; } }, metadata: _metadata }, _zaiLaiSanGe_initializers, _zaiLaiSanGe_extraInitializers);
+        __esDecorate(null, null, _rootLayout_decorators, { kind: "field", name: "rootLayout", static: false, private: false, access: { has: obj => "rootLayout" in obj, get: obj => obj.rootLayout, set: (obj, value) => { obj.rootLayout = value; } }, metadata: _metadata }, _rootLayout_initializers, _rootLayout_extraInitializers);
+        __esDecorate(null, null, _itemNode_decorators, { kind: "field", name: "itemNode", static: false, private: false, access: { has: obj => "itemNode" in obj, get: obj => obj.itemNode, set: (obj, value) => { obj.itemNode = value; } }, metadata: _metadata }, _itemNode_initializers, _itemNode_extraInitializers);
         __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
         Gx_gameBox = _classThis = _classDescriptor.value;
         if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });

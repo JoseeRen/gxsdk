@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const GxConstant_1 = __importDefault(require("../core/GxConstant"));
+const GxGame_1 = __importDefault(require("../GxGame"));
 class GxUtils {
     static randomInt(min, max) {
         return Math.floor(this.random(min, max));
@@ -11,8 +12,9 @@ class GxUtils {
     static random(min, max) {
         min = Number(min);
         max = Number(max);
-        if (min == NaN || max == NaN)
+        if (Number.isNaN(min) || Number.isNaN(max)) {
             return null;
+        }
         if (min > max)
             min = (max ^= min ^= max) ^ min;
         return Math.random() * (max - min + 1) + min;
@@ -75,7 +77,10 @@ class GxUtils {
         });
     }
     static getRes(path, type) {
-        if (cc.resources) {
+        if (GxGame_1.default.gxResBundle) {
+            return GxGame_1.default.gxResBundle.get(path, type);
+        }
+        else if (cc.resources) {
             return cc.resources.get(path, type);
         }
         return cc.loader.getRes(path, type);
@@ -83,7 +88,7 @@ class GxUtils {
     static formatTime(time) {
         let m = Math.floor(time / 60);
         let s = time % 60;
-        return ('0' + m).slice(-2) + ':' + ('0' + s).slice(-2);
+        return ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
     }
     static getNetworkTime() {
         return new Promise((resolve, reject) => {
@@ -104,7 +109,7 @@ class GxUtils {
         let y = time.getFullYear();
         let M = time.getMonth() + 1;
         let d = time.getDate();
-        return Number(y + ('0' + M).slice(-2) + ('0' + d).slice(-2));
+        return Number(y + ("0" + M).slice(-2) + ("0" + d).slice(-2));
     }
     static degreesToVectors(degree) {
         let radian = cc.misc.degreesToRadians(degree);
@@ -136,7 +141,7 @@ class GxUtils {
             temp = new Object();
             for (let item in obj) {
                 let val = obj[item];
-                temp[item] = typeof val == 'object' ? GxUtils.clone(val) : val;
+                temp[item] = typeof val == "object" ? GxUtils.clone(val) : val;
             }
         }
         return temp;
@@ -167,7 +172,7 @@ class GxUtils {
         }
     }
     static newPrefab(url, parent, cbk) {
-        url = 'prefab/' + url;
+        url = "prefab/" + url;
         let create = () => {
             let node = cc.instantiate(this.getRes(url, cc.Prefab));
             if (cc.isValid(parent, true)) {
@@ -189,12 +194,12 @@ class GxUtils {
      * @param value
      */
     static isNumber(value) {
-        if (typeof value == 'number')
+        if (typeof value == "number")
             return true;
-        if (typeof value !== 'string')
+        if (typeof value !== "string")
             return false;
         value = value.replace(/\s+/g, "");
-        if (value == '')
+        if (value == "")
             return false;
         if (isNaN(value))
             return false;
@@ -235,7 +240,7 @@ class GxUtils {
      * @param url 以/拼接的节点路径
      */
     static findNode(url, parent) {
-        if (!url || url === undefined || typeof url != 'string') {
+        if (!url || url === undefined || typeof url != "string") {
             if (parent && parent !== undefined && parent instanceof cc.Node) {
                 return parent;
             }
@@ -245,7 +250,7 @@ class GxUtils {
             parent = cc.director.getScene();
         }
         // 分割路径
-        let name_list = url.split('/');
+        let name_list = url.split("/");
         let child = null;
         for (let name of name_list) {
             child = parent.getChildByName(name);
@@ -261,31 +266,40 @@ class GxUtils {
         if (callbak && callbak !== undefined) {
             window[`onGx${listener_name}`] = callbak;
         }
-        if (params != null && typeof params != 'string') {
+        if (params != null && typeof params != "string") {
             params = JSON.stringify(params);
         }
         if (GxConstant_1.default.IS_ANDROID_NATIVE) {
-            let signature = `(${params == null ? '' : 'Ljava/lang/String;'})Ljava/lang/String;`;
+            let signature = `(${params == null ? "" : "Ljava/lang/String;"})Ljava/lang/String;`;
             console.log(`[gx_game]callMethod method = ${method_name} signature = ${signature} params = ${params}`);
             if (params == null || params === undefined) {
-                result = jsb.reflection.callStaticMethod('com/gxgame/helper/GxBridge', method_name, '()Ljava/lang/String;');
+                result = jsb.reflection.callStaticMethod("com/gxgame/helper/GxBridge", method_name, "()Ljava/lang/String;");
             }
             else {
-                result = jsb.reflection.callStaticMethod('com/gxgame/helper/GxBridge', method_name, '(Ljava/lang/String;)Ljava/lang/String;', params);
+                result = jsb.reflection.callStaticMethod("com/gxgame/helper/GxBridge", method_name, "(Ljava/lang/String;)Ljava/lang/String;", params);
             }
         }
         else if (GxConstant_1.default.IS_ANDROID_H5) {
-            result = window["H5Bridge"][method_name]();
+            try {
+                if (!!params) {
+                }
+                else {
+                    params = "";
+                }
+                result = window["H5Bridge"][method_name](params);
+            }
+            catch (e) {
+            }
             // jsb.reflection.callStaticMethod('GxBridge', `${method_name}${params.length == 0 ? '' : ':'}`, ...params);
         }
         else if (GxConstant_1.default.IS_IOS_NATIVE) {
             let signature = ``;
             console.log(`[gx_game]callMethod method = ${method_name} signature = ${signature} params = ${params}`);
             if (params == null || params === undefined) {
-                result = jsb.reflection.callStaticMethod('GxBridge', method_name + ":", '');
+                result = jsb.reflection.callStaticMethod("GxBridge", method_name + ":", "");
             }
             else {
-                result = jsb.reflection.callStaticMethod('GxBridge', method_name + ":", params);
+                result = jsb.reflection.callStaticMethod("GxBridge", method_name + ":", params);
             }
         }
         else {
@@ -313,14 +327,14 @@ class GxUtils {
                } else {
                    result = jsb.reflection.callStaticMethod('com/gxgame/helper/GxBridge', method_name, '(Ljava/lang/String;)Z', params);
                }*/
-            result = jsb.reflection.callStaticMethod('com/gxgame/helper/GxBridge', method_name, '(Ljava/lang/String;)Z', key);
+            result = jsb.reflection.callStaticMethod("com/gxgame/helper/GxBridge", method_name, "(Ljava/lang/String;)Z", key);
         }
         else if (GxConstant_1.default.IS_ANDROID_H5) {
             result = window["H5Bridge"][method_name](key);
             // jsb.reflection.callStaticMethod('GxBridge', `${method_name}${params.length == 0 ? '' : ':'}`, ...params);
         }
         else if (GxConstant_1.default.IS_IOS_NATIVE) {
-            result = jsb.reflection.callStaticMethod('GxBridge', method_name + ":", key);
+            result = jsb.reflection.callStaticMethod("GxBridge", method_name + ":", key);
         }
         else {
         }
@@ -346,14 +360,48 @@ class GxUtils {
                } else {
                    result = jsb.reflection.callStaticMethod('com/gxgame/helper/GxBridge', method_name, '(Ljava/lang/String;)Z', params);
                }*/
-            result = jsb.reflection.callStaticMethod('com/gxgame/helper/GxBridge', method_name, '(Ljava/lang/String;I)I', key, defaultValue);
+            result = jsb.reflection.callStaticMethod("com/gxgame/helper/GxBridge", method_name, "(Ljava/lang/String;I)I", key, defaultValue);
         }
         else if (GxConstant_1.default.IS_ANDROID_H5) {
             result = window["H5Bridge"][method_name](key, defaultValue);
             // jsb.reflection.callStaticMethod('GxBridge', `${method_name}${params.length == 0 ? '' : ':'}`, ...params);
         }
         else if (GxConstant_1.default.IS_IOS_NATIVE) {
-            result = jsb.reflection.callStaticMethod('GxBridge', method_name + ":defaultValue:", key, defaultValue);
+            result = jsb.reflection.callStaticMethod("GxBridge", method_name + ":defaultValue:", key, defaultValue);
+        }
+        else {
+            // jsb.reflection.callStaticMethod('GxBridge', `${method_name}${params.length == 0 ? '' : ':'}`, ...params);
+        }
+        return result;
+    }
+    static callMethodLabelValueStr(key, defaultValue = "", callbak) {
+        let result = null;
+        let method_name = "getSelfValueStr";
+        let listener_name = method_name.substring(0, 1).toUpperCase() + method_name.substring(1);
+        if (GxConstant_1.default.IS_ANDROID_NATIVE) {
+            if (callbak && callbak !== undefined) {
+                window[`onGx${listener_name}`] = callbak;
+            }
+            /*   let signature = `(${params == null ? '' : 'Ljava/lang/String;'})Ljava/lang/String;`
+
+               if (params != null && typeof params != 'string') {
+                   params = JSON.stringify(params)
+               }
+               console.log(`[gx_game]callMethod method = ${method_name} signature = ${signature} params = ${params}`);
+
+               if (params == null || params === undefined) {
+                   result = jsb.reflection.callStaticMethod('com/gxgame/helper/GxBridge', method_name, '()Ljava/lang/String;');
+               } else {
+                   result = jsb.reflection.callStaticMethod('com/gxgame/helper/GxBridge', method_name, '(Ljava/lang/String;)Z', params);
+               }*/
+            result = jsb.reflection.callStaticMethod("com/gxgame/helper/GxBridge", method_name, "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;", key, defaultValue);
+        }
+        else if (GxConstant_1.default.IS_ANDROID_H5) {
+            result = window["H5Bridge"][method_name](key, defaultValue);
+            // jsb.reflection.callStaticMethod('GxBridge', `${method_name}${params.length == 0 ? '' : ':'}`, ...params);
+        }
+        else if (GxConstant_1.default.IS_IOS_NATIVE) {
+            result = jsb.reflection.callStaticMethod("GxBridge", method_name + ":defaultValue:", key, defaultValue);
         }
         else {
             // jsb.reflection.callStaticMethod('GxBridge', `${method_name}${params.length == 0 ? '' : ':'}`, ...params);
@@ -361,7 +409,7 @@ class GxUtils {
         return result;
     }
     static getNativePlatform() {
-        return this.callMethod('getNativePlatform');
+        return this.callMethod("getNativePlatform");
     }
     /**
      * 分帧执行 Generator 逻辑

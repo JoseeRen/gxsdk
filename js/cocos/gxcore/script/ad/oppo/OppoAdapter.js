@@ -12,7 +12,9 @@ const GxEnum_1 = require("../../core/GxEnum");
 const GxAdParams_1 = require("../../GxAdParams");
 const GxGameUtil_1 = __importDefault(require("../../core/GxGameUtil"));
 const DataStorage_2 = __importDefault(require("../../util/DataStorage"));
+const GxConstant_1 = __importDefault(require("../../core/GxConstant"));
 // import TDSDK from "../../td/TDSDK";
+let GravityAnalyticsAPI = require("../../sdk/gravityengine.mg.cocoscreator.min");
 class OppoAdapter extends BaseAdapter_1.default {
     constructor() {
         super(...arguments);
@@ -33,6 +35,8 @@ class OppoAdapter extends BaseAdapter_1.default {
         this.pkgName = "";
         this.videoShowing = false;
         this.showVideoTime = 0;
+        this.openId = "";
+        this.getOpenidTry = 0;
     }
     static getInstance() {
         if (this.instance == null) {
@@ -52,7 +56,7 @@ class OppoAdapter extends BaseAdapter_1.default {
         if (label) {
             GxGame_1.default.adConfig.adCdTime = 0;
         }
-        this.isGameCd = GxGame_1.default.adConfig.adCdTime > 0;
+        this.isGameCd = false; //GxGame.adConfig.adCdTime > 0;
         this.logi("广告冷却：" + this.isGameCd);
         super.initAd();
         // @ts-ignore
@@ -60,7 +64,7 @@ class OppoAdapter extends BaseAdapter_1.default {
             // @ts-ignore
             qg.getManifestInfo({
                 success: (res) => {
-                    console.log(JSON.stringify(res.manifest));
+                    // console.log(JSON.stringify(res.manifest));
                     let info = JSON.parse(res.manifest);
                     this.setManifestInfo(info);
                     // TDSDK.getInstance().init("DEBB78D26E894F4FB174FAA2A8F4DE24", info.package.replace(/\./g, "_"))
@@ -71,10 +75,18 @@ class OppoAdapter extends BaseAdapter_1.default {
                 }
             });
         }
+        this.getOpenId((openId) => {
+            if (!!openId) {
+                this.initGravityEngine();
+            }
+            else {
+                this.loge("获取不到openid无法初始化引力");
+            }
+        });
         this._gameCd();
         this.initBanner();
         this.initNormalBanner();
-        //lsn  2024年5月10修改 视频参数可能多个 
+        //lsn  2024年5月10修改 视频参数可能多个
         this.videoArr = [];
         if (GxAdParams_1.AdParams.oppo.video.includes("_")) {
             this.videoArr = GxAdParams_1.AdParams.oppo.video.split("_");
@@ -822,12 +834,12 @@ class OppoAdapter extends BaseAdapter_1.default {
             if (res && res.isEnded) {
                 this.videoReward++;
                 this.checkAdTarget();
-                this.videocallback && this.videocallback(true);
+                this.videocallback && this.videocallback(true, 1);
                 this._videoCompleteEvent();
             }
             else {
                 this._videoCloseEvent();
-                this.videocallback && this.videocallback(false);
+                this.videocallback && this.videocallback(false, 0);
                 /*   let node = cc.instantiate(Utils.getRes('hs_ui/ui_watch_video', cc.Prefab));
                    let ui_watch_video = node.getComponent('hs_ui_watch_video');
                    ui_watch_video && ui_watch_video.show(() => {
@@ -842,15 +854,16 @@ class OppoAdapter extends BaseAdapter_1.default {
     showVideo(complete, flag = "") {
         // 过滤多次触发
         if (this.get_time() - this.showVideoTime < 5000) {
-            complete && complete(false);
+            complete && complete(false, 0);
             return;
         }
         this.showVideoTime = this.get_time();
         if (this.videoShowing) {
-            complete && complete(false);
+            complete && complete(false, 0);
             return;
         }
         super.showVideo(null, flag);
+        this._videoCallEvent(flag);
         this.videoShowing = true;
         if (this.videoAd == null) {
             this.initVideo();
@@ -859,7 +872,7 @@ class OppoAdapter extends BaseAdapter_1.default {
             this.createToast("暂无视频，请稍后再试");
             this.videoShowing = false;
             this._videoErrorEvent();
-            complete && complete(false);
+            complete && complete(false, 0);
             return;
         }
         this.videocallback = complete;
@@ -867,7 +880,7 @@ class OppoAdapter extends BaseAdapter_1.default {
         }).catch(() => {
             this._videoErrorEvent();
             this.createToast("暂无视频，请稍后再试");
-            complete && complete(false);
+            complete && complete(false, 0);
             this.videoShowing = false;
         });
     }
@@ -1511,6 +1524,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                     this.loge(` installShortcut error: ${JSON.stringify(err)}`);
                     on_fail && on_fail();
                     if (showToast) {
+                        //@ts-ignore
                         window["qg"].showToast({
                             title: "请稍后再试",
                             icon: "none"
@@ -1529,6 +1543,7 @@ class OppoAdapter extends BaseAdapter_1.default {
                 success: res => {
                     on_succ && on_succ(res);
                 },
+                //@ts-ignore
                 fail: (err) => {
                     on_fail && on_fail(err);
                 }
@@ -1646,6 +1661,175 @@ class OppoAdapter extends BaseAdapter_1.default {
         else {
             failedCallback && failedCallback();
         }
+    }
+    getOpenId(callback) {
+        let self = this;
+        if (self.getOpenidTry >= 5) {
+            self.getOpenidTry = 0;
+            console.warn("获取openId重试最大次数了");
+            callback && callback(null);
+            return;
+        }
+        let item = DataStorage_2.default.getItem("__gx_openId__", null);
+        if (!!item) {
+            console.log("获取到缓存的openid：" + item);
+            self.openId = item;
+            callback && callback(item);
+            return;
+        }
+        // @ts-ignore
+        qg.login({
+            success: function (res) {
+                //@ts-ignore
+                if (res.data.token) {
+                    // 使用token进行服务端对接
+                    let request = () => {
+                        self.requestNet({
+                            //@ts-ignore
+                            url: `${GxConstant_1.default.Code2SessionUrl}/ov?packageName=${GxAdParams_1.AdParams.oppo.packageName}&token=${res.data.token}&platform=oppo`,
+                            successCallback: (res) => {
+                                try {
+                                    self.logi(JSON.stringify(res.data));
+                                }
+                                catch (e) {
+                                }
+                                if (res.data.code == 1) {
+                                    self.openId = res.data.data.openid;
+                                    self.logi("获取openid成功：" + self.openId);
+                                    DataStorage_2.default.setItem("__gx_openId__", self.openId);
+                                    callback && callback(self.openId);
+                                }
+                                else {
+                                    self.logw("登录失败！" + res.data["msg"]);
+                                    // self.reported = false
+                                    setTimeout(() => {
+                                        self.getOpenidTry++;
+                                        self.getOpenId(callback);
+                                    }, 3000);
+                                }
+                            },
+                            failedCallback: (res) => {
+                                self.logw("登录失败！" + res["errMsg"]);
+                                try {
+                                    self.logw(JSON.stringify(res));
+                                }
+                                catch (e) {
+                                }
+                                // self.reported = false
+                                setTimeout(() => {
+                                    self.getOpenidTry++;
+                                    self.getOpenId(callback);
+                                }, 3000);
+                            }
+                        });
+                    };
+                    if (!!GxAdParams_1.AdParams.oppo.packageName) {
+                        request();
+                    }
+                    else {
+                        // @ts-ignore
+                        qg.getManifestInfo({
+                            success: function (res) {
+                                console.log(JSON.parse(res.manifest));
+                                let info = JSON.parse(res.manifest);
+                                self.setManifestInfo(info);
+                                request();
+                            },
+                            fail: function (err) {
+                                self.getOpenidTry = 5;
+                                self.getOpenId(callback);
+                            },
+                            complete: function (res) {
+                            }
+                        });
+                    }
+                }
+                else {
+                    setTimeout(() => {
+                        self.getOpenidTry++;
+                        self.getOpenId(callback);
+                    }, 3000);
+                }
+            },
+            //@ts-ignore
+            fail: function (err) {
+                console.log("登录失败" + JSON.stringify(err));
+                setTimeout(() => {
+                    self.getOpenidTry++;
+                    self.getOpenId(callback);
+                }, 3000);
+            }
+        });
+    }
+    initGravityEngine() {
+        if (!!GxAdParams_1.AdParams.oppo.gravityEngineAccessToken) {
+            console.log("初始化ge");
+            let debug = "none";
+            if (window["geDebug"]) {
+                debug = "debug";
+            }
+            const config = {
+                accessToken: GxAdParams_1.AdParams.oppo.gravityEngineAccessToken, // 项目通行证，在：网站后台-->设置-->应用列表中找到Access Token列 复制（首次使用可能需要先新增应用）
+                clientId: this.openId, // 用户唯一标识，如产品为小游戏，则必须填用户openid（注意，不是小游戏的APPID！！！）
+                autoTrack: {
+                    appLaunch: true, // 自动采集 $MPLaunch
+                    appShow: true, // 自动采集 $MPShow
+                    appHide: true // 自动采集 $MPHide
+                },
+                name: "ge", // 全局变量名称, 默认为 gravityengine
+                debugMode: debug // 是否开启测试模式，开启测试模式后，可以在 网站后台--设置--元数据--事件流中查看实时数据上报结果。（测试时使用，上线之后一定要关掉，改成none或者删除）
+            };
+            const ge = new GravityAnalyticsAPI(config);
+            ge.setupAndStart();
+            let item = DataStorage_2.default.getItem("geInit");
+            if (!!item) {
+                console.log("ge inited");
+            }
+            else {
+                let versionNumber = 100;
+                try {
+                    if (this.manifestInfo) {
+                        let mpVersion = this.manifestInfo.versionCode;
+                        if (!!mpVersion) {
+                            let re = parseInt(mpVersion);
+                            if (!isNaN(re)) {
+                                versionNumber = re;
+                            }
+                        }
+                    }
+                }
+                catch (e) {
+                }
+                this.logi("init versionNumber:" + versionNumber);
+                ge.initialize({
+                    name: this.openId,
+                    version: versionNumber,
+                    openid: this.openId,
+                    enable_sync_attribution: false
+                })
+                    .then((res) => {
+                    console.log("ge initialize success " + res);
+                    DataStorage_2.default.setItem("geInit", "1");
+                })
+                    .catch((err) => {
+                    console.log("ge initialize failed, error is " + err);
+                });
+            }
+        }
+        else {
+            console.warn("没有参数 不初始化引力引擎");
+        }
+    }
+    setManifestInfo(info) {
+        GxAdParams_1.AdParams.oppo.packageName = info.package;
+        this.manifestInfo = info;
+        /*  TDSDK.getInstance().initApp(
+              info.package,
+              info.name,
+              info.versionName,
+              info.versionCode
+          );*/
+        console.log("[gx_game]设置info");
     }
 }
 exports.default = OppoAdapter;

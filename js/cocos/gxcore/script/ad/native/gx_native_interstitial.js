@@ -244,7 +244,7 @@ let native_interstitial = (() => {
                 if (!!iconUrl) {
                     this.img_icon.sizeMode = cc.Sprite.SizeMode.CUSTOM;
                     this.img_icon.node.width = 150;
-                    this.img_icon.node.width = 150;
+                    this.img_icon.node.height = 150;
                     ResUtil_1.default.loadRemoteSpiteFrame(iconUrl, (err, sp) => {
                         if (!cc.isValid(this.node, true))
                             return;

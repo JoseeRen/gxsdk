@@ -86,15 +86,15 @@ class ZFBAdapter extends BaseAdapter_1.default {
             style: {
                 left: bannerLeft,
                 top: bannerTop,
-                width: bannerWidth,
-            },
+                width: bannerWidth
+            }
         });
         this.bannerAd.onLoad(() => {
-            console.log(' banner 加载完成');
+            console.log(" banner 加载完成");
             console.log("能获得什么：" + JSON.stringify(this.bannerAd));
         });
         this.bannerAd.onError((err) => {
-            console.log(' banner 广告错误' + JSON.stringify(err));
+            console.log(" banner 广告错误" + JSON.stringify(err));
         });
         console.log(JSON.stringify(this.bannerAd));
     }
@@ -132,32 +132,32 @@ class ZFBAdapter extends BaseAdapter_1.default {
         this.destroyVideo();
         // @ts-ignore
         this.videoAd = my.createRewardedAd({
-            adUnitId: GxAdParams_1.AdParams.zfb.video,
+            adUnitId: GxAdParams_1.AdParams.zfb.video
         });
         this.videoAd.onLoad((res) => {
-            console.log('激励视频加载', res);
+            console.log("激励视频加载", res);
         });
         this.videoAd.onError((err) => {
-            console.log('激励视频-失败', err);
+            console.log("激励视频-失败", err);
         });
         this.videoAd.onClose((res) => {
-            console.log('激励视频关闭');
+            console.log("激励视频关闭");
             this.recorderResume();
             if (res && res.isEnded) {
-                console.log('激励视频完成');
-                this.videocallback && this.videocallback(true);
+                console.log("激励视频完成");
+                this.videocallback && this.videocallback(true, 1);
             }
             else {
-                this.videocallback && this.videocallback(false);
+                this.videocallback && this.videocallback(false, 0);
             }
         });
     }
-    showVideo(complete, flag = '') {
+    showVideo(complete, flag = "") {
         super.showVideo(null, flag);
         if (this.videoAd == null)
             this.initVideo();
         if (this.videoAd == null) {
-            complete && complete(false);
+            complete && complete(false, 0);
             return;
         }
         this.videocallback = complete;
@@ -178,7 +178,7 @@ class ZFBAdapter extends BaseAdapter_1.default {
                 .catch(() => {
                 this.videoAd.load();
                 console.log("暂无广告");
-                this.videocallback && this.videocallback(false);
+                this.videocallback && this.videocallback(false, 0);
             });
         });
     }
@@ -198,11 +198,11 @@ class ZFBAdapter extends BaseAdapter_1.default {
         this.destroyNormalInter();
         // @ts-ignore
         this.interAd = my.createInterstitialAd({
-            adUnitId: GxAdParams_1.AdParams.zfb.inter,
+            adUnitId: GxAdParams_1.AdParams.zfb.inter
         });
         this.interAd &&
             this.interAd.onLoad(() => {
-                console.log('插屏广告加载');
+                console.log("插屏广告加载");
                 this.interAd.show().then(() => {
                     this.recorderPause();
                     on_show && on_show();
@@ -210,7 +210,7 @@ class ZFBAdapter extends BaseAdapter_1.default {
             });
         this.interAd &&
             this.interAd.onError((err) => {
-                console.log('show inter err' + JSON.stringify(err));
+                console.log("show inter err" + JSON.stringify(err));
                 this.destroyNormalInter();
             });
         this.interAd &&

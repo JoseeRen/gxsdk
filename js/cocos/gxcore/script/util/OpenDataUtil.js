@@ -28,7 +28,8 @@ const OpenDataConstant = {
         ShowShareFriend: "ShowShareFriend",
         RefreshShareFriend: "RefreshShareFriend",
         CloseShareFriend: "CloseShareFriend",
-        InitContext: "InitContext",
+        CloseFriendRank: "CloseFriendRank",
+        InitContext: "InitContext"
     },
     Scene: {
         ShareToFriend: 1
@@ -84,7 +85,7 @@ class OpenDataUtil {
             openDataContext.postMessage({
                 action: action,
                 data: data,
-                dataEx: dataEx,
+                dataEx: dataEx
             });
             return true;
         }
@@ -100,6 +101,17 @@ class OpenDataUtil {
     }
     static refreshShareFriend() {
         this._postMessage(OpenDataConstant.DomainAction.RefreshShareFriend, {});
+    }
+    /**
+     *
+     * @param rankId  后台的排行榜唯一标识id
+     * @param suffix 后缀  比如 关  分  不传就不显示
+     */
+    static showRankFriend(rankId = "", suffix = "") {
+        this._postMessage(OpenDataConstant.DomainAction.FetchFriendLevel, { rankId: rankId, suffix: suffix });
+    }
+    static closeRankFriend() {
+        this._postMessage(OpenDataConstant.DomainAction.CloseFriendRank, {});
     }
 }
 exports.default = OpenDataUtil;

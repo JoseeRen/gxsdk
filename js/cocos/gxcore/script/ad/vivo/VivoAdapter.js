@@ -10,6 +10,9 @@ const GxUtils_1 = __importDefault(require("../../util/GxUtils"));
 const BaseAdapter_1 = __importDefault(require("../base/BaseAdapter"));
 const GxEnum_1 = require("../../core/GxEnum");
 const GxAdParams_1 = require("../../GxAdParams");
+const GxConstant_1 = __importDefault(require("../../core/GxConstant"));
+const DataStorage_1 = __importDefault(require("../../util/DataStorage"));
+let GravityEngine = require("../../sdk/gravityengine.mg.cocoscreator.min");
 class VivoAdapter extends BaseAdapter_1.default {
     constructor() {
         super(...arguments);
@@ -20,6 +23,8 @@ class VivoAdapter extends BaseAdapter_1.default {
         this.videoNum = 0;
         this.interShowCount = 0;
         this.videoShowing = false;
+        this.openId = "";
+        this.getOpenidTry = 0;
     }
     static getInstance() {
         if (this.instance == null) {
@@ -37,13 +42,22 @@ class VivoAdapter extends BaseAdapter_1.default {
         var data = qg.getSystemInfoSync();
         if (data["miniGame"]) {
             let packageName = data.miniGame.package;
+            GxAdParams_1.AdParams.vivo.packageName = packageName;
             /*            TDSDK.getInstance().initApp(packageName, "", data.miniGame.version + "", data.miniGame.version)
 
                         TDSDK.getInstance().init("9066EF5283E848D69F28921A96A9FF54", packageName.replace(/\./g, "_"))*/
         }
+        this.getOpenId((openId) => {
+            if (!!openId) {
+                this.initGravityEngine();
+            }
+            else {
+                this.loge("获取不到openid无法初始化引力");
+            }
+        });
         this.initBanner();
         this.initNormalBanner();
-        //lsn  2024年5月10修改 视频参数可能多个 
+        //lsn  2024年5月10修改 视频参数可能多个
         this.videoArr = [];
         if (GxAdParams_1.AdParams.vivo.video.includes("_")) {
             this.videoArr = GxAdParams_1.AdParams.vivo.video.split("_");
@@ -180,7 +194,7 @@ class VivoAdapter extends BaseAdapter_1.default {
         }
         if (native_data == null || native_data === undefined) {
             // this.showNormalBanner();
-            this.showCustomBanner();
+            this._showCustomBanner();
         }
         else {
             let node = cc.instantiate(GxUtils_1.default.getRes("gx/prefab/ad/native_banner", cc.Prefab));
@@ -240,12 +254,12 @@ class VivoAdapter extends BaseAdapter_1.default {
             GxAudioUtil_1.default.setSoundVolume(1);
             if (res && res.isEnded) {
                 self.logi("正常播放结束，可以下发游戏奖励");
-                this.videocallback && this.videocallback(true);
+                this.videocallback && this.videocallback(true, 1);
                 self._videoCompleteEvent();
             }
             else {
                 self._videoCloseEvent();
-                this.videocallback && this.videocallback(false);
+                this.videocallback && this.videocallback(false, 0);
             }
             this.videoAd.load();
             this.videoShowing = false;
@@ -254,10 +268,11 @@ class VivoAdapter extends BaseAdapter_1.default {
     }
     showVideo(complete, flag = "") {
         if (this.videoShowing) {
-            complete && complete(false);
+            complete && complete(false, 0);
             return;
         }
         super.showVideo(null, flag);
+        this._videoCallEvent(flag);
         this.videoShowing = true;
         if (this.videoAd == null) {
             this.initVideo(true);
@@ -266,7 +281,7 @@ class VivoAdapter extends BaseAdapter_1.default {
             this.createToast("暂无视频，请稍后再试");
             this.videoShowing = false;
             this._videoErrorEvent();
-            complete && complete(false);
+            complete && complete(false, 0);
             return;
         }
         this.videocallback = complete;
@@ -276,7 +291,7 @@ class VivoAdapter extends BaseAdapter_1.default {
         }).catch(() => {
             this._videoErrorEvent();
             this.logi("激励视频onerror2");
-            this.videocallback && this.videocallback(false);
+            this.videocallback && this.videocallback(false, 0);
             this.videocallback = null;
             this.createToast("暂无视频，请稍后再试");
             this.videoShowing = false;
@@ -697,7 +712,7 @@ class VivoAdapter extends BaseAdapter_1.default {
     /**
      * 原生模板
      */
-    showCustomBanner() {
+    _showCustomBanner() {
         let ad_id = GxAdParams_1.AdParams.vivo.custom_banner;
         // @ts-ignore
         if (ad_id == null || ad_id === undefined || ad_id.length <= 0 || !qg.createCustomAd) {
@@ -1115,6 +1130,172 @@ class VivoAdapter extends BaseAdapter_1.default {
         }
         else {
             failedCallback && failedCallback();
+        }
+    }
+    getOpenId(callback) {
+        let self = this;
+        if (self.getOpenidTry >= 5) {
+            self.getOpenidTry = 0;
+            console.warn("获取openId重试最大次数了");
+            callback && callback(null);
+            return;
+        }
+        let item = DataStorage_1.default.getItem("__gx_openId__", null);
+        if (!!item) {
+            console.log("获取到缓存的openid：" + item);
+            self.openId = item;
+            callback && callback(item);
+            return;
+        }
+        if (GxAdParams_1.AdParams.vivo.accountAppKey && GxAdParams_1.AdParams.vivo.accountAppSecret) {
+            // @ts-ignore  这个一直不能用 获取不到不知道什么原因
+            if (qg.getAccountInfo && 1 == 2) {
+                // @ts-ignore
+                qg.getAccountInfo({
+                    appKey: GxAdParams_1.AdParams.vivo.accountAppKey,
+                    appSecret: GxAdParams_1.AdParams.vivo.accountAppSecret,
+                    success(res) {
+                        console.log(JSON.stringify(res));
+                        console.log("getAccountInfo success");
+                        self.getOpenidTry = 0;
+                        callback && callback(res.data.openId);
+                    },
+                    fail(res) {
+                        console.log(JSON.stringify(res));
+                        console.log("getAccountInfo fail");
+                        setTimeout(() => {
+                            self.getOpenidTry++;
+                            self.getOpenId(callback);
+                        }, 3000);
+                    }
+                });
+            }
+            else {
+                // @ts-ignore
+                qg.login().then((res) => {
+                    if (res.data.token) {
+                        // 使用token进行服务端对接
+                        self.requestGet(`${GxConstant_1.default.Code2SessionUrl}/ov?appKey=${GxAdParams_1.AdParams.vivo.accountAppKey}&appSecret=${GxAdParams_1.AdParams.vivo.accountAppSecret}&token=${res.data.token}&packageName=${GxAdParams_1.AdParams.vivo.packageName}&platform=vivo`, (res) => {
+                            self.logi(res.data);
+                            if (res.data.code == 1) {
+                                self.openId = res.data.data.openid;
+                                self.logi("获取openid成功：" + self.openId);
+                                DataStorage_1.default.setItem("__gx_openId__", self.openId);
+                                callback && callback(self.openId);
+                            }
+                            else {
+                                self.logw("登录失败！" + res.data["msg"]);
+                                // self.reported = false
+                                setTimeout(() => {
+                                    self.getOpenidTry++;
+                                    self.getOpenId(callback);
+                                }, 3000);
+                            }
+                        }, (res) => {
+                            self.logw("登录失败！" + res["errMsg"]);
+                            self.logw(res);
+                            // self.reported = false
+                            setTimeout(() => {
+                                self.getOpenidTry++;
+                                self.getOpenId(callback);
+                            }, 3000);
+                        });
+                    }
+                    else {
+                        setTimeout(() => {
+                            self.getOpenidTry++;
+                            self.getOpenId(callback);
+                        }, 3000);
+                    }
+                }, (err) => {
+                    console.log("登录失败" + JSON.stringify(err));
+                    setTimeout(() => {
+                        self.getOpenidTry++;
+                        self.getOpenId(callback);
+                    }, 3000);
+                });
+            }
+        }
+        else {
+            console.warn("没有配置appKey和appSecret 不能获取openid");
+        }
+    }
+    requestGet(url, successCallback, failCallback) {
+        //@ts-ignore
+        qg.request({
+            url: url,
+            success(res) {
+                successCallback && successCallback(res);
+            },
+            //@ts-ignore
+            fail(res) {
+                failCallback && failCallback(res);
+            }
+        });
+    }
+    logw(...data) {
+        super.LOGW("[VivoAdapter]", ...data);
+    }
+    initGravityEngine() {
+        if (!!GxAdParams_1.AdParams.vivo.gravityEngineAccessToken) {
+            console.log("初始化ge");
+            let debug = "none";
+            if (window["geDebug"]) {
+                debug = "debug";
+            }
+            const config = {
+                accessToken: GxAdParams_1.AdParams.vivo.gravityEngineAccessToken, // 项目通行证，在：网站后台-->设置-->应用列表中找到Access Token列 复制（首次使用可能需要先新增应用）
+                clientId: this.openId, // 用户唯一标识，如产品为小游戏，则必须填用户openid（注意，不是小游戏的APPID！！！）
+                autoTrack: {
+                    appLaunch: true, // 自动采集 $MPLaunch
+                    appShow: true, // 自动采集 $MPShow
+                    appHide: true // 自动采集 $MPHide
+                },
+                name: "ge", // 全局变量名称, 默认为 gravityengine
+                debugMode: debug // 是否开启测试模式，开启测试模式后，可以在 网站后台--设置--元数据--事件流中查看实时数据上报结果。（测试时使用，上线之后一定要关掉，改成none或者删除）
+            };
+            const ge = new GravityEngine(config);
+            ge.setupAndStart();
+            let item = DataStorage_1.default.getItem("geInit");
+            if (!!item) {
+                console.log("ge inited");
+            }
+            else {
+                let versionNumber = 100;
+                try {
+                    //@ts-ignore
+                    if (qg["getSystemInfoSync"]) {
+                        //@ts-ignore
+                        let ttElementElement = qg["getSystemInfoSync"]()["miniGame"];
+                        let mpVersion = ttElementElement["version"];
+                        if (!!mpVersion) {
+                            let re = parseInt(mpVersion);
+                            if (!isNaN(re)) {
+                                versionNumber = re;
+                            }
+                        }
+                    }
+                }
+                catch (e) {
+                }
+                this.logi("init versionNumber:" + versionNumber);
+                ge.initialize({
+                    name: this.openId,
+                    version: versionNumber,
+                    openid: this.openId,
+                    enable_sync_attribution: false
+                })
+                    .then((res) => {
+                    console.log("ge initialize success " + res);
+                    DataStorage_1.default.setItem("geInit", "1");
+                })
+                    .catch((err) => {
+                    console.log("ge initialize failed, error is " + err);
+                });
+            }
+        }
+        else {
+            console.warn("没有参数 不初始化引力引擎");
         }
     }
 }

@@ -103,6 +103,7 @@ class H54399Adapter extends BaseAdapter_1.default {
             return;
         this.showVideoTime = this.get_time();
         super.showVideo(null, flag);
+        this._videoCallEvent(flag);
         let self = this;
         /**
          * 此callback回调函数的形式
@@ -122,7 +123,7 @@ class H54399Adapter extends BaseAdapter_1.default {
                 cc.director.resume();
                 cc.audioEngine.setEffectsVolume(1);
                 cc.audioEngine.setMusicVolume(1);
-                complete && complete(true);
+                complete && complete(true, 1);
             }
             else {
                 cc.director.resume();
@@ -136,10 +137,10 @@ class H54399Adapter extends BaseAdapter_1.default {
                         // self.createToast('暂无视频，请明天再来');
                     }
                     else {
-                        self.createToast('暂无视频，请稍后再试');
+                        self.createToast("暂无视频，请稍后再试");
                     }
                 });
-                complete && complete(false);
+                complete && complete(false, 0);
             }
         }
         /**
@@ -212,7 +213,7 @@ class H54399Adapter extends BaseAdapter_1.default {
     }
     create_ad(ad_type) {
         return new Promise((resolve, reject) => {
-            GxUtils_1.default.callMethod('createNativeAd', ad_type.toString(), ret => {
+            GxUtils_1.default.callMethod("createNativeAd", ad_type.toString(), ret => {
                 console.log("[gx_game]native data load succ:" + JSON.stringify(ret));
                 if (ret == -1 /* RET_TYPE.ERROR */) {
                 }

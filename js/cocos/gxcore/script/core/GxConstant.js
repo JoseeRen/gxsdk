@@ -15,4 +15,7 @@ class GxConstant extends BaseGxConstant_1.default {
 /*可以自己定义常量*/
 GxConstant.Code2SessionUrl = "https://wx.sjzgxwl.com/openid/code2Session/v2";
 GxConstant.SubmsgBaseUrl = "https://wx.sjzgxwl.com/submsg";
+GxConstant.DataServerUrl = "https://api.sjzgxwl.com";
+GxConstant.DataServerUrl11 = "https://api.sjzgxwl.com";
+GxConstant.DataServerUrlDebug = "http://localhost:19802";
 exports.default = GxConstant;
